@@ -10,8 +10,8 @@ namespace osmium {
 
 class Player {
 public:
-    Player(uint32_t handle, uint32_t fps);
-    Player(const char* filename, uint32_t fps);
+    Player(uint32_t handle, uint32_t fps, const char* soundfont = nullptr);
+    Player(const char* filename, uint32_t fps, const char* soundfont = nullptr);
 
     const std::vector<float>& get_samples() const { return m_buffer; }
     uint32_t get_sample_rate() const { return m_sample_rate; }
@@ -25,7 +25,6 @@ private:
     uint32_t m_sample_rate;
     uint32_t m_num_channels;
 
-    std::vector<float> m_buffer_full;
     std::vector<float> m_buffer;
 };
 
