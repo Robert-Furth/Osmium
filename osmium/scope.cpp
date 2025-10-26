@@ -12,6 +12,8 @@
 
 #include <bass.h>
 
+#include "error.h"
+
 namespace osmium {
 
 // --- helper functions ---
@@ -95,12 +97,15 @@ void Scope::update_buffers() {
                                                   | BASS_DATA_FLOAT);
     if (bytes_read == -1) {
         int code = BASS_ErrorGetCode();
-        if (code == BASS_ERROR_ENDED) {
-            shift_in(m_left_buffer, {}, m_samples_per_frame);
-            shift_in(m_right_buffer, {}, m_samples_per_frame);
-        }
+        if (code != BASS_ERROR_ENDED)
+            throw Error::from_bass_error("Error getting wave data: ");
+
+        // At the end of the data; shift in zeroes and exit early
+        shift_in(m_left_buffer, {}, m_samples_per_frame);
+        shift_in(m_right_buffer, {}, m_samples_per_frame);
         return;
     }
+
     m_frame_num++;
     uint32_t samples_read = bytes_read / sizeof(float) / m_src_num_channels;
     m_total_samples_read += samples_read * m_src_num_channels;

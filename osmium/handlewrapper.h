@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+namespace osmium {
+
 class HandleWrapper {
 public:
     HandleWrapper(uint32_t handle = 0);
@@ -27,4 +29,5 @@ private:
     std::vector<unsigned long> m_soundfont_handles;
 };
 
+} // namespace osmium
 #endif // HANDLEWRAPPER_H

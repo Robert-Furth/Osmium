@@ -3,6 +3,10 @@
 #include <bass.h>
 #include <bassmidi.h>
 
+#include "error.h"
+
+namespace osmium {
+
 HandleWrapper::HandleWrapper(uint32_t handle) : m_handle(handle), m_extra_data(nullptr) {}
 
 HandleWrapper::HandleWrapper(HandleWrapper&& other) noexcept : m_handle(other.m_handle) {
@@ -51,5 +55,9 @@ void HandleWrapper::set_soundfonts(const std::vector<HSOUNDFONT>& soundfonts) {
     for (auto hsf : soundfonts) {
         font_structs.emplace_back(BASS_MIDI_FONT{hsf, -1, 0});
     }
-    BASS_MIDI_StreamSetFonts(m_handle, font_structs.data(), font_structs.size());
+
+    if (!BASS_MIDI_StreamSetFonts(m_handle, font_structs.data(), font_structs.size()))
+        throw Error::from_bass_error("Error applying soundfonts: ");
 }
+
+} // namespace osmium

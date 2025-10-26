@@ -1,7 +1,12 @@
 #include "scopebuilder.h"
 
+#include <format>
+#include <string>
+
 #include <bass.h>
 #include <bassmidi.h>
+
+#include "error.h"
 
 namespace osmium {
 
@@ -19,10 +24,9 @@ std::vector<HSOUNDFONT> construct_soundfonts(const std::vector<std::string>& sou
     std::vector<HSOUNDFONT> handles;
     for (const auto& filename : soundfonts) {
         HSOUNDFONT handle = BASS_MIDI_FontInit(filename.c_str(), 0);
-        if (!handle) {
-            // TODO error handling
-            // throw std::runtime_error("Could not initialize soundfont");
-        }
+        if (!handle)
+            throw Error::from_bass_error("Error initializing soundfont: ");
+
         handles.push_back(handle);
     }
 
@@ -36,7 +40,12 @@ Scope ScopeBuilder::build_from_file(const char* filename) {
     if (!m_stereo) {
         flags |= BASS_SAMPLE_MONO;
     }
+
     HSTREAM handle = BASS_StreamCreateFile(BASS_FILE_NAME, filename, 0, 0, flags);
+    if (!handle) {
+        std::string msg = std::format("Error opening file {}: ", filename);
+        throw Error::from_bass_error(msg);
+    }
 
     return build_from_handle(handle);
 }
@@ -46,28 +55,29 @@ Scope ScopeBuilder::build_from_midi_channel(const char* filename, int channel) {
     if (!m_stereo) {
         flags |= BASS_SAMPLE_MONO;
     }
+
     HSTREAM handle = BASS_MIDI_StreamCreateFile(false, filename, 0, 0, flags, 0);
+    if (!handle)
+        throw Error::from_bass_error("Error creating stream: ");
 
     Scope scope = build_from_handle(handle);
     scope.m_stream_handle.set_extra_data(channel);
 
-    BASS_MIDI_StreamSetFilter(handle,
-                              false,
-                              midi_filter_channel,
-                              scope.m_stream_handle.extra_data_ptr().get());
+    int result = BASS_MIDI_StreamSetFilter(handle,
+                                           false,
+                                           midi_filter_channel,
+                                           scope.m_stream_handle.extra_data_ptr().get());
+    if (!result)
+        throw Error::from_bass_error("Error creating filter: ");
 
     return scope;
 }
 
 Scope ScopeBuilder::build_from_handle(HSTREAM handle) {
-    // uint32_t samples_per_frame = m_sample_rate / m_frame_rate;
-    // std::cout << samples_per_frame << " samples per frame\n";
-    // uint32_t window_size = m_output_window_size == 0
-    //                            ? samples_per_frame / 2
-    //                            : std::min(m_output_window_size, samples_per_frame / 2);
-
     BASS_CHANNELINFO info;
     BASS_ChannelGetInfo(handle, &info);
+    if (!BASS_ChannelGetInfo(handle, &info))
+        throw Error::from_bass_error("Error getting channel info: ");
 
     uint32_t samples_per_frame = info.freq / m_frame_rate;
     // samples/sec * ms/window * sec/ms = samples/window
