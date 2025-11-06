@@ -42,12 +42,14 @@ public:
     VideoSocketWorker();
 
 public slots:
-    void init(const QStringList& filenames,
+    void init(const QString& filename,
+              const QString& soundfont,
               const QList<ScopeRenderer::ChannelArgs> channel_args,
               const ScopeRenderer::GlobalArgs global_args);
 
 signals:
     void ready();
+    void init_error(const QString& msg);
     void done(bool, const QString& msg = "");
     void progress_changed(int);
     void preview_image_changed(const QPixmap&);
@@ -71,10 +73,11 @@ public:
     uint32_t get_num_channels();
 
 public slots:
-    void init(const QString& filename, int fps);
+    void init(const QString& filename, const QString& soundfont, int fps);
 
 signals:
     void ready();
+    void init_error(const QString& msg);
     void done(bool, const QString& msg = "");
 
 protected:
@@ -94,16 +97,21 @@ public:
     const AudioSocketWorker* audio_worker() { return m_as_worker; }
 
 public slots:
-    void work(const QStringList& filenames,
+    void work(const QString& input_file,
+              const QString& soundfont,
+              const QString& output_file,
               const QList<ScopeRenderer::ChannelArgs> channel_args,
               const ScopeRenderer::GlobalArgs global_args);
     void request_stop();
+    void notify_init_error(const QString& msg);
 
 signals:
-    void init_video(const QStringList& filenames,
+    void init_video(const QString& input_file,
+                    const QString& soundfont,
                     const QList<ScopeRenderer::ChannelArgs> channel_args,
                     const ScopeRenderer::GlobalArgs global_args);
-    void init_audio(const QString& filename, int fps);
+    void init_audio(const QString& filename, const QString& soundfont, int fps);
+    void error(const QString& msg);
     void progress_changed(int);
     void done(bool, const QString& msg);
     // void stopped();
@@ -118,6 +126,7 @@ private:
     QString m_audio_server_path;
 
     ScopeRenderer::GlobalArgs m_global_args;
+    QString m_output_path;
 
     bool m_is_running;
     bool m_video_is_ready;

@@ -10,7 +10,7 @@
 #include <QPicture>
 #include <QString>
 
-#include "osmium/osmium.h"
+#include <osmium.h>
 
 class ScopeRenderer : QObject {
     Q_OBJECT
@@ -24,21 +24,30 @@ public:
         ChannelOrder order;
         int fps;
         QRgb border_color;
-        int border_thickness;
+        double border_thickness;
+        QRgb background_color;
         bool debug_vis;
     };
 
     struct ChannelArgs {
         int scope_width_ms;
-        int max_nudge_ms;
         double amplification;
-        double trigger_threshold;
         bool is_stereo;
         QRgb color;
         double thickness;
+
+        int max_nudge_ms;
+        double trigger_threshold;
+        double similarity_bias;
+        int similarity_window_ms;
+        // double repeat_bias;
+        // int repeat_bias_window;
+        double peak_bias;
+        double peak_bias_factor;
     };
 
     ScopeRenderer(const QString& filename,
+                  const QString& soundfont,
                   const QList<ChannelArgs>& channel_args,
                   const GlobalArgs& global_args);
     ScopeRenderer(const ScopeRenderer&) = delete;

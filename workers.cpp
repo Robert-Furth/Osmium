@@ -53,60 +53,56 @@ void AbstractSocketWorker::priv_on_connection() {
         handle_connection(connection);
     }
 
-    // if (connection->state() == QLocalSocket::ConnectedState) {
     connection->disconnectFromServer();
-    // }
 }
 
 // -- VideoSocketWorker --
 
 VideoSocketWorker::VideoSocketWorker() : AbstractSocketWorker("osvid-") {}
 
-void VideoSocketWorker::init(const QStringList& filenames,
+void VideoSocketWorker::init(const QString& filename,
+                             const QString& soundfont,
                              const QList<ScopeRenderer::ChannelArgs> channel_args,
                              const ScopeRenderer::GlobalArgs global_args) {
     m_width = global_args.width;
     m_height = global_args.height;
     m_fps = global_args.fps;
 
-    m_renderer.emplace(filenames[0], channel_args, global_args);
+    try {
+        m_renderer.emplace(filename, soundfont, channel_args, global_args);
+    } catch (const std::runtime_error& e) {
+        emit init_error(e.what());
+        return;
+    }
+
     m_is_ready = true;
     emit ready();
 }
 
 void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
-    // QImage img(m_width, m_height, QImage::Format_RGB32);
-    // QPixmap pixmap(m_width, m_height);
-    // if (img.isNull()) {
-    //     emit done(false, "Could not allocate a framebuffer -- out of memory?");
-    //     return;
-    // }
-
-    // QPainter painter(&img);
-    // painter.setRenderHint(QPainter::Antialiasing);
-
     typedef std::chrono::milliseconds ms;
 
     int frame_counter = 0;
-    int preview_update_freq = std::max(1, m_fps / 4);
+    int preview_update_freq = std::max(1, m_fps / 2);
     unsigned long long elapsed_ms = 0;
     std::chrono::steady_clock clock;
     auto render_start = clock.now();
     while (m_renderer->has_frames_remaining() && !m_abort_requested) {
         auto frame_start = clock.now();
         auto frame = m_renderer->paint_frame();
-        // pic.play(&painter);
         auto frame_dur = std::chrono::duration_cast<ms>(clock.now() - frame_start);
         elapsed_ms += frame_dur.count();
 
-        connection->flush();
-        // QImage frame = pixmap.toImage().convertToFormat(QImage::Format_RGB32);
+        if (frame_counter % 4 == 0) {
+            connection->flush();
+        }
         qint64 write_result = connection->write(reinterpret_cast<const char*>(
                                                     frame.constBits()),
                                                 frame.sizeInBytes());
         if (write_result == -1) {
             auto err_message = QString("Error writing frame data: %1")
                                    .arg(connection->errorString());
+            m_renderer.reset();
             emit done(false, err_message);
             return;
         }
@@ -115,20 +111,21 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
             emit preview_image_changed(QPixmap::fromImage(frame));
         }
         emit progress_changed(m_renderer->get_progress() * 1000);
-        // qDebug() << "VIDEO" << frame_counter;
 
         frame_counter += 1;
     }
 
     auto render_dur = std::chrono::duration_cast<ms>(clock.now() - render_start);
 
+    qDebug() << "VIDEO:" << frame_counter << "frames";
     qDebug() << "Average frame render time:"
              << elapsed_ms / static_cast<double>(frame_counter) << "ms";
     qDebug() << "Total render time:" << std::format("{:%M:%S}", render_dur).c_str();
 
     connection->flush();
     m_renderer.reset();
-    emit done(true);
+
+    emit done(true, m_abort_requested ? "Rendering aborted" : "");
 }
 
 // -- AudioSocketWorker --
@@ -141,14 +138,21 @@ uint32_t AudioSocketWorker::get_num_channels() {
     return m_player->get_num_channels();
 }
 
-void AudioSocketWorker::init(const QString& filename, int fps) {
+void AudioSocketWorker::init(const QString& filename, const QString& soundfont, int fps) {
     m_filename = filename;
-    m_player.emplace(m_filename.toUtf8(), fps);
+    try {
+        m_player.emplace(m_filename.toUtf8(), fps, soundfont.toUtf8());
+    } catch (const std::runtime_error& e) {
+        emit init_error(e.what());
+        return;
+    }
+
     m_is_ready = true;
     emit ready();
 }
 
 void AudioSocketWorker::handle_connection(QLocalSocket* connection) {
+    int frame_no = 0;
     while (m_player->is_playing() && !m_abort_requested) {
         m_player->next_wave_data();
         auto& samples = m_player->get_samples();
@@ -158,13 +162,17 @@ void AudioSocketWorker::handle_connection(QLocalSocket* connection) {
         if (write_result == -1) {
             auto err_message = QString("Error writing audio data: %1")
                                    .arg(connection->errorString());
+            m_player.reset();
             emit done(false, err_message);
             return;
         }
+        frame_no++;
     }
 
+    qDebug() << "AUDIO:" << frame_no << "frames";
     connection->flush();
-    emit done(true);
+    m_player.reset();
+    emit done(true, m_abort_requested ? "Rendering aborted" : "");
 }
 
 // -- RenderWorker --
@@ -184,6 +192,10 @@ RenderWorker::RenderWorker(QObject* parent)
     m_video_server_path = m_vs_worker->get_full_path();
     connect(this, &RenderWorker::init_video, m_vs_worker, &VideoSocketWorker::init);
     connect(m_vs_worker, &VideoSocketWorker::ready, this, &RenderWorker::set_video_ready);
+    connect(m_vs_worker,
+            &VideoSocketWorker::init_error,
+            this,
+            &RenderWorker::notify_init_error);
     connect(m_vs_worker, &VideoSocketWorker::done, this, &RenderWorker::notify_video_done);
     m_video_thread.start();
 
@@ -192,11 +204,17 @@ RenderWorker::RenderWorker(QObject* parent)
     m_audio_server_path = m_as_worker->get_full_path();
     connect(this, &RenderWorker::init_audio, m_as_worker, &AudioSocketWorker::init);
     connect(m_as_worker, &AudioSocketWorker::ready, this, &RenderWorker::set_audio_ready);
+    connect(m_as_worker,
+            &AudioSocketWorker::init_error,
+            this,
+            &RenderWorker::notify_init_error);
     connect(m_as_worker, &AudioSocketWorker::done, this, &RenderWorker::notify_audio_done);
     m_audio_thread.start();
 }
 
-void RenderWorker::work(const QStringList& filenames,
+void RenderWorker::work(const QString& input_file,
+                        const QString& soundfont,
+                        const QString& output_file,
                         const QList<ScopeRenderer::ChannelArgs> channel_args,
                         const ScopeRenderer::GlobalArgs global_args) {
     if (m_is_running)
@@ -208,9 +226,10 @@ void RenderWorker::work(const QStringList& filenames,
     m_audio_is_ready = false;
     m_audio_is_done = false;
     m_global_args = global_args;
+    m_output_path = output_file;
 
-    emit init_video(filenames, channel_args, global_args);
-    emit init_audio(filenames[0], global_args.fps);
+    emit init_video(input_file, soundfont, channel_args, global_args);
+    emit init_audio(input_file, soundfont, global_args.fps);
 }
 
 void RenderWorker::request_stop() {
@@ -251,7 +270,7 @@ QStringList RenderWorker::get_ffmpeg_args() {
                          << "-c:a" << "aac" << "-b:a"
                          << "192k"
                          // output file
-                         << DEBUG_OUTPUT_PATH;
+                         << m_output_path;
 }
 
 void RenderWorker::set_video_ready() {
@@ -268,13 +287,23 @@ void RenderWorker::set_audio_ready() {
     }
 }
 
+void RenderWorker::notify_init_error(const QString& msg) {
+    m_audio_is_ready = false;
+    m_video_is_ready = false;
+
+    if (!m_is_running)
+        return;
+    m_is_running = false;
+    emit done(false, msg);
+}
+
 void RenderWorker::notify_video_done(bool ok, const QString& message) {
     // m_video_thread.quit();
     m_video_is_done = true;
 
     if (ok && m_audio_is_done) {
         m_ffmpeg.waitForFinished();
-        emit done(true, "");
+        emit done(true, message);
     } else if (!ok && !m_audio_is_done) {
         emit done(false, message);
         request_stop();
@@ -289,7 +318,7 @@ void RenderWorker::notify_audio_done(bool ok, const QString& message) {
 
     if (ok && m_video_is_done) {
         m_ffmpeg.waitForFinished();
-        emit done(true, "");
+        emit done(true, message);
     } else if (!ok && !m_video_is_done) {
         emit done(false, message);
         request_stop();
