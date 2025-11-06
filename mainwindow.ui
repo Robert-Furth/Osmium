@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1117</width>
-    <height>600</height>
+    <width>1080</width>
+    <height>675</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,306 +17,28 @@
    <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="1" alignment="Qt::AlignmentFlag::AlignLeft">
-     <widget class="QGroupBox" name="groupBox_2">
-      <property name="minimumSize">
-       <size>
-        <width>225</width>
-        <height>0</height>
-       </size>
+    <item row="2" column="1">
+     <widget class="QPushButton" name="btnStopRender">
+      <property name="enabled">
+       <bool>false</bool>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>225</width>
-        <height>16777215</height>
-       </size>
+      <property name="text">
+       <string>Stop</string>
       </property>
-      <property name="title">
-       <string>Channel Options</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item alignment="Qt::AlignmentFlag::AlignTop">
-        <widget class="QWidget" name="widget" native="true">
-         <layout class="QGridLayout" name="gridLayout_2">
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="chbInheritOpts">
-            <property name="statusTip">
-             <string>Whether this channel should inherit the below values from the default settings.</string>
-            </property>
-            <property name="text">
-             <string>Use Default</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="btnResetOpts">
-            <property name="text">
-             <string>Reset to Default</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="Line" name="line_2">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QComboBox" name="cmbChannel"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QScrollArea" name="scraChannelOpts">
-         <property name="frameShape">
-          <enum>QFrame::Shape::NoFrame</enum>
-         </property>
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents_3">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>240</width>
-            <height>340</height>
-           </rect>
-          </property>
-          <layout class="QFormLayout" name="formLayout">
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Wave Color</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QWidget" name="widget_4" native="true">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QLineEdit" name="lineEdit"/>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_12">
-             <property name="text">
-              <string>Wave Thickness</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="dsbWaveThickness">
-             <property name="minimum">
-              <double>0.500000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>Scope Width</string>
-             </property>
-             <property name="buddy">
-              <cstring>sbScopeWidth</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="sbScopeWidth">
-             <property name="suffix">
-              <string>ms</string>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>1000</number>
-             </property>
-             <property name="value">
-              <number>40</number>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>Amplification</string>
-             </property>
-             <property name="buddy">
-              <cstring>dsbAmplification</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QDoubleSpinBox" name="dsbAmplification">
-             <property name="minimum">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="value">
-              <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QCheckBox" name="chbStereo">
-             <property name="text">
-              <string>Stereo</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0" colspan="2">
-            <widget class="Line" name="line">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_8">
-             <property name="statusTip">
-              <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
-             </property>
-             <property name="text">
-              <string>Maximum Nudge</string>
-             </property>
-             <property name="buddy">
-              <cstring>sbMaxNudge</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QSpinBox" name="sbMaxNudge">
-             <property name="statusTip">
-              <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
-             </property>
-             <property name="suffix">
-              <string>ms</string>
-             </property>
-             <property name="minimum">
-              <number>0</number>
-             </property>
-             <property name="maximum">
-              <number>100</number>
-             </property>
-             <property name="value">
-              <number>16</number>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="statusTip">
-              <string>How high (proportional to the largest sample in the window) a wave must get for it to count as a rising edge.</string>
-             </property>
-             <property name="text">
-              <string>Trigger Threshold</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QDoubleSpinBox" name="dsbTriggerThreshold">
-             <property name="statusTip">
-              <string>How high (proportional to the largest sample in the window) a wave must get for it to count as a rising edge.</string>
-             </property>
-             <property name="maximum">
-              <double>1.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.050000000000000</double>
-             </property>
-             <property name="value">
-              <double>0.250000000000000</double>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QGroupBox" name="groupBox">
+    <item row="1" column="0">
+     <widget class="QGroupBox" name="gbGlobalOpts">
       <property name="minimumSize">
        <size>
-        <width>225</width>
+        <width>250</width>
         <height>0</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>225</width>
+        <width>250</width>
         <height>16777215</height>
        </size>
       </property>
@@ -355,93 +77,14 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>249</width>
-            <height>432</height>
+            <width>272</width>
+            <height>437</height>
            </rect>
           </property>
-          <layout class="QFormLayout" name="formLayout_3">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Frame Rate</string>
-             </property>
-             <property name="buddy">
-              <cstring>cmbFrameRate</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QComboBox" name="cmbFrameRate">
-             <property name="currentIndex">
-              <number>-1</number>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Render Width</string>
-             </property>
-             <property name="buddy">
-              <cstring>sbRenderWidth</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QSpinBox" name="sbRenderWidth">
-             <property name="suffix">
-              <string>px</string>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>10000</number>
-             </property>
-             <property name="value">
-              <number>1920</number>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Render Height</string>
-             </property>
-             <property name="buddy">
-              <cstring>sbRenderHeight</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="sbRenderHeight">
-             <property name="suffix">
-              <string>px</string>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>10000</number>
-             </property>
-             <property name="value">
-              <number>1080</number>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Order</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QWidget" name="widget_2" native="true">
-             <layout class="QVBoxLayout" name="verticalLayout_2">
-              <property name="spacing">
-               <number>3</number>
-              </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QWidget" name="widget_3" native="true">
+             <layout class="QFormLayout" name="formLayout_2">
               <property name="leftMargin">
                <number>0</number>
               </property>
@@ -454,74 +97,243 @@
               <property name="bottomMargin">
                <number>0</number>
               </property>
-              <item>
-               <widget class="QRadioButton" name="rbRowMajorLayout">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label">
                 <property name="text">
-                 <string>Row-major</string>
+                 <string>Frame Rate</string>
                 </property>
-                <property name="checked">
-                 <bool>true</bool>
+                <property name="buddy">
+                 <cstring>cmbFrameRate</cstring>
                 </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">bgrpCellOrder</string>
-                </attribute>
                </widget>
               </item>
-              <item>
-               <widget class="QRadioButton" name="rbColMajorLayout">
-                <property name="text">
-                 <string>Column-major</string>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="cmbFrameRate">
+                <property name="currentIndex">
+                 <number>-1</number>
                 </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">bgrpCellOrder</string>
-                </attribute>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>Render Width</string>
+                </property>
+                <property name="buddy">
+                 <cstring>sbRenderWidth</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSpinBox" name="sbRenderWidth">
+                <property name="suffix">
+                 <string>px</string>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+                <property name="value">
+                 <number>1920</number>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Render Height</string>
+                </property>
+                <property name="buddy">
+                 <cstring>sbRenderHeight</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QSpinBox" name="sbRenderHeight">
+                <property name="suffix">
+                 <string>px</string>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+                <property name="value">
+                 <number>1080</number>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0" colspan="2">
+               <widget class="Line" name="line_4">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>Order</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QWidget" name="widget_2" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_2">
+                 <property name="spacing">
+                  <number>3</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QRadioButton" name="rbRowMajorLayout">
+                   <property name="text">
+                    <string>Row-major</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">bgrpCellOrder</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="rbColMajorLayout">
+                   <property name="text">
+                    <string>Column-major</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">bgrpCellOrder</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>Row Count</string>
+                </property>
+                <property name="buddy">
+                 <cstring>sbRowCount</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QSpinBox" name="sbRowCount">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>Column Count</string>
+                </property>
+                <property name="buddy">
+                 <cstring>sbColCount</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QSpinBox" name="sbColCount">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>Background Color</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="ColorPicker" name="cpBackground" native="true">
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::TabFocus</enum>
+                </property>
+                <property name="color" stdset="0">
+                 <color>
+                  <red>0</red>
+                  <green>0</green>
+                  <blue>0</blue>
+                 </color>
+                </property>
+                <property name="allowAlpha" stdset="0">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="0">
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string>Gridline Color</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="1">
+               <widget class="ColorPicker" name="cpGridlineColor" native="true">
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::TabFocus</enum>
+                </property>
+                <property name="color" stdset="0">
+                 <color>
+                  <red>0</red>
+                  <green>128</green>
+                  <blue>160</blue>
+                 </color>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="0">
+               <widget class="QLabel" name="label_20">
+                <property name="text">
+                 <string>Gridline Thickness</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="1">
+               <widget class="QDoubleSpinBox" name="dsbGridlineThickness">
+                <property name="suffix">
+                 <string>px</string>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="value">
+                 <double>2.000000000000000</double>
+                </property>
                </widget>
               </item>
              </layout>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_10">
-             <property name="text">
-              <string>Row Count</string>
-             </property>
-             <property name="buddy">
-              <cstring>sbRowCount</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QSpinBox" name="sbRowCount">
-             <property name="minimum">
-              <number>1</number>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Column Count</string>
-             </property>
-             <property name="buddy">
-              <cstring>sbColCount</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QSpinBox" name="sbColCount">
-             <property name="minimum">
-              <number>1</number>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0" colspan="2">
+           <item>
             <widget class="Line" name="line_3">
              <property name="orientation">
               <enum>Qt::Orientation::Horizontal</enum>
              </property>
             </widget>
            </item>
-           <item row="7" column="0" colspan="2">
+           <item>
             <widget class="QCheckBox" name="chbDebugVis">
              <property name="text">
               <string>Debug Visualization</string>
@@ -535,24 +347,442 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="0">
+    <item row="1" column="1" alignment="Qt::AlignmentFlag::AlignLeft">
+     <widget class="QGroupBox" name="gbChannelOpts">
+      <property name="minimumSize">
+       <size>
+        <width>250</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>250</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>Channel Options</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="widget" native="true">
+         <layout class="QGridLayout" name="gridLayout_2">
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item row="2" column="0" colspan="2">
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="btnResetOpts">
+            <property name="text">
+             <string>Reset to Default</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="chbInheritOpts">
+            <property name="statusTip">
+             <string>Whether this channel should inherit the below values from the default settings.</string>
+            </property>
+            <property name="text">
+             <string>Use Default</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QComboBox" name="cmbChannel"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QScrollArea" name="scraChannelOpts">
+         <property name="frameShape">
+          <enum>QFrame::Shape::NoFrame</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents_3">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>233</width>
+            <height>397</height>
+           </rect>
+          </property>
+          <layout class="QFormLayout" name="formLayout">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="chbStereo">
+             <property name="text">
+              <string>Stereo</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Wave Color</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="ColorPicker" name="cpWaveColor" native="true">
+             <property name="focusPolicy">
+              <enum>Qt::FocusPolicy::TabFocus</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Wave Thickness</string>
+             </property>
+             <property name="buddy">
+              <cstring>dsbWaveThickness</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="dsbWaveThickness">
+             <property name="suffix">
+              <string>px</string>
+             </property>
+             <property name="minimum">
+              <double>0.500000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>2.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Amplification</string>
+             </property>
+             <property name="buddy">
+              <cstring>dsbAmplification</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QDoubleSpinBox" name="dsbAmplification">
+             <property name="minimum">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Scope Width</string>
+             </property>
+             <property name="buddy">
+              <cstring>sbScopeWidth</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="sbScopeWidth">
+             <property name="suffix">
+              <string>ms</string>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>1000</number>
+             </property>
+             <property name="value">
+              <number>40</number>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0" colspan="2">
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="statusTip">
+              <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
+             </property>
+             <property name="text">
+              <string>Maximum Nudge</string>
+             </property>
+             <property name="buddy">
+              <cstring>sbMaxNudge</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QSpinBox" name="sbMaxNudge">
+             <property name="statusTip">
+              <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
+             </property>
+             <property name="suffix">
+              <string>ms</string>
+             </property>
+             <property name="minimum">
+              <number>0</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>30</number>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="statusTip">
+              <string>Minimum amplitude of a sample for it to trigger a rising edge.</string>
+             </property>
+             <property name="text">
+              <string>Trigger Threshold</string>
+             </property>
+             <property name="buddy">
+              <cstring>dsbTriggerThreshold</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QDoubleSpinBox" name="dsbTriggerThreshold">
+             <property name="statusTip">
+              <string>Minimum amplitude of a sample for it to trigger a rising edge.</string>
+             </property>
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>Similarity Bias</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QDoubleSpinBox" name="dsbSimilarityBias">
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0">
+            <widget class="QLabel" name="label_15">
+             <property name="text">
+              <string>Similarity Window</string>
+             </property>
+             <property name="buddy">
+              <cstring>sbSimilarityWindow</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="1">
+            <widget class="QSpinBox" name="sbSimilarityWindow">
+             <property name="suffix">
+              <string>ms</string>
+             </property>
+             <property name="maximum">
+              <number>1000</number>
+             </property>
+             <property name="value">
+              <number>40</number>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0">
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>Peak Bias</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="1">
+            <widget class="QDoubleSpinBox" name="dsbPeakBias">
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="0">
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>Peak Threshold</string>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="1">
+            <widget class="QDoubleSpinBox" name="dsbPeakThreshold">
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.900000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="2" column="0">
      <widget class="QPushButton" name="btnStartRender">
       <property name="text">
-       <string>Start</string>
+       <string>Render</string>
       </property>
       <property name="default">
        <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
+    <item row="0" column="0" colspan="2">
+     <widget class="QWidget" name="wgtFileChoosers" native="true">
+      <layout class="QGridLayout" name="gridLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="leInputFile">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Input File</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>Soundfont</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="leSoundfont">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="btnChooseFile">
+         <property name="text">
+          <string>Choose...</string>
+         </property>
+         <property name="icon">
+          <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="btnChooseSoundfont">
+         <property name="text">
+          <string>Choose...</string>
+         </property>
+         <property name="icon">
+          <iconset theme="QIcon::ThemeIcon::AudioCard"/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="2" rowspan="2">
      <widget class="QGroupBox" name="groupBox_3">
-      <property name="title">
-       <string>Preview</string>
-      </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="ResizableQLabel" name="lbCanvas">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+	background: #000000;
+}</string>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -572,13 +802,6 @@
         </widget>
        </item>
       </layout>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QPushButton" name="btnStopRender">
-      <property name="text">
-       <string>Stop</string>
-      </property>
      </widget>
     </item>
    </layout>
@@ -611,7 +834,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1117</width>
+     <width>1080</width>
      <height>25</height>
     </rect>
    </property>
@@ -626,6 +849,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionChooseSoundfont"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -657,6 +881,17 @@
     <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
+  <action name="actionChooseSoundfont">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::AudioCard"/>
+   </property>
+   <property name="text">
+    <string>Choose Soundfont...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -664,8 +899,21 @@
    <extends>QLabel</extends>
    <header>resizableqlabel.h</header>
   </customwidget>
+  <customwidget>
+   <class>ColorPicker</class>
+   <extends>QWidget</extends>
+   <header>colorpicker.h</header>
+   <container>1</container>
+   <slots>
+    <signal>valueChanged(QColor)</signal>
+   </slots>
+  </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>leInputFile</tabstop>
+  <tabstop>btnChooseFile</tabstop>
+  <tabstop>leSoundfont</tabstop>
+  <tabstop>btnChooseSoundfont</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>cmbFrameRate</tabstop>
   <tabstop>sbRenderWidth</tabstop>
@@ -674,19 +922,25 @@
   <tabstop>rbColMajorLayout</tabstop>
   <tabstop>sbRowCount</tabstop>
   <tabstop>sbColCount</tabstop>
+  <tabstop>cpBackground</tabstop>
+  <tabstop>cpGridlineColor</tabstop>
+  <tabstop>dsbGridlineThickness</tabstop>
   <tabstop>chbDebugVis</tabstop>
   <tabstop>cmbChannel</tabstop>
   <tabstop>chbInheritOpts</tabstop>
   <tabstop>btnResetOpts</tabstop>
   <tabstop>scraChannelOpts</tabstop>
-  <tabstop>lineEdit</tabstop>
-  <tabstop>pushButton</tabstop>
-  <tabstop>dsbWaveThickness</tabstop>
-  <tabstop>sbScopeWidth</tabstop>
-  <tabstop>dsbAmplification</tabstop>
   <tabstop>chbStereo</tabstop>
+  <tabstop>cpWaveColor</tabstop>
+  <tabstop>dsbWaveThickness</tabstop>
+  <tabstop>dsbAmplification</tabstop>
+  <tabstop>sbScopeWidth</tabstop>
   <tabstop>sbMaxNudge</tabstop>
   <tabstop>dsbTriggerThreshold</tabstop>
+  <tabstop>dsbSimilarityBias</tabstop>
+  <tabstop>sbSimilarityWindow</tabstop>
+  <tabstop>dsbPeakBias</tabstop>
+  <tabstop>dsbPeakThreshold</tabstop>
   <tabstop>btnStartRender</tabstop>
   <tabstop>btnStopRender</tabstop>
  </tabstops>
@@ -699,8 +953,8 @@
    <slot>setCurrentChannel(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>367</x>
-     <y>105</y>
+     <x>452</x>
+     <y>175</y>
     </hint>
     <hint type="destinationlabel">
      <x>363</x>
@@ -715,8 +969,8 @@
    <slot>recalcPreview()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>134</y>
+     <x>221</x>
+     <y>206</y>
     </hint>
     <hint type="destinationlabel">
      <x>558</x>
@@ -731,8 +985,8 @@
    <slot>recalcPreview()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>165</y>
+     <x>221</x>
+     <y>237</y>
     </hint>
     <hint type="destinationlabel">
      <x>558</x>
@@ -763,8 +1017,8 @@
    <slot>recalcPreview()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>247</y>
+     <x>193</x>
+     <y>308</y>
     </hint>
     <hint type="destinationlabel">
      <x>558</x>
@@ -779,8 +1033,8 @@
    <slot>recalcPreview()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>278</y>
+     <x>176</x>
+     <y>335</y>
     </hint>
     <hint type="destinationlabel">
      <x>558</x>
@@ -795,8 +1049,8 @@
    <slot>debugStart()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>145</x>
-     <y>568</y>
+     <x>165</x>
+     <y>643</y>
     </hint>
     <hint type="destinationlabel">
      <x>143</x>
@@ -811,8 +1065,8 @@
    <slot>resetCurrentToDefault()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>402</x>
-     <y>130</y>
+     <x>452</x>
+     <y>205</y>
     </hint>
     <hint type="destinationlabel">
      <x>403</x>
@@ -827,12 +1081,60 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>287</x>
-     <y>131</y>
+     <x>349</x>
+     <y>203</y>
     </hint>
     <hint type="destinationlabel">
-     <x>456</x>
-     <y>220</y>
+     <x>461</x>
+     <y>441</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnStopRender</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>btnStopRender</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>643</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>643</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpen</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>choose_input_file()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>558</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionChooseSoundfont</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>choose_soundfont()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>558</x>
+     <y>299</y>
     </hint>
    </hints>
   </connection>
@@ -843,6 +1145,8 @@
   <slot>setCurrentChannel(int)</slot>
   <slot>recalcPreview()</slot>
   <slot>resetCurrentToDefault()</slot>
+  <slot>choose_input_file()</slot>
+  <slot>choose_soundfont()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="bgrpCellOrder"/>

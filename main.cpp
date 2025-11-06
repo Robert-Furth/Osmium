@@ -11,11 +11,12 @@
 int main(int argc, char *argv[])
 {
     if (!osmium::init()) {
-        std::cout << "Could not start osmium\n";
+        std::cout << "Could not start osmium library\n";
         return 1;
     }
 
     QApplication a(argc, argv);
+    a.setApplicationName("Osmium");
 
     // The windows11 style is hideous; override it here
     a.setStyle("Fusion");

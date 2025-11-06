@@ -5,16 +5,21 @@
 #define NOMINMAX
 #endif
 
+#include <filesystem>
+
 #include <QColor>
+#include <QDialog>
 #include <QDir>
+#include <QFileDialog>
 #include <QImage>
 #include <QList>
+#include <QMessageBox>
 #include <QPainter>
 #include <QPixmap>
 #include <QProcess>
 #include <QWaitCondition>
 
-#include "constants.h"
+#include "saveload.h"
 #include "scoperenderer.h"
 #include "workers.h"
 
@@ -29,22 +34,52 @@ MainWindow::MainWindow(QWidget* parent)
       m_render_thread(this) {
     ui->setupUi(this);
 
-    // Frame rates
-    ui->cmbFrameRate->addItem("25", 25);
-    ui->cmbFrameRate->addItem("30", 30);
-    ui->cmbFrameRate->addItem("50", 50);
-    ui->cmbFrameRate->addItem("60", 60);
+    // Set up tool button-action mapping
+    connect(ui->btnChooseFile,
+            &QPushButton::clicked,
+            this,
+            &MainWindow::choose_input_file);
+    connect(ui->btnChooseSoundfont,
+            &QPushButton::clicked,
+            this,
+            &MainWindow::choose_soundfont);
+
+    // Button group
+    ui->bgrpCellOrder->setId(ui->rbColMajorLayout,
+                             static_cast<int>(ScopeRenderer::ChannelOrder::COLUMN_MAJOR));
+    ui->bgrpCellOrder->setId(ui->rbRowMajorLayout,
+                             static_cast<int>(ScopeRenderer::ChannelOrder::ROW_MAJOR));
+
+    // Frame rate dropdown
+    ui->cmbFrameRate->addItem("25 fps", 25);
+    ui->cmbFrameRate->addItem("30 fps", 30);
+    ui->cmbFrameRate->addItem("50 fps", 50);
+    ui->cmbFrameRate->addItem("60 fps", 60);
     ui->cmbFrameRate->setCurrentIndex(1);
+
+    // Read in config
+    PersistentConfig cfg;
+    if (cfg.load()) {
+        m_input_file_dir.assign(cfg.input_file_dir);
+        m_output_file_dir.assign(cfg.output_file_dir);
+        set_soundfont(QString::fromStdString(cfg.soundfont_path));
+    }
 
     // Per-channel model: default values
     QStandardItem* default_item = new QStandardItem("Default");
     default_item->setData(40, toint(ChannelArgRole::ScopeWidthMs));
-    default_item->setData(16, toint(ChannelArgRole::MaxNudgeMs));
     default_item->setData(1.0, toint(ChannelArgRole::Amplification));
-    default_item->setData(0.25, toint(ChannelArgRole::TriggerThreshold));
     default_item->setData(true, toint(ChannelArgRole::IsStereo));
     default_item->setData(QColor(255, 255, 255), toint(ChannelArgRole::Color));
     default_item->setData(2, toint(ChannelArgRole::Thickness));
+
+    default_item->setData(0.1, toint(ChannelArgRole::TriggerThreshold));
+    default_item->setData(30, toint(ChannelArgRole::MaxNudgeMs));
+    default_item->setData(1.0, toint(ChannelArgRole::SimilarityBias));
+    default_item->setData(20, toint(ChannelArgRole::SimilarityWindowMs));
+    default_item->setData(0.5, toint(ChannelArgRole::PeakBias));
+    default_item->setData(0.9, toint(ChannelArgRole::PeakBiasFactor));
+
     default_item->setData(true, toint(ChannelArgRole::InheritDefaults));
     m_channel_model.appendRow(default_item);
     reinit_channel_model(16); // DEBUG
@@ -67,12 +102,31 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->chbStereo,
             &QCheckBox::clicked,
             model_updater<bool, ChannelArgRole::IsStereo>());
+    connect(ui->cpWaveColor,
+            &ColorPicker::valueChanged,
+            model_updater<QColor, ChannelArgRole::Color>());
     connect(ui->dsbWaveThickness,
             &QDoubleSpinBox::valueChanged,
             model_updater<double, ChannelArgRole::Thickness>());
     connect(ui->chbInheritOpts,
             &QCheckBox::clicked,
             model_updater<bool, ChannelArgRole::InheritDefaults>());
+    connect(ui->dsbSimilarityBias,
+            &QDoubleSpinBox::valueChanged,
+            model_updater<double, ChannelArgRole::SimilarityBias>());
+    connect(ui->sbSimilarityWindow,
+            &QSpinBox::valueChanged,
+            model_updater<int, ChannelArgRole::SimilarityWindowMs>());
+    connect(ui->sbScopeWidth,
+            &QSpinBox::valueChanged,
+            ui->sbSimilarityWindow,
+            &QSpinBox::setMaximum);
+    connect(ui->dsbPeakBias,
+            &QDoubleSpinBox::valueChanged,
+            model_updater<double, ChannelArgRole::PeakBias>());
+    connect(ui->dsbPeakThreshold,
+            &QDoubleSpinBox::valueChanged,
+            model_updater<double, ChannelArgRole::PeakBiasFactor>());
 
     // Set up render thread
     m_r_worker = new RenderWorker();
@@ -98,6 +152,14 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow() {
     delete ui;
+
+    PersistentConfig cfg{
+        .soundfont_path = m_input_soundfont.toStdString(),
+        .input_file_dir = m_input_file_dir.toStdString(),
+        .output_file_dir = m_output_file_dir.toStdString(),
+    };
+    cfg.save();
+
     m_render_thread.quit();
     m_render_thread.wait();
 }
@@ -111,6 +173,23 @@ void MainWindow::reinit_channel_model(int num_channels) {
         item->setText(QString("Channel %1").arg(i));
         m_channel_model.setItem(i, item);
     }
+
+    m_current_index = 0;
+    syncUiToModel();
+}
+
+void MainWindow::set_ui_state(UiState state) {
+    switch (state) {
+    case UiState::Editing:
+        ui->wgtFileChoosers->setEnabled(true);
+        ui->gbChannelOpts->setEnabled(true);
+        ui->gbGlobalOpts->setEnabled(true);
+        break;
+    case UiState::Rendering:
+        break;
+    case UiState::Canceling:
+        break;
+    }
 }
 
 template<typename T>
@@ -119,18 +198,62 @@ void MainWindow::update_model_value(ChannelArgRole role, const T& val) {
     m_channel_model.item(index)->setData(val, toint(role));
 }
 
+// -- MainWindow slots --
+
 void MainWindow::debugStart() {
+    if (m_input_file.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Please choose a file to render.");
+        return;
+    }
+
+    if (m_input_soundfont.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Please choose a soundfont to use.");
+        return;
+    }
+
+    if (!std::filesystem::is_regular_file(m_input_file.toStdString())) {
+        QString message = QString("The file \"%1\" does not exist or is not a regular "
+                                  "file. Please choose a new file.")
+                              .arg(m_input_file);
+        QMessageBox::warning(this, "Error", message);
+        set_input_file("");
+        return;
+    }
+
+    if (!std::filesystem::is_regular_file(m_input_soundfont.toStdString())) {
+        QString message = QString("The file \"%1\" does not exist or is not a regular "
+                                  "file. Please choose a new file.")
+                              .arg(m_input_soundfont);
+        QMessageBox::warning(this, "Error", message);
+        set_soundfont("");
+        return;
+    }
+
+    QString output_file = QFileDialog::getSaveFileName(this,
+                                                       "Render File",
+                                                       m_output_file_dir,
+                                                       "MP4 Files (*.mp4)");
+    if (output_file.isNull())
+        return;
+    m_output_file_dir = QFileInfo(output_file).absoluteDir().path();
+
     ui->btnStartRender->setEnabled(false);
 
-    // TODO: implement row-major/column-major
+    // Set up args
+    auto channel_order = static_cast<ScopeRenderer::ChannelOrder>(
+        ui->bgrpCellOrder->checkedId());
+
     ScopeRenderer::GlobalArgs global_args{
         .width = ui->sbRenderWidth->value(),
         .height = ui->sbRenderHeight->value(),
-        .num_rows_or_cols = ui->sbColCount->value(),
-        .order = ScopeRenderer::ChannelOrder::ROW_MAJOR,
+        .num_rows_or_cols = channel_order == ScopeRenderer::ChannelOrder::ROW_MAJOR
+                                ? ui->sbColCount->value()
+                                : ui->sbRowCount->value(),
+        .order = channel_order,
         .fps = ui->cmbFrameRate->currentData().toInt(),
-        .border_color = qRgb(0, 0x80, 0xa0),
-        .border_thickness = 2,
+        .border_color = ui->cpGridlineColor->color().rgb(),
+        .border_thickness = ui->dsbGridlineThickness->value(),
+        .background_color = ui->cpBackground->color().rgb(),
         .debug_vis = ui->chbDebugVis->isChecked(),
     };
 
@@ -145,22 +268,100 @@ void MainWindow::debugStart() {
 
         channel_args_list << ScopeRenderer::ChannelArgs{
             .scope_width_ms = args->data(toint(ChannelArgRole::ScopeWidthMs)).toInt(),
-            .max_nudge_ms = args->data(toint(ChannelArgRole::MaxNudgeMs)).toInt(),
             .amplification = args->data(toint(ChannelArgRole::Amplification)).toDouble(),
-            .trigger_threshold = args->data(toint(ChannelArgRole::TriggerThreshold))
-                                     .toDouble(),
             .is_stereo = args->data(toint(ChannelArgRole::IsStereo)).toBool(),
             .color = args->data(toint(ChannelArgRole::Color)).value<QColor>().rgb(),
             .thickness = args->data(toint(ChannelArgRole::Thickness)).toDouble(),
+            .max_nudge_ms = args->data(toint(ChannelArgRole::MaxNudgeMs)).toInt(),
+            .trigger_threshold = args->data(toint(ChannelArgRole::TriggerThreshold))
+                                     .toDouble(),
+            .similarity_bias = args->data(toint(ChannelArgRole::SimilarityBias)).toDouble(),
+            .similarity_window_ms = args->data(toint(ChannelArgRole::SimilarityWindowMs))
+                                        .toInt(),
+            .peak_bias = args->data(toint(ChannelArgRole::PeakBias)).toDouble(),
+            .peak_bias_factor = args->data(toint(ChannelArgRole::PeakBiasFactor))
+                                    .toDouble(),
         };
     }
 
-    emit workerStartRequested({DEBUG_INPUT_PATH}, channel_args_list, global_args);
+    emit workerStartRequested(m_input_file,
+                              m_input_soundfont,
+                              output_file,
+                              channel_args_list,
+                              global_args);
+    ui->btnStopRender->setEnabled(true);
 }
 
 void MainWindow::onWorkerStop(bool ok, const QString& message) {
-    qDebug() << message;
+    if (!message.isEmpty()) {
+        qDebug() << message;
+    }
+
+    if (!ok || !message.isEmpty()) {
+        QString display_message;
+        if (!ok) {
+            display_message = message.isEmpty()
+                                  ? "An error occurred during rendering."
+                                  : "The following error occurred during rendering:\n"
+                                        + message;
+        } else {
+            display_message = message;
+        }
+        QString title = ok ? "Osmium" : "Error";
+        QMessageBox::Icon icon = ok ? QMessageBox::Information : QMessageBox::Warning;
+
+        QMessageBox mbox(icon,
+                         title,
+                         display_message,
+                         QMessageBox::StandardButton::Ok,
+                         this);
+        mbox.exec();
+    }
+
     ui->btnStartRender->setEnabled(true);
+    ui->btnStopRender->setEnabled(false);
+}
+
+void MainWindow::choose_input_file() {
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    "Choose File",
+                                                    m_input_file_dir,
+                                                    "MIDI Files (*.mid *.midi)");
+    if (filename.isNull())
+        return;
+
+    set_input_file(filename);
+}
+
+void MainWindow::set_input_file(const QString& filename) {
+    m_input_file = filename;
+    m_input_file_dir = QFileInfo(filename).absoluteDir().path();
+    ui->leInputFile->setText(filename);
+
+    ui->btnStartRender->setDisabled(m_input_file.isEmpty() || m_input_soundfont.isEmpty());
+}
+
+void MainWindow::choose_soundfont() {
+    QString soundfont_dir;
+    if (!m_input_soundfont.isEmpty()) {
+        soundfont_dir = QFileInfo(m_input_soundfont).absoluteDir().path();
+    }
+
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    "Choose Soundfont",
+                                                    soundfont_dir,
+                                                    "Soundfonts (*.sf2 *.sfz)");
+    if (filename.isNull())
+        return;
+
+    set_soundfont(filename);
+}
+
+void MainWindow::set_soundfont(const QString& filename) {
+    m_input_soundfont = filename;
+    ui->leSoundfont->setText(filename);
+
+    ui->btnStartRender->setDisabled(m_input_file.isEmpty() || m_input_soundfont.isEmpty());
 }
 
 void MainWindow::setCurrentChannel(int index) {
@@ -198,19 +399,28 @@ void MainWindow::syncUiToModel() {
                             && m_current_index != 0;
 
     ui->sbScopeWidth->setValue(item->data(toint(ChannelArgRole::ScopeWidthMs)).toInt());
-    ui->sbMaxNudge->setValue(item->data(toint(ChannelArgRole::MaxNudgeMs)).toInt());
     ui->dsbAmplification->setValue(
         item->data(toint(ChannelArgRole::Amplification)).toDouble());
-    ui->dsbTriggerThreshold->setValue(
-        item->data(toint(ChannelArgRole::TriggerThreshold)).toDouble());
     ui->chbStereo->setChecked(item->data(toint(ChannelArgRole::IsStereo)).toBool());
-    // TODO color
+    ui->cpWaveColor->setValue(item->data(toint(ChannelArgRole::Color)).value<QColor>());
     ui->dsbWaveThickness->setValue(
         item->data(toint(ChannelArgRole::Thickness)).toDouble());
+
+    ui->dsbTriggerThreshold->setValue(
+        item->data(toint(ChannelArgRole::TriggerThreshold)).toDouble());
+    ui->sbMaxNudge->setValue(item->data(toint(ChannelArgRole::MaxNudgeMs)).toInt());
+    ui->dsbSimilarityBias->setValue(
+        item->data(toint(ChannelArgRole::SimilarityBias)).toDouble());
+    ui->sbSimilarityWindow->setValue(
+        item->data(toint(ChannelArgRole::SimilarityWindowMs)).toInt());
+    ui->dsbPeakBias->setValue(item->data(toint(ChannelArgRole::PeakBias)).toDouble());
+    ui->dsbPeakThreshold->setValue(
+        item->data(toint(ChannelArgRole::PeakBiasFactor)).toDouble());
+
     ui->chbInheritOpts->setChecked(inherit_defaults);
     ui->scraChannelOpts->setDisabled(inherit_defaults);
 }
 
 void MainWindow::recalcPreview() {}
 
-#include "mainwindow.moc"
+// #include "mainwindow.moc"

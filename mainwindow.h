@@ -17,14 +17,25 @@ QT_END_NAMESPACE
 
 enum class ChannelArgRole {
     ScopeWidthMs = Qt::UserRole + 2,
-    MaxNudgeMs,
     Amplification,
-    TriggerThreshold,
     IsStereo,
     Color,
     Thickness,
 
+    TriggerThreshold,
+    MaxNudgeMs,
+    SimilarityBias,
+    SimilarityWindowMs,
+    PeakBias,
+    PeakBiasFactor,
+
     InheritDefaults,
+};
+
+enum class UiState {
+    Editing,
+    Rendering,
+    Canceling,
 };
 
 class MainWindow : public QMainWindow {
@@ -35,9 +46,12 @@ public:
     ~MainWindow();
 
     void reinit_channel_model(int num_channels);
+    void set_ui_state(UiState state);
 
 private:
     Ui::MainWindow* ui;
+    UiState m_state = UiState::Editing;
+
     RenderWorker* m_r_worker;
     QThread m_render_thread;
 
@@ -45,12 +59,15 @@ private:
     int m_current_index = -1;
 
     QString m_input_file;
+    QString m_input_soundfont;
+    QString m_input_file_dir;
+    QString m_output_file_dir;
 
     template<typename T>
     void update_model_value(ChannelArgRole role, const T& val);
 
     template<typename T, ChannelArgRole role>
-    constexpr auto model_updater() {
+    constexpr inline auto model_updater() {
         return std::bind(&MainWindow::update_model_value<T>,
                          this,
                          role,
@@ -61,13 +78,20 @@ public slots:
     void debugStart();
     void onWorkerStop(bool, const QString&);
 
+    void choose_input_file();
+    void set_input_file(const QString&);
+    void choose_soundfont();
+    void set_soundfont(const QString&);
+
     void setCurrentChannel(int);
     void resetCurrentToDefault();
     void syncUiToModel();
     void recalcPreview();
 
 signals:
-    void workerStartRequested(const QStringList& filenames,
+    void workerStartRequested(const QString& input_file,
+                              const QString& soundfont,
+                              const QString& output_file,
                               const QList<ScopeRenderer::ChannelArgs>&,
                               const ScopeRenderer::GlobalArgs&);
     void workerStopRequested();
