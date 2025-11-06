@@ -21,6 +21,8 @@ set(PROJECT_SOURCES
     mainwindow.ui
     resizableqlabel.cpp
     resizableqlabel.h
+    saveload.cpp
+    saveload.h
     scoperenderer.cpp
     scoperenderer.h
     workers.cpp
@@ -38,7 +40,10 @@ target_link_libraries(OsmiumGui
     PRIVATE OsmiumLib
 )
 
-target_include_directories(OsmiumGui PRIVATE "${PROJECT_SOURCE_DIR}/osmium")
+target_include_directories(OsmiumGui
+    PRIVATE "${PROJECT_SOURCE_DIR}/include"
+    PRIVATE "${PROJECT_SOURCE_DIR}/osmium"
+)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
