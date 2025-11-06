@@ -29,7 +29,8 @@ set(PROJECT_SOURCES
     workers.h
 )
 
-qt_add_executable(OsmiumGui ${PROJECT_SOURCES})
+qt_add_executable(OsmiumGui ${PROJECT_SOURCES}
+    colorpicker.h colorpicker.cpp colorpicker.ui)
 
 target_link_libraries(OsmiumGui
     PRIVATE Qt6::Core
