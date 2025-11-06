@@ -31,12 +31,13 @@ Player::Player(uint32_t handle, uint32_t fps, const char* soundfont)
 }
 
 Player::Player(const char* filename, uint32_t fps, const char* soundfont)
-    : Player(BASS_StreamCreateFile(BASS_FILE_NAME,
-                                   filename,
-                                   0,
-                                   0,
-                                   BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE
-                                       | BASS_MIDI_DECAYEND),
+    : Player(BASS_MIDI_StreamCreateFile(BASS_FILE_NAME,
+                                        filename,
+                                        0,
+                                        0,
+                                        BASS_SAMPLE_FLOAT | BASS_STREAM_DECODE
+                                            | BASS_MIDI_DECAYEND,
+                                        0),
              fps,
              soundfont) {}
 
