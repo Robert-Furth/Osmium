@@ -1,5 +1,10 @@
 #include "scopebuilder.h"
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include <algorithm>
 #include <format>
 #include <string>
 
@@ -15,7 +20,19 @@ namespace osmium {
 BOOL CALLBACK midi_filter_channel(
     HSTREAM handle, int track, BASS_MIDI_EVENT* event, BOOL seeking, void* user) {
     int* channelp = static_cast<int*>(user);
-    return event->chan == *channelp;
+    // Filter out all notes not from the given channel
+    if (event->event == MIDI_EVENT_NOTE)
+        return event->chan == *channelp;
+    return true;
+}
+
+BOOL CALLBACK midi_filter_track(
+    HSTREAM handle, int track, BASS_MIDI_EVENT* event, BOOL seeking, void* user) {
+    int* channelp = static_cast<int*>(user);
+    // Filter out all notes not from the given track
+    if (event->event == MIDI_EVENT_NOTE)
+        return track == *channelp;
+    return true;
 }
 
 // -- Helpers --
@@ -83,16 +100,22 @@ Scope ScopeBuilder::build_from_handle(HSTREAM handle) {
     // samples/sec * ms/window * sec/ms = samples/window
     uint32_t samples_per_window = info.freq * m_display_window_ms / 1000;
     uint32_t max_nudge_samples = info.freq * m_max_nudge_ms / 1000;
+    uint32_t similarity_window = info.freq * m_similarity_window_ms / 1000;
 
-    Scope scope(handle,
-                samples_per_frame,
-                info.freq,
-                samples_per_window,
-                max_nudge_samples,
-                m_amplification,
-                m_trigger_threshold,
-                info.chans,
-                m_stereo);
+    Scope scope(handle, samples_per_window, samples_per_window + max_nudge_samples);
+    scope.m_samples_per_frame = samples_per_frame;
+    scope.m_sample_rate = info.freq;
+    scope.m_window_size = samples_per_window;
+    scope.m_amplification = m_amplification;
+    scope.m_src_num_channels = info.chans;
+    scope.m_is_stereo = m_stereo;
+
+    scope.m_max_nudge = max_nudge_samples;
+    scope.m_trigger_threshold = m_trigger_threshold;
+    scope.m_similarity_bias = m_similarity_bias;
+    scope.m_similarity_window = std::min(similarity_window, samples_per_window);
+    scope.m_peak_bias = m_peak_bias;
+    scope.m_peak_bias_min_factor = m_peak_threshold;
 
     if (!m_soundfonts.empty()) {
         auto sf_handles = construct_soundfonts(m_soundfonts);

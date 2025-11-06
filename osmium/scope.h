@@ -19,11 +19,15 @@ public:
     double get_window_size_ms() const { return 1000.0 * m_window_size / m_sample_rate; }
     double get_max_nudge_ms() const { return 1000.0 * m_max_nudge / m_sample_rate; }
     double get_this_nudge_ms() const { return 1000.0 * m_nudge_amount / m_sample_rate; }
+    bool get_no_nudges_found() const { return m_no_good_nudge; }
 
     uint64_t get_total_samples() const;
     bool is_playing() const;
 
     void next_wave_data();
+
+    bool m_flag1 = false;
+    bool m_flag2 = false;
 
 private:
     HandleWrapper m_stream_handle;
@@ -31,35 +35,40 @@ private:
     uint32_t m_samples_per_frame;
     uint32_t m_sample_rate;
     uint32_t m_window_size;
-    uint32_t m_max_nudge;
-    float m_amplification;
-    float m_trigger_threshold;
+    double m_amplification;
     unsigned m_src_num_channels;
     bool m_is_stereo;
 
+    // Inter-frame alignment //
+
+    // How far forward a sample can be moved to fit
+    uint32_t m_max_nudge;
+    uint32_t m_similarity_window;
+    double m_trigger_threshold;
+    double m_similarity_bias;
+    // double m_repeat_bias;
+    // uint32_t m_repeat_bias_window; // 48 samples = 1 ms
+    double m_peak_bias;
+    double m_peak_bias_min_factor; // 90% of peak
+
+    // Info/debug variables
     uint64_t m_total_samples_read = 0;
     int32_t m_nudge_amount = 0;
+    int32_t m_nudge_change = 0;
     int m_frame_num = 0;
+    bool m_no_good_nudge = false;
 
     std::vector<float> m_left_output;
     std::vector<float> m_right_output;
     std::vector<float> m_left_buffer;
     std::vector<float> m_right_buffer;
 
-    Scope(uint32_t handle,
-          uint32_t samples_per_frame,
-          uint32_t sample_rate,
-          uint32_t window_size,
-          uint32_t max_nudge,
-          float amplification,
-          float trigger_threshold,
-          unsigned src_num_channels,
-          bool is_stereo);
+    Scope(uint32_t handle, uint32_t window_size, uint32_t internal_size);
 
     void update_buffers();
 
-    std::optional<size_t> find_best_startpoint(const std::vector<float>&,
-                                               const std::vector<float>&);
+    std::optional<int32_t> find_best_nudge(const std::vector<float>&,
+                                           const std::vector<float>&);
 
     friend class ScopeBuilder;
 };
