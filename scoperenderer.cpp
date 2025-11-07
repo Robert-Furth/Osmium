@@ -14,6 +14,8 @@
 
 #include <osmium.h>
 
+#include "instrumentnames.h"
+
 ScopeRenderer::ScopeRenderer(const QString& filename,
                              const QString& soundfont,
                              const QList<ChannelArgs>& channel_args,
@@ -23,7 +25,8 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
       m_debug_vis(global_args.debug_vis),
       m_background_color(global_args.background_color),
       m_border_color(global_args.border_color),
-      m_border_thickness(global_args.border_thickness) {
+      m_border_thickness(global_args.border_thickness),
+      m_event_tracker(filename.toUtf8(), global_args.fps) {
     int num_channels = channel_args.size();
     switch (global_args.order) {
     case ChannelOrder::ROW_MAJOR:
@@ -61,6 +64,7 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
 
         m_scopes.emplace_back(std::move(scope));
         m_paint_infos.emplace_back(PaintInfo{
+            .channel = i,
             .x = col * w,
             .y = row * h,
             .w = w,
@@ -68,6 +72,7 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
             .is_stereo = args.is_stereo,
             .color = args.color,
             .thickness = args.thickness,
+            .label = get_instrument_name(0, 0, i == 9),
         });
 
         switch (global_args.order) {
@@ -107,6 +112,7 @@ QImage ScopeRenderer::paint_frame() {
     std::vector<int> indices(m_scopes.size());
     std::iota(indices.begin(), indices.end(), 0);
 
+    m_event_tracker.next_events();
     auto subimages = QtConcurrent::blockingMapped(indices, [this](int index) {
         m_scopes[index].next_wave_data();
         return paint_subimage(index);
@@ -202,6 +208,15 @@ QImage ScopeRenderer::paint_subimage(int index) {
                    p.color);
     }
 
+    for (const auto& event : m_event_tracker.get_events()) {
+        if (event.chan == p.channel && event.event == MIDI_EVENT_PROGRAM) {
+            p.label = get_instrument_name(event.param, 0, p.channel == 9);
+        }
+    }
+
+    painter.setFont(QFont("Arial", 16));
+    painter.setPen(QPen(QColorConstants::White, 2));
+    painter.drawText(QRect(10, 0, p.w - 10, p.h), p.label);
     /*if (m_debug_vis) {
         // DEBUG: nudge window
         double nudge_px = p.w * scope.get_this_nudge_ms() / scope.get_window_size_ms();

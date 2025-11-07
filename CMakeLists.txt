@@ -15,6 +15,11 @@ add_subdirectory(osmium)
 # add_subdirectory(cli)
 
 set(PROJECT_SOURCES
+    colorpicker.cpp
+    colorpicker.h
+    colorpicker.ui
+    instrumentnames.cpp
+    instrumentnames.h
     main.cpp
     mainwindow.cpp
     mainwindow.h
@@ -29,8 +34,7 @@ set(PROJECT_SOURCES
     workers.h
 )
 
-qt_add_executable(OsmiumGui ${PROJECT_SOURCES}
-    colorpicker.h colorpicker.cpp colorpicker.ui)
+qt_add_executable(OsmiumGui ${PROJECT_SOURCES})
 
 target_link_libraries(OsmiumGui
     PRIVATE Qt6::Core

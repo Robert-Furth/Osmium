@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_SOURCES
     error.h
+    eventtracker.cpp
+    eventtracker.h
     handlewrapper.cpp
     handlewrapper.h
     osmium.cpp

@@ -64,6 +64,7 @@ signals:
 
 private:
     struct PaintInfo {
+        int channel;
         double x;
         double y;
         double w;
@@ -71,11 +72,14 @@ private:
         bool is_stereo;
         QRgb color;
         double thickness;
+        QString label;
     };
 
+    osmium::EventTracker m_event_tracker;
     std::vector<osmium::Scope> m_scopes;
     std::vector<PaintInfo> m_paint_infos;
     std::vector<ChannelArgs> m_channel_args;
+
     QColor m_border_color;
     double m_border_thickness;
     QColor m_background_color;
