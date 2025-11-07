@@ -36,6 +36,11 @@ public:
         QRgb color;
         double thickness;
 
+        QRgb midline_color;
+        double midline_thickness;
+        bool draw_h_midline;
+        bool draw_v_midline;
+
         int max_nudge_ms;
         double trigger_threshold;
         double similarity_bias;
@@ -70,8 +75,12 @@ private:
         double w;
         double h;
         bool is_stereo;
-        QRgb color;
-        double thickness;
+        QRgb wave_color;
+        double wave_thickness;
+        QRgb midline_color;
+        double midline_thickness;
+        bool draw_h_midline;
+        bool draw_v_midline;
         QString label;
     };
 

@@ -225,47 +225,30 @@
                </widget>
               </item>
               <item row="5" column="0">
-               <widget class="QLabel" name="label_10">
+               <widget class="QLabel" name="lbRowColCount">
                 <property name="text">
-                 <string>Row Count</string>
+                 <string>Column Count</string>
                 </property>
                 <property name="buddy">
-                 <cstring>sbRowCount</cstring>
+                 <cstring>sbRowColCount</cstring>
                 </property>
                </widget>
               </item>
               <item row="5" column="1">
-               <widget class="QSpinBox" name="sbRowCount">
+               <widget class="QSpinBox" name="sbRowColCount">
                 <property name="minimum">
                  <number>1</number>
                 </property>
                </widget>
               </item>
               <item row="6" column="0">
-               <widget class="QLabel" name="label_4">
-                <property name="text">
-                 <string>Column Count</string>
-                </property>
-                <property name="buddy">
-                 <cstring>sbColCount</cstring>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="1">
-               <widget class="QSpinBox" name="sbColCount">
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="0">
                <widget class="QLabel" name="label_16">
                 <property name="text">
                  <string>Background Color</string>
                 </property>
                </widget>
               </item>
-              <item row="7" column="1">
+              <item row="6" column="1">
                <widget class="ColorPicker" name="cpBackground" native="true">
                 <property name="focusPolicy">
                  <enum>Qt::FocusPolicy::TabFocus</enum>
@@ -282,14 +265,14 @@
                 </property>
                </widget>
               </item>
-              <item row="8" column="0">
+              <item row="7" column="0">
                <widget class="QLabel" name="label_17">
                 <property name="text">
                  <string>Gridline Color</string>
                 </property>
                </widget>
               </item>
-              <item row="8" column="1">
+              <item row="7" column="1">
                <widget class="ColorPicker" name="cpGridlineColor" native="true">
                 <property name="focusPolicy">
                  <enum>Qt::FocusPolicy::TabFocus</enum>
@@ -303,14 +286,14 @@
                 </property>
                </widget>
               </item>
-              <item row="9" column="0">
+              <item row="8" column="0">
                <widget class="QLabel" name="label_20">
                 <property name="text">
                  <string>Gridline Thickness</string>
                 </property>
                </widget>
               </item>
-              <item row="9" column="1">
+              <item row="8" column="1">
                <widget class="QDoubleSpinBox" name="dsbGridlineThickness">
                 <property name="suffix">
                  <string>px</string>
@@ -434,9 +417,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
+            <y>-68</y>
             <width>233</width>
-            <height>397</height>
+            <height>534</height>
            </rect>
           </property>
           <layout class="QFormLayout" name="formLayout">
@@ -546,7 +529,7 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="0">
+           <item row="11" column="0">
             <widget class="QLabel" name="label_8">
              <property name="statusTip">
               <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
@@ -559,7 +542,7 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="1">
+           <item row="11" column="1">
             <widget class="QSpinBox" name="sbMaxNudge">
              <property name="statusTip">
               <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
@@ -578,7 +561,7 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="0">
+           <item row="12" column="0">
             <widget class="QLabel" name="label_11">
              <property name="statusTip">
               <string>Minimum amplitude of a sample for it to trigger a rising edge.</string>
@@ -591,7 +574,7 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="1">
+           <item row="12" column="1">
             <widget class="QDoubleSpinBox" name="dsbTriggerThreshold">
              <property name="statusTip">
               <string>Minimum amplitude of a sample for it to trigger a rising edge.</string>
@@ -607,14 +590,14 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="0">
+           <item row="13" column="0">
             <widget class="QLabel" name="label_21">
              <property name="text">
               <string>Similarity Bias</string>
              </property>
             </widget>
            </item>
-           <item row="8" column="1">
+           <item row="13" column="1">
             <widget class="QDoubleSpinBox" name="dsbSimilarityBias">
              <property name="maximum">
               <double>1.000000000000000</double>
@@ -627,7 +610,7 @@
              </property>
             </widget>
            </item>
-           <item row="9" column="0">
+           <item row="14" column="0">
             <widget class="QLabel" name="label_15">
              <property name="text">
               <string>Similarity Window</string>
@@ -637,7 +620,7 @@
              </property>
             </widget>
            </item>
-           <item row="9" column="1">
+           <item row="14" column="1">
             <widget class="QSpinBox" name="sbSimilarityWindow">
              <property name="suffix">
               <string>ms</string>
@@ -650,14 +633,14 @@
              </property>
             </widget>
            </item>
-           <item row="10" column="0">
+           <item row="15" column="0">
             <widget class="QLabel" name="label_18">
              <property name="text">
               <string>Peak Bias</string>
              </property>
             </widget>
            </item>
-           <item row="10" column="1">
+           <item row="15" column="1">
             <widget class="QDoubleSpinBox" name="dsbPeakBias">
              <property name="maximum">
               <double>1.000000000000000</double>
@@ -670,14 +653,14 @@
              </property>
             </widget>
            </item>
-           <item row="11" column="0">
+           <item row="16" column="0">
             <widget class="QLabel" name="label_19">
              <property name="text">
               <string>Peak Threshold</string>
              </property>
             </widget>
            </item>
-           <item row="11" column="1">
+           <item row="16" column="1">
             <widget class="QDoubleSpinBox" name="dsbPeakThreshold">
              <property name="maximum">
               <double>1.000000000000000</double>
@@ -687,6 +670,54 @@
              </property>
              <property name="value">
               <double>0.900000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string>Midline Color</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0" colspan="2">
+            <widget class="Line" name="line_5">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="ColorPicker" name="cpMidlineColor" native="true"/>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>Midline Thickness</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QDoubleSpinBox" name="dsbMidlineThickness">
+             <property name="suffix">
+              <string>px</string>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0" colspan="2">
+            <widget class="QCheckBox" name="chbVMidline">
+             <property name="text">
+              <string>Vertical Midline</string>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0" colspan="2">
+            <widget class="QCheckBox" name="chbHMidline">
+             <property name="text">
+              <string>Horizontal Midline</string>
              </property>
             </widget>
            </item>
@@ -920,8 +951,7 @@
   <tabstop>sbRenderHeight</tabstop>
   <tabstop>rbRowMajorLayout</tabstop>
   <tabstop>rbColMajorLayout</tabstop>
-  <tabstop>sbRowCount</tabstop>
-  <tabstop>sbColCount</tabstop>
+  <tabstop>sbRowColCount</tabstop>
   <tabstop>cpBackground</tabstop>
   <tabstop>cpGridlineColor</tabstop>
   <tabstop>dsbGridlineThickness</tabstop>
@@ -995,23 +1025,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>bgrpCellOrder</sender>
-   <signal>idClicked(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>recalcPreview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>558</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbRowCount</sender>
+   <sender>sbRowColCount</sender>
    <signal>valueChanged(int)</signal>
    <receiver>MainWindow</receiver>
    <slot>recalcPreview()</slot>
@@ -1019,22 +1033,6 @@
     <hint type="sourcelabel">
      <x>193</x>
      <y>308</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>558</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbColCount</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>recalcPreview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>176</x>
-     <y>335</y>
     </hint>
     <hint type="destinationlabel">
      <x>558</x>
@@ -1138,6 +1136,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>bgrpCellOrder</sender>
+   <signal>idClicked(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>recalcPreview()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>558</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>bgrpCellOrder</sender>
+   <signal>idClicked(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>update_cell_order(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>539</x>
+     <y>337</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>debugStart()</slot>
@@ -1147,6 +1177,7 @@
   <slot>resetCurrentToDefault()</slot>
   <slot>choose_input_file()</slot>
   <slot>choose_soundfont()</slot>
+  <slot>update_cell_order(int)</slot>
  </slots>
  <buttongroups>
   <buttongroup name="bgrpCellOrder"/>

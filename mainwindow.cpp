@@ -70,8 +70,12 @@ MainWindow::MainWindow(QWidget* parent)
     default_item->setData(40, toint(ChannelArgRole::ScopeWidthMs));
     default_item->setData(1.0, toint(ChannelArgRole::Amplification));
     default_item->setData(true, toint(ChannelArgRole::IsStereo));
-    default_item->setData(QColor(255, 255, 255), toint(ChannelArgRole::Color));
-    default_item->setData(2, toint(ChannelArgRole::Thickness));
+    default_item->setData(QColor(255, 255, 255), toint(ChannelArgRole::WaveColor));
+    default_item->setData(2, toint(ChannelArgRole::WaveThickness));
+    default_item->setData(QColor(96, 96, 96), toint(ChannelArgRole::MidlineColor));
+    default_item->setData(1, toint(ChannelArgRole::MidlineThickness));
+    default_item->setData(true, toint(ChannelArgRole::DrawHMidline));
+    default_item->setData(true, toint(ChannelArgRole::DrawVMidline));
 
     default_item->setData(0.1, toint(ChannelArgRole::TriggerThreshold));
     default_item->setData(30, toint(ChannelArgRole::MaxNudgeMs));
@@ -86,6 +90,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Per-channel model: model updaters
     ui->cmbChannel->setModel(&m_channel_model);
+    connect(ui->chbInheritOpts,
+            &QCheckBox::clicked,
+            model_updater<bool, ChannelArgRole::InheritDefaults>());
 
     connect(ui->sbScopeWidth,
             &QSpinBox::valueChanged,
@@ -104,13 +111,22 @@ MainWindow::MainWindow(QWidget* parent)
             model_updater<bool, ChannelArgRole::IsStereo>());
     connect(ui->cpWaveColor,
             &ColorPicker::valueChanged,
-            model_updater<QColor, ChannelArgRole::Color>());
+            model_updater<QColor, ChannelArgRole::WaveColor>());
     connect(ui->dsbWaveThickness,
             &QDoubleSpinBox::valueChanged,
-            model_updater<double, ChannelArgRole::Thickness>());
-    connect(ui->chbInheritOpts,
+            model_updater<double, ChannelArgRole::WaveThickness>());
+    connect(ui->cpMidlineColor,
+            &ColorPicker::valueChanged,
+            model_updater<QColor, ChannelArgRole::MidlineColor>());
+    connect(ui->dsbMidlineThickness,
+            &QDoubleSpinBox::valueChanged,
+            model_updater<double, ChannelArgRole::MidlineThickness>());
+    connect(ui->chbHMidline,
             &QCheckBox::clicked,
-            model_updater<bool, ChannelArgRole::InheritDefaults>());
+            model_updater<bool, ChannelArgRole::DrawHMidline>());
+    connect(ui->chbVMidline,
+            &QCheckBox::clicked,
+            model_updater<bool, ChannelArgRole::DrawVMidline>());
     connect(ui->dsbSimilarityBias,
             &QDoubleSpinBox::valueChanged,
             model_updater<double, ChannelArgRole::SimilarityBias>());
@@ -246,9 +262,7 @@ void MainWindow::debugStart() {
     ScopeRenderer::GlobalArgs global_args{
         .width = ui->sbRenderWidth->value(),
         .height = ui->sbRenderHeight->value(),
-        .num_rows_or_cols = channel_order == ScopeRenderer::ChannelOrder::ROW_MAJOR
-                                ? ui->sbColCount->value()
-                                : ui->sbRowCount->value(),
+        .num_rows_or_cols = ui->sbRowColCount->value(),
         .order = channel_order,
         .fps = ui->cmbFrameRate->currentData().toInt(),
         .border_color = ui->cpGridlineColor->color().rgb(),
@@ -270,8 +284,16 @@ void MainWindow::debugStart() {
             .scope_width_ms = args->data(toint(ChannelArgRole::ScopeWidthMs)).toInt(),
             .amplification = args->data(toint(ChannelArgRole::Amplification)).toDouble(),
             .is_stereo = args->data(toint(ChannelArgRole::IsStereo)).toBool(),
-            .color = args->data(toint(ChannelArgRole::Color)).value<QColor>().rgb(),
-            .thickness = args->data(toint(ChannelArgRole::Thickness)).toDouble(),
+
+            .color = args->data(toint(ChannelArgRole::WaveColor)).value<QColor>().rgb(),
+            .thickness = args->data(toint(ChannelArgRole::WaveThickness)).toDouble(),
+            .midline_color
+            = args->data(toint(ChannelArgRole::MidlineColor)).value<QColor>().rgb(),
+            .midline_thickness = args->data(toint(ChannelArgRole::MidlineThickness))
+                                     .toDouble(),
+            .draw_h_midline = args->data(toint(ChannelArgRole::DrawHMidline)).toBool(),
+            .draw_v_midline = args->data(toint(ChannelArgRole::DrawVMidline)).toBool(),
+
             .max_nudge_ms = args->data(toint(ChannelArgRole::MaxNudgeMs)).toInt(),
             .trigger_threshold = args->data(toint(ChannelArgRole::TriggerThreshold))
                                      .toDouble(),
@@ -364,6 +386,17 @@ void MainWindow::set_soundfont(const QString& filename) {
     ui->btnStartRender->setDisabled(m_input_file.isEmpty() || m_input_soundfont.isEmpty());
 }
 
+void MainWindow::update_cell_order(int order) {
+    switch (static_cast<ScopeRenderer::ChannelOrder>(order)) {
+    case ScopeRenderer::ChannelOrder::COLUMN_MAJOR:
+        ui->lbRowColCount->setText("Row Count");
+        break;
+    case ScopeRenderer::ChannelOrder::ROW_MAJOR:
+        ui->lbRowColCount->setText("Column Count");
+        break;
+    }
+}
+
 void MainWindow::setCurrentChannel(int index) {
     m_current_index = index;
     auto item = m_channel_model.item(m_current_index);
@@ -398,17 +431,25 @@ void MainWindow::syncUiToModel() {
     bool inherit_defaults = item->data(toint(ChannelArgRole::InheritDefaults)).toBool()
                             && m_current_index != 0;
 
-    ui->sbScopeWidth->setValue(item->data(toint(ChannelArgRole::ScopeWidthMs)).toInt());
+    ui->chbStereo->setChecked(item->data(toint(ChannelArgRole::IsStereo)).toBool());
+    ui->cpWaveColor->setValue(
+        item->data(toint(ChannelArgRole::WaveColor)).value<QColor>());
+    ui->dsbWaveThickness->setValue(
+        item->data(toint(ChannelArgRole::WaveThickness)).toDouble());
     ui->dsbAmplification->setValue(
         item->data(toint(ChannelArgRole::Amplification)).toDouble());
-    ui->chbStereo->setChecked(item->data(toint(ChannelArgRole::IsStereo)).toBool());
-    ui->cpWaveColor->setValue(item->data(toint(ChannelArgRole::Color)).value<QColor>());
-    ui->dsbWaveThickness->setValue(
-        item->data(toint(ChannelArgRole::Thickness)).toDouble());
+    ui->sbScopeWidth->setValue(item->data(toint(ChannelArgRole::ScopeWidthMs)).toInt());
 
+    ui->cpMidlineColor->setValue(
+        item->data(toint(ChannelArgRole::MidlineColor)).value<QColor>());
+    ui->dsbMidlineThickness->setValue(
+        item->data(toint(ChannelArgRole::MidlineThickness)).toDouble());
+    ui->chbHMidline->setChecked(item->data(toint(ChannelArgRole::DrawHMidline)).toBool());
+    ui->chbVMidline->setChecked(item->data(toint(ChannelArgRole::DrawVMidline)).toBool());
+
+    ui->sbMaxNudge->setValue(item->data(toint(ChannelArgRole::MaxNudgeMs)).toInt());
     ui->dsbTriggerThreshold->setValue(
         item->data(toint(ChannelArgRole::TriggerThreshold)).toDouble());
-    ui->sbMaxNudge->setValue(item->data(toint(ChannelArgRole::MaxNudgeMs)).toInt());
     ui->dsbSimilarityBias->setValue(
         item->data(toint(ChannelArgRole::SimilarityBias)).toDouble());
     ui->sbSimilarityWindow->setValue(

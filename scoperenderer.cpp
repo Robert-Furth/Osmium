@@ -70,8 +70,12 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
             .w = w,
             .h = h,
             .is_stereo = args.is_stereo,
-            .color = args.color,
-            .thickness = args.thickness,
+            .wave_color = args.color,
+            .wave_thickness = args.thickness,
+            .midline_color = args.midline_color,
+            .midline_thickness = args.midline_thickness,
+            .draw_h_midline = args.draw_h_midline,
+            .draw_v_midline = args.draw_v_midline,
             .label = get_instrument_name(0, 0, i == 9),
         });
 
@@ -177,35 +181,41 @@ QImage ScopeRenderer::paint_subimage(int index) {
     QPainter painter(&img);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    painter.setPen(QPen(QColor(0x60, 0x60, 0x60), 1));
-    painter.drawLine(p.w * 0.5, 0, p.w * 0.5, p.h); // Vertical axis
+    painter.setPen(QPen(QColor(p.midline_color), p.midline_thickness));
+    if (p.draw_v_midline) {
+        painter.drawLine(p.w * 0.5, 0, p.w * 0.5, p.h); // Vertical axis
+    }
 
     if (p.is_stereo) {
-        painter.drawLine(0, p.h * 0.25, p.w, p.h * 0.25); // H axis 1
-        painter.drawLine(0, p.h * 0.75, p.w, p.h * 0.75); // H axis 2
+        if (p.draw_h_midline) {
+            painter.drawLine(0, p.h * 0.25, p.w, p.h * 0.25); // H axis 1
+            painter.drawLine(0, p.h * 0.75, p.w, p.h * 0.75); // H axis 2
+        }
         paint_wave(scope.get_left_samples(),
                    painter,
                    p.w,
                    p.h * 0.5,
                    p.h * 0.25,
-                   p.thickness,
-                   p.color);
+                   p.wave_thickness,
+                   p.wave_color);
         paint_wave(scope.get_right_samples(),
                    painter,
                    p.w,
                    p.h * 0.5,
                    p.h * 0.75,
-                   p.thickness,
-                   p.color);
+                   p.wave_thickness,
+                   p.wave_color);
     } else {
-        painter.drawLine(0, p.h * 0.5, p.w, p.h * 0.5);
+        if (p.draw_h_midline) {
+            painter.drawLine(0, p.h * 0.5, p.w, p.h * 0.5);
+        }
         paint_wave(scope.get_left_samples(),
                    painter,
                    p.w,
                    p.h,
                    p.h * 0.5,
-                   p.thickness,
-                   p.color);
+                   p.wave_thickness,
+                   p.wave_color);
     }
 
     for (const auto& event : m_event_tracker.get_events()) {
@@ -217,6 +227,7 @@ QImage ScopeRenderer::paint_subimage(int index) {
     painter.setFont(QFont("Arial", 16));
     painter.setPen(QPen(QColorConstants::White, 2));
     painter.drawText(QRect(10, 0, p.w - 10, p.h), p.label);
+
     /*if (m_debug_vis) {
         // DEBUG: nudge window
         double nudge_px = p.w * scope.get_this_nudge_ms() / scope.get_window_size_ms();

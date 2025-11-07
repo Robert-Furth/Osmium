@@ -19,8 +19,13 @@ enum class ChannelArgRole {
     ScopeWidthMs = Qt::UserRole + 2,
     Amplification,
     IsStereo,
-    Color,
-    Thickness,
+
+    WaveColor,
+    WaveThickness,
+    MidlineColor,
+    MidlineThickness,
+    DrawHMidline,
+    DrawVMidline,
 
     TriggerThreshold,
     MaxNudgeMs,
@@ -82,6 +87,8 @@ public slots:
     void set_input_file(const QString&);
     void choose_soundfont();
     void set_soundfont(const QString&);
+
+    void update_cell_order(int);
 
     void setCurrentChannel(int);
     void resetCurrentToDefault();
