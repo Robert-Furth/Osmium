@@ -77,8 +77,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>272</width>
-            <height>437</height>
+            <width>244</width>
+            <height>468</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -166,21 +166,21 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0" colspan="2">
+              <item row="4" column="0" colspan="2">
                <widget class="Line" name="line_4">
                 <property name="orientation">
                  <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                </widget>
               </item>
-              <item row="4" column="0">
+              <item row="5" column="0">
                <widget class="QLabel" name="label_6">
                 <property name="text">
                  <string>Order</string>
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
+              <item row="5" column="1">
                <widget class="QWidget" name="widget_2" native="true">
                 <layout class="QVBoxLayout" name="verticalLayout_2">
                  <property name="spacing">
@@ -224,7 +224,7 @@
                 </layout>
                </widget>
               </item>
-              <item row="5" column="0">
+              <item row="6" column="0">
                <widget class="QLabel" name="lbRowColCount">
                 <property name="text">
                  <string>Column Count</string>
@@ -234,14 +234,14 @@
                 </property>
                </widget>
               </item>
-              <item row="5" column="1">
+              <item row="6" column="1">
                <widget class="QSpinBox" name="sbRowColCount">
                 <property name="minimum">
                  <number>1</number>
                 </property>
                </widget>
               </item>
-              <item row="6" column="0">
+              <item row="7" column="0">
                <widget class="QLabel" name="label_16">
                 <property name="text">
                  <string>Background Color</string>
@@ -265,7 +265,7 @@
                 </property>
                </widget>
               </item>
-              <item row="7" column="0">
+              <item row="8" column="0">
                <widget class="QLabel" name="label_17">
                 <property name="text">
                  <string>Gridline Color</string>
@@ -286,14 +286,14 @@
                 </property>
                </widget>
               </item>
-              <item row="8" column="0">
+              <item row="9" column="0">
                <widget class="QLabel" name="label_20">
                 <property name="text">
                  <string>Gridline Thickness</string>
                 </property>
                </widget>
               </item>
-              <item row="8" column="1">
+              <item row="9" column="1">
                <widget class="QDoubleSpinBox" name="dsbGridlineThickness">
                 <property name="suffix">
                  <string>px</string>
@@ -303,6 +303,38 @@
                 </property>
                 <property name="value">
                  <double>2.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>Volume</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="controls::LabeledSlider" name="horizontalSlider">
+                <property name="maximum">
+                 <number>200</number>
+                </property>
+                <property name="value">
+                 <number>100</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="tickPosition">
+                 <enum>QSlider::TickPosition::TicksBelow</enum>
+                </property>
+                <property name="tickInterval">
+                 <number>20</number>
+                </property>
+                <property name="labelFormat" stdset="0">
+                 <string>%v%</string>
+                </property>
+                <property name="labelAlignment" stdset="0">
+                 <number>2</number>
                 </property>
                </widget>
               </item>
@@ -417,9 +449,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-68</y>
-            <width>233</width>
-            <height>534</height>
+            <y>0</y>
+            <width>230</width>
+            <height>456</height>
            </rect>
           </property>
           <layout class="QFormLayout" name="formLayout">
@@ -866,7 +898,7 @@
      <x>0</x>
      <y>0</y>
      <width>1080</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -938,6 +970,11 @@
    <slots>
     <signal>valueChanged(QColor)</signal>
    </slots>
+  </customwidget>
+  <customwidget>
+   <class>controls::LabeledSlider</class>
+   <extends>QSlider</extends>
+   <header>labeledslider.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

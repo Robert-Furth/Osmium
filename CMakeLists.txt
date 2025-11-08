@@ -19,6 +19,8 @@ set(PROJECT_SOURCES
     colorpicker.ui
     instrumentnames.cpp
     instrumentnames.h
+    labeledslider.cpp
+    labeledslider.h
     main.cpp
     mainwindow.cpp
     mainwindow.h
