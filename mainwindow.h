@@ -6,14 +6,11 @@
 #include <QThread>
 #include <QVariant>
 
-#include "scoperenderer.h"
 #include "workers.h"
 
-QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
 }
-QT_END_NAMESPACE
 
 enum class ChannelArgRole {
     ScopeWidthMs = Qt::UserRole + 2,
@@ -99,8 +96,8 @@ signals:
     void workerStartRequested(const QString& input_file,
                               const QString& soundfont,
                               const QString& output_file,
-                              const QList<ScopeRenderer::ChannelArgs>&,
-                              const ScopeRenderer::GlobalArgs&);
+                              const QList<ChannelArgs>&,
+                              const GlobalArgs&);
     void workerStopRequested();
 };
 

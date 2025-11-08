@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
+#include "ui_mainwindow.h"
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -20,7 +20,8 @@
 #include <QWaitCondition>
 
 #include "saveload.h"
-#include "scoperenderer.h"
+// #include "scoperenderer.h"
+#include "renderargs.h"
 #include "workers.h"
 
 // Because typing "static_cast<int>(...)" every time gets old fast
@@ -46,9 +47,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Button group
     ui->bgrpCellOrder->setId(ui->rbColMajorLayout,
-                             static_cast<int>(ScopeRenderer::ChannelOrder::COLUMN_MAJOR));
+                             static_cast<int>(ChannelOrder::COLUMN_MAJOR));
     ui->bgrpCellOrder->setId(ui->rbRowMajorLayout,
-                             static_cast<int>(ScopeRenderer::ChannelOrder::ROW_MAJOR));
+                             static_cast<int>(ChannelOrder::ROW_MAJOR));
 
     // Frame rate dropdown
     ui->cmbFrameRate->addItem("25 fps", 25);
@@ -256,10 +257,9 @@ void MainWindow::debugStart() {
     ui->btnStartRender->setEnabled(false);
 
     // Set up args
-    auto channel_order = static_cast<ScopeRenderer::ChannelOrder>(
-        ui->bgrpCellOrder->checkedId());
+    auto channel_order = static_cast<ChannelOrder>(ui->bgrpCellOrder->checkedId());
 
-    ScopeRenderer::GlobalArgs global_args{
+    GlobalArgs global_args{
         .width = ui->sbRenderWidth->value(),
         .height = ui->sbRenderHeight->value(),
         .num_rows_or_cols = ui->sbRowColCount->value(),
@@ -271,7 +271,7 @@ void MainWindow::debugStart() {
         .debug_vis = ui->chbDebugVis->isChecked(),
     };
 
-    QList<ScopeRenderer::ChannelArgs> channel_args_list;
+    QList<ChannelArgs> channel_args_list;
 
     auto default_args = m_channel_model.item(0);
     for (int i = 1; i < m_channel_model.rowCount(); i++) {
@@ -280,7 +280,7 @@ void MainWindow::debugStart() {
             args = default_args;
         }
 
-        channel_args_list << ScopeRenderer::ChannelArgs{
+        channel_args_list << ChannelArgs{
             .scope_width_ms = args->data(toint(ChannelArgRole::ScopeWidthMs)).toInt(),
             .amplification = args->data(toint(ChannelArgRole::Amplification)).toDouble(),
             .is_stereo = args->data(toint(ChannelArgRole::IsStereo)).toBool(),
@@ -387,11 +387,11 @@ void MainWindow::set_soundfont(const QString& filename) {
 }
 
 void MainWindow::update_cell_order(int order) {
-    switch (static_cast<ScopeRenderer::ChannelOrder>(order)) {
-    case ScopeRenderer::ChannelOrder::COLUMN_MAJOR:
+    switch (static_cast<ChannelOrder>(order)) {
+    case ChannelOrder::COLUMN_MAJOR:
         ui->lbRowColCount->setText("Row Count");
         break;
-    case ScopeRenderer::ChannelOrder::ROW_MAJOR:
+    case ChannelOrder::ROW_MAJOR:
         ui->lbRowColCount->setText("Column Count");
         break;
     }
@@ -463,5 +463,3 @@ void MainWindow::syncUiToModel() {
 }
 
 void MainWindow::recalcPreview() {}
-
-// #include "mainwindow.moc"

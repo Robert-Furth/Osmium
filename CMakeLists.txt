@@ -7,8 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Concurrent Network)
-find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Widgets Network)
 qt_standard_project_setup()
 
 add_subdirectory(osmium)
@@ -24,6 +23,7 @@ set(PROJECT_SOURCES
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+    renderargs.h
     resizableqlabel.cpp
     resizableqlabel.h
     saveload.cpp

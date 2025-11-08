@@ -10,8 +10,6 @@
 #include <QObject>
 #include <QString>
 
-#include "constants.h"
-
 // -- AbstractSocketWorker --
 
 AbstractSocketWorker::AbstractSocketWorker(const QString& prefix, QObject* parent)
@@ -62,8 +60,8 @@ VideoSocketWorker::VideoSocketWorker() : AbstractSocketWorker("osvid-") {}
 
 void VideoSocketWorker::init(const QString& filename,
                              const QString& soundfont,
-                             const QList<ScopeRenderer::ChannelArgs> channel_args,
-                             const ScopeRenderer::GlobalArgs global_args) {
+                             const QList<ChannelArgs> channel_args,
+                             const GlobalArgs global_args) {
     m_width = global_args.width;
     m_height = global_args.height;
     m_fps = global_args.fps;
@@ -215,8 +213,8 @@ RenderWorker::RenderWorker(QObject* parent)
 void RenderWorker::work(const QString& input_file,
                         const QString& soundfont,
                         const QString& output_file,
-                        const QList<ScopeRenderer::ChannelArgs> channel_args,
-                        const ScopeRenderer::GlobalArgs global_args) {
+                        const QList<ChannelArgs> channel_args,
+                        const GlobalArgs global_args) {
     if (m_is_running)
         return;
 

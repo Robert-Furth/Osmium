@@ -12,45 +12,11 @@
 
 #include <osmium.h>
 
+#include "renderargs.h"
+
 class ScopeRenderer : QObject {
     Q_OBJECT
 public:
-    enum class ChannelOrder { ROW_MAJOR, COLUMN_MAJOR };
-
-    struct GlobalArgs {
-        int width;
-        int height;
-        int num_rows_or_cols;
-        ChannelOrder order;
-        int fps;
-        QRgb border_color;
-        double border_thickness;
-        QRgb background_color;
-        bool debug_vis;
-    };
-
-    struct ChannelArgs {
-        int scope_width_ms;
-        double amplification;
-        bool is_stereo;
-        QRgb color;
-        double thickness;
-
-        QRgb midline_color;
-        double midline_thickness;
-        bool draw_h_midline;
-        bool draw_v_midline;
-
-        int max_nudge_ms;
-        double trigger_threshold;
-        double similarity_bias;
-        int similarity_window_ms;
-        // double repeat_bias;
-        // int repeat_bias_window;
-        double peak_bias;
-        double peak_bias_factor;
-    };
-
     ScopeRenderer(const QString& filename,
                   const QString& soundfont,
                   const QList<ChannelArgs>& channel_args,
@@ -107,8 +73,5 @@ private:
                     double thickness,
                     QRgb color);
 };
-
-Q_DECLARE_METATYPE(ScopeRenderer::GlobalArgs)
-Q_DECLARE_METATYPE(ScopeRenderer::ChannelArgs)
 
 #endif // SCOPERENDERER_H

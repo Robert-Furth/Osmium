@@ -44,8 +44,8 @@ public:
 public slots:
     void init(const QString& filename,
               const QString& soundfont,
-              const QList<ScopeRenderer::ChannelArgs> channel_args,
-              const ScopeRenderer::GlobalArgs global_args);
+              const QList<ChannelArgs> channel_args,
+              const GlobalArgs global_args);
 
 signals:
     void ready();
@@ -100,16 +100,16 @@ public slots:
     void work(const QString& input_file,
               const QString& soundfont,
               const QString& output_file,
-              const QList<ScopeRenderer::ChannelArgs> channel_args,
-              const ScopeRenderer::GlobalArgs global_args);
+              const QList<ChannelArgs> channel_args,
+              const GlobalArgs global_args);
     void request_stop();
     void notify_init_error(const QString& msg);
 
 signals:
     void init_video(const QString& input_file,
                     const QString& soundfont,
-                    const QList<ScopeRenderer::ChannelArgs> channel_args,
-                    const ScopeRenderer::GlobalArgs global_args);
+                    const QList<ChannelArgs> channel_args,
+                    const GlobalArgs global_args);
     void init_audio(const QString& filename, const QString& soundfont, int fps);
     void error(const QString& msg);
     void progress_changed(int);
@@ -125,7 +125,7 @@ private:
     QString m_video_server_path;
     QString m_audio_server_path;
 
-    ScopeRenderer::GlobalArgs m_global_args;
+    GlobalArgs m_global_args;
     QString m_output_path;
 
     bool m_is_running;
