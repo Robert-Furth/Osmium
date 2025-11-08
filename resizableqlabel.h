@@ -5,6 +5,8 @@
 #include <QPixmap>
 #include <QResizeEvent>
 
+namespace controls {
+
 class ResizableQLabel : public QLabel {
     Q_OBJECT
 
@@ -22,5 +24,7 @@ public slots:
     void setPixmap(const QPixmap&);
     void resizeEvent(QResizeEvent*) override;
 };
+
+} // namespace controls
 
 #endif // RESIZABLEQLABEL_H

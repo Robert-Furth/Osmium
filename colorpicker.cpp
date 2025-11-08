@@ -5,6 +5,8 @@
 #include <QPalette>
 #include <QStyle>
 
+namespace controls {
+
 ColorPicker::ColorPicker(QWidget* parent) : QWidget(parent), ui(new Ui::ColorPicker) {
     ui->setupUi(this);
 
@@ -43,3 +45,5 @@ void ColorPicker::openPicker() {
         setColor(color);
     }
 }
+
+} // namespace controls

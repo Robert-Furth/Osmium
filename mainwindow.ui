@@ -248,8 +248,8 @@
                 </property>
                </widget>
               </item>
-              <item row="6" column="1">
-               <widget class="ColorPicker" name="cpBackground" native="true">
+              <item row="7" column="1">
+               <widget class="controls::ColorPicker" name="cpBackground" native="true">
                 <property name="focusPolicy">
                  <enum>Qt::FocusPolicy::TabFocus</enum>
                 </property>
@@ -272,8 +272,8 @@
                 </property>
                </widget>
               </item>
-              <item row="7" column="1">
-               <widget class="ColorPicker" name="cpGridlineColor" native="true">
+              <item row="8" column="1">
+               <widget class="controls::ColorPicker" name="cpGridlineColor" native="true">
                 <property name="focusPolicy">
                  <enum>Qt::FocusPolicy::TabFocus</enum>
                 </property>
@@ -441,7 +441,7 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="ColorPicker" name="cpWaveColor" native="true">
+            <widget class="controls::ColorPicker" name="cpWaveColor" native="true">
              <property name="focusPolicy">
               <enum>Qt::FocusPolicy::TabFocus</enum>
              </property>
@@ -688,7 +688,7 @@
             </widget>
            </item>
            <item row="6" column="1">
-            <widget class="ColorPicker" name="cpMidlineColor" native="true"/>
+            <widget class="controls::ColorPicker" name="cpMidlineColor" native="true"/>
            </item>
            <item row="7" column="0">
             <widget class="QLabel" name="label_23">
@@ -808,7 +808,7 @@
      <widget class="QGroupBox" name="groupBox_3">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="ResizableQLabel" name="lbCanvas">
+        <widget class="controls::ResizableQLabel" name="lbCanvas">
          <property name="styleSheet">
           <string notr="true">QLabel {
 	background: #000000;
@@ -926,12 +926,12 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ResizableQLabel</class>
+   <class>controls::ResizableQLabel</class>
    <extends>QLabel</extends>
    <header>resizableqlabel.h</header>
   </customwidget>
   <customwidget>
-   <class>ColorPicker</class>
+   <class>controls::ColorPicker</class>
    <extends>QWidget</extends>
    <header>colorpicker.h</header>
    <container>1</container>

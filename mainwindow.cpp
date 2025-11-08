@@ -111,13 +111,13 @@ MainWindow::MainWindow(QWidget* parent)
             &QCheckBox::clicked,
             model_updater<bool, ChannelArgRole::IsStereo>());
     connect(ui->cpWaveColor,
-            &ColorPicker::valueChanged,
+            &controls::ColorPicker::valueChanged,
             model_updater<QColor, ChannelArgRole::WaveColor>());
     connect(ui->dsbWaveThickness,
             &QDoubleSpinBox::valueChanged,
             model_updater<double, ChannelArgRole::WaveThickness>());
     connect(ui->cpMidlineColor,
-            &ColorPicker::valueChanged,
+            &controls::ColorPicker::valueChanged,
             model_updater<QColor, ChannelArgRole::MidlineColor>());
     connect(ui->dsbMidlineThickness,
             &QDoubleSpinBox::valueChanged,
@@ -161,7 +161,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(m_r_worker->video_worker(),
             &VideoSocketWorker::preview_image_changed,
             ui->lbCanvas,
-            &ResizableQLabel::setPixmap);
+            &controls::ResizableQLabel::setPixmap);
     connect(m_r_worker, &RenderWorker::done, this, &MainWindow::onWorkerStop);
 
     m_render_thread.start();

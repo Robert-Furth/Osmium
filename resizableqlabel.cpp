@@ -1,5 +1,7 @@
 #include "resizableqlabel.h"
 
+namespace controls {
+
 ResizableQLabel::ResizableQLabel(QWidget* parent)
     : QLabel(parent) {
     setMinimumSize(1, 1);
@@ -30,3 +32,5 @@ void ResizableQLabel::resizeEvent(QResizeEvent* evt) {
         QLabel::setPixmap(scaledPixmap());
     }
 }
+
+} // namespace controls

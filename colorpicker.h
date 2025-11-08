@@ -8,6 +8,8 @@ namespace Ui {
 class ColorPicker;
 }
 
+namespace controls {
+
 class ColorPicker : public QWidget {
     Q_OBJECT
 
@@ -40,5 +42,7 @@ private:
     QColor m_color = QColor(0, 0, 0);
     bool m_allow_alpha = true;
 };
+
+} // namespace controls
 
 #endif // COLORPICKER_H
