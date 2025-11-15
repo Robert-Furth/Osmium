@@ -8,8 +8,7 @@
 
 #include "osmium/osmium.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     if (!osmium::init()) {
         std::cout << "Could not start osmium library\n";
         return 1;

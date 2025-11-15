@@ -14,6 +14,7 @@ LabeledSlider::LabeledSlider(QWidget* parent)
     m_slider = new QSlider();
     m_slider->setOrientation(Qt::Horizontal);
     layout->addWidget(m_slider);
+    setFocusProxy(m_slider);
     connect(m_slider, &QSlider::valueChanged, this, &LabeledSlider::setValue);
     connect(this, &LabeledSlider::rangeChanged, m_slider, &QSlider::setRange);
     connect(this, &LabeledSlider::rangeChanged, this, &LabeledSlider::update_label_size);

@@ -1,7 +1,6 @@
 #include "instrumentnames.h"
 
 #include <array>
-#include <string>
 #include <unordered_map>
 
 // const std::unordered_map<std::pair<int, int>, std::string> g_instrument_names = {
@@ -175,6 +174,7 @@ const std::array g_instrument_names = {
     "Gunshot",
 };
 
+// NOLINTNEXTLINE(clazy-non-pod-global-static)
 const std::unordered_map<int, const char*> g_percussion_names = {
     {0, "Standard Kit"},
     {8, "Room Kit"},
