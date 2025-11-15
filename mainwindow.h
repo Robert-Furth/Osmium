@@ -26,6 +26,13 @@ enum class ChannelArgRole {
     DrawHMidline,
     DrawVMidline,
 
+    ShowInstrumentLabels,
+    LabelFontFamily,
+    LabelFontSize,
+    LabelFontColor,
+    LabelBold,
+    LabelItalic,
+
     TriggerThreshold,
     MaxNudgeMs,
     SimilarityBias,
@@ -34,6 +41,7 @@ enum class ChannelArgRole {
     PeakThreshold,
 
     InheritDefaults,
+    IsVisible,
 };
 
 enum class UiState {
@@ -118,10 +126,10 @@ public slots:
     void debugStart();
     void onWorkerStop(bool, const QString&);
 
-    void choose_input_file();
+    // void choose_input_file();
     void set_input_file(const QString&);
-    void choose_soundfont();
-    void set_soundfont(const QString&);
+    // void choose_soundfont();
+    // void set_soundfont(const QString&);
 
     void update_cell_order(int);
     void update_channel_opts_enabled();

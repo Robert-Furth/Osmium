@@ -11,6 +11,7 @@
 #include <QDialog>
 #include <QDir>
 #include <QFileDialog>
+#include <QFontComboBox>
 #include <QImage>
 #include <QList>
 #include <QMessageBox>
@@ -62,6 +63,7 @@ MainWindow::MainWindow(QWidget* parent)
     default_item->setData(40, toint(ChannelArgRole::ScopeWidthMs));
     default_item->setData(1.0, toint(ChannelArgRole::Amplification));
     default_item->setData(true, toint(ChannelArgRole::IsStereo));
+
     default_item->setData(QColor(255, 255, 255), toint(ChannelArgRole::WaveColor));
     default_item->setData(2, toint(ChannelArgRole::WaveThickness));
     default_item->setData(QColor(96, 96, 96), toint(ChannelArgRole::MidlineColor));
@@ -69,14 +71,22 @@ MainWindow::MainWindow(QWidget* parent)
     default_item->setData(true, toint(ChannelArgRole::DrawHMidline));
     default_item->setData(true, toint(ChannelArgRole::DrawVMidline));
 
+    default_item->setData(true, toint(ChannelArgRole::ShowInstrumentLabels));
+    default_item->setData(QFont(), toint(ChannelArgRole::LabelFontFamily));
+    default_item->setData(QFont().pointSizeF(), toint(ChannelArgRole::LabelFontSize));
+    default_item->setData(QColor(255, 255, 255), toint(ChannelArgRole::LabelFontColor));
+    default_item->setData(false, toint(ChannelArgRole::LabelBold));
+    default_item->setData(false, toint(ChannelArgRole::LabelItalic));
+
     default_item->setData(0.1, toint(ChannelArgRole::TriggerThreshold));
-    default_item->setData(30, toint(ChannelArgRole::MaxNudgeMs));
+    default_item->setData(35, toint(ChannelArgRole::MaxNudgeMs));
     default_item->setData(1.0, toint(ChannelArgRole::SimilarityBias));
     default_item->setData(20, toint(ChannelArgRole::SimilarityWindowMs));
     default_item->setData(0.5, toint(ChannelArgRole::PeakBias));
     default_item->setData(0.9, toint(ChannelArgRole::PeakThreshold));
 
     default_item->setData(true, toint(ChannelArgRole::InheritDefaults));
+    default_item->setData(true, toint(ChannelArgRole::IsVisible));
     m_channel_model.appendRow(default_item);
 
     // Per-channel model: model updaters
@@ -86,6 +96,10 @@ MainWindow::MainWindow(QWidget* parent)
     //         model_updater<bool, ChannelArgRole::InheritDefaults>());
     bind_to_model<QCheckBox, bool>(ui->chbInheritOpts,
                                    ChannelArgRole::InheritDefaults,
+                                   &QCheckBox::clicked,
+                                   &QCheckBox::setChecked);
+    bind_to_model<QCheckBox, bool>(ui->chbIsVisible,
+                                   ChannelArgRole::IsVisible,
                                    &QCheckBox::clicked,
                                    &QCheckBox::setChecked);
 
@@ -127,6 +141,31 @@ MainWindow::MainWindow(QWidget* parent)
                                    &QCheckBox::clicked,
                                    &QCheckBox::setChecked);
 
+    bind_to_model<QCheckBox, bool>(ui->chbShowLabels,
+                                   ChannelArgRole::ShowInstrumentLabels,
+                                   &QCheckBox::clicked,
+                                   &QCheckBox::setChecked);
+    bind_to_model(ui->fcbLabelFont,
+                  ChannelArgRole::LabelFontFamily,
+                  &QFontComboBox::currentFontChanged,
+                  &QFontComboBox::setCurrentFont);
+    bind_to_model(ui->dsbFontSize,
+                  ChannelArgRole::LabelFontSize,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
+    bind_to_model(ui->cpFontColor,
+                  ChannelArgRole::LabelFontColor,
+                  &controls::ColorPicker::colorChanged,
+                  &controls::ColorPicker::setColor);
+    bind_to_model<QToolButton, bool>(ui->tbLabelBold,
+                                     ChannelArgRole::LabelBold,
+                                     &QToolButton::clicked,
+                                     &QToolButton::setChecked);
+    bind_to_model<QToolButton, bool>(ui->tbLabelItalic,
+                                     ChannelArgRole::LabelItalic,
+                                     &QToolButton::clicked,
+                                     &QToolButton::setChecked);
+
     bind_to_model(ui->dsbTriggerThreshold,
                   ChannelArgRole::TriggerThreshold,
                   &QDoubleSpinBox::valueChanged,
@@ -155,10 +194,19 @@ MainWindow::MainWindow(QWidget* parent)
     reinit_channel_model(16); // DEBUG
 
     // Some other deferred connections
+    connect(ui->chbIsVisible,
+            &QCheckBox::clicked,
+            this,
+            &MainWindow::update_channel_opts_enabled);
     connect(ui->chbInheritOpts,
             &QCheckBox::clicked,
             this,
             &MainWindow::update_channel_opts_enabled);
+
+    connect(m_options_dialog,
+            &OptionsDialog::accepted,
+            this,
+            &MainWindow::update_options_from_dialog);
 
     // Set up render thread
     m_r_worker = new RenderWorker();
@@ -226,13 +274,13 @@ void MainWindow::set_ui_state(UiState state) {
     }
 }
 
+// -- MainWindow slots --
+
 template<typename T>
 void MainWindow::update_model_value(ChannelArgRole role, const T& val) {
     int index = ui->cmbChannel->currentIndex();
     m_channel_model.item(index)->setData(val, toint(role));
 }
-
-// -- MainWindow slots --
 
 void MainWindow::debugStart() {
     if (m_input_file.isEmpty()) {
@@ -282,6 +330,7 @@ void MainWindow::debugStart() {
         .num_rows_or_cols = ui->sbRowColCount->value(),
         .order = channel_order,
         .fps = ui->cmbFrameRate->currentData().toInt(),
+        .volume = ui->slVolume->value() / 100.0,
         .border_color = ui->cpGridlineColor->color().rgb(),
         .border_thickness = ui->dsbGridlineThickness->value(),
         .background_color = ui->cpBackground->color().rgb(),
@@ -293,12 +342,23 @@ void MainWindow::debugStart() {
     auto default_args = m_channel_model.item(0);
     for (int i = 1; i < m_channel_model.rowCount(); i++) {
         auto args = m_channel_model.item(i);
+
+        if (!args->data(toint(ChannelArgRole::IsVisible)).toBool())
+            continue;
+
         if (args->data(toint(ChannelArgRole::InheritDefaults)).toBool()) {
             args = default_args;
         }
 
+        auto font = args->data(toint(ChannelArgRole::LabelFontFamily)).value<QFont>();
+        font.setPointSizeF(args->data(toint(ChannelArgRole::LabelFontSize)).toDouble());
+        font.setBold(args->data(toint(ChannelArgRole::LabelBold)).toBool());
+        font.setItalic(args->data(toint(ChannelArgRole::LabelItalic)).toBool());
+
         channel_args_list << ChannelArgs{
+            .channel_number = i - 1,
             .scope_width_ms = args->data(toint(ChannelArgRole::ScopeWidthMs)).toInt(),
+
             .amplification = args->data(toint(ChannelArgRole::Amplification)).toDouble(),
             .is_stereo = args->data(toint(ChannelArgRole::IsStereo)).toBool(),
 
@@ -311,6 +371,11 @@ void MainWindow::debugStart() {
             .draw_h_midline = args->data(toint(ChannelArgRole::DrawHMidline)).toBool(),
             .draw_v_midline = args->data(toint(ChannelArgRole::DrawVMidline)).toBool(),
 
+            .draw_labels = args->data(toint(ChannelArgRole::ShowInstrumentLabels)).toBool(),
+            .label_font = font,
+            .label_color
+            = args->data(toint(ChannelArgRole::LabelFontColor)).value<QColor>().rgb(),
+
             .max_nudge_ms = args->data(toint(ChannelArgRole::MaxNudgeMs)).toInt(),
             .trigger_threshold = args->data(toint(ChannelArgRole::TriggerThreshold))
                                      .toDouble(),
@@ -318,8 +383,7 @@ void MainWindow::debugStart() {
             .similarity_window_ms = args->data(toint(ChannelArgRole::SimilarityWindowMs))
                                         .toInt(),
             .peak_bias = args->data(toint(ChannelArgRole::PeakBias)).toDouble(),
-            .peak_bias_factor = args->data(toint(ChannelArgRole::PeakBiasFactor))
-                                    .toDouble(),
+            .peak_threshold = args->data(toint(ChannelArgRole::PeakThreshold)).toDouble(),
         };
     }
 
@@ -408,7 +472,8 @@ void MainWindow::update_channel_opts_enabled() {
 
     auto item = m_channel_model.item(m_current_index);
     ui->scraChannelOpts->setEnabled(
-        !item->data(toint(ChannelArgRole::InheritDefaults)).toBool());
+        !item->data(toint(ChannelArgRole::InheritDefaults)).toBool()
+        && item->data(toint(ChannelArgRole::IsVisible)).toBool());
 }
 
 void MainWindow::setCurrentChannel(int index) {

@@ -35,18 +35,20 @@ signals:
 
 private:
     struct PaintInfo {
-        int channel;
+        //int channel;
         double x;
         double y;
         double w;
         double h;
-        bool is_stereo;
+        QPen wave_pen;
+        QPen midline_pen;
+        /*bool is_stereo;
         QRgb wave_color;
         double wave_thickness;
         QRgb midline_color;
         double midline_thickness;
         bool draw_h_midline;
-        bool draw_v_midline;
+        bool draw_v_midline;*/
         QString label;
     };
 
@@ -69,9 +71,7 @@ private:
                     QPainter& painter,
                     double w,
                     double h,
-                    double mid_y,
-                    double thickness,
-                    QRgb color);
+                    double mid_y);
 };
 
 #endif // SCOPERENDERER_H

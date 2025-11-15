@@ -26,7 +26,8 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
       m_background_color(global_args.background_color),
       m_border_color(global_args.border_color),
       m_border_thickness(global_args.border_thickness),
-      m_event_tracker(filename.toUtf8(), global_args.fps) {
+      m_event_tracker(filename.toUtf8(), global_args.fps),
+      m_channel_args(channel_args.cbegin(), channel_args.cend()) {
     int num_channels = channel_args.size();
     switch (global_args.order) {
     case ChannelOrder::ROW_MAJOR:
@@ -54,29 +55,31 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
                          .frame_rate(global_args.fps)
                          .max_nudge_ms(args.max_nudge_ms)
                          .peak_bias(args.peak_bias)
-                         .peak_threshold(args.peak_bias_factor)
+                         .peak_threshold(args.peak_threshold)
                          .similarity_bias(args.similarity_bias)
                          .similarity_window_ms(args.similarity_window_ms)
                          .soundfonts({soundfont.toStdString()})
                          .stereo(args.is_stereo)
                          .trigger_threshold(args.trigger_threshold)
-                         .build_from_midi_channel(filename.toUtf8(), i);
+                         .build_from_midi_channel(filename.toUtf8(), args.channel_number);
 
         m_scopes.emplace_back(std::move(scope));
         m_paint_infos.emplace_back(PaintInfo{
-            .channel = i,
+            // .channel = args.channel_number,
             .x = col * w,
             .y = row * h,
             .w = w,
             .h = h,
-            .is_stereo = args.is_stereo,
+            .wave_pen = QPen(QColor(args.color), args.thickness),
+            .midline_pen = QPen(QColor(args.midline_color), args.midline_thickness),
+            /*.is_stereo = args.is_stereo,
             .wave_color = args.color,
             .wave_thickness = args.thickness,
             .midline_color = args.midline_color,
             .midline_thickness = args.midline_thickness,
             .draw_h_midline = args.draw_h_midline,
-            .draw_v_midline = args.draw_v_midline,
-            .label = get_instrument_name(0, 0, i == 9),
+            .draw_v_midline = args.draw_v_midline,*/
+            .label = get_instrument_name(0, 0, args.channel_number == 9),
         });
 
         switch (global_args.order) {
@@ -161,6 +164,7 @@ QImage ScopeRenderer::paint_frame() {
 QImage ScopeRenderer::paint_subimage(int index) {
     auto& scope = m_scopes[index];
     auto& p = m_paint_infos[index];
+    auto& args = m_channel_args[index];
     QImage img(std::ceil(p.w), std::ceil(p.h), QImage::Format_RGB32);
 
     if (m_debug_vis) {
@@ -181,52 +185,44 @@ QImage ScopeRenderer::paint_subimage(int index) {
     QPainter painter(&img);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    painter.setPen(QPen(QColor(p.midline_color), p.midline_thickness));
-    if (p.draw_v_midline) {
+    painter.setPen(p.midline_pen);
+    if (args.draw_v_midline) {
         painter.drawLine(p.w * 0.5, 0, p.w * 0.5, p.h); // Vertical axis
     }
 
-    if (p.is_stereo) {
-        if (p.draw_h_midline) {
+    if (args.draw_labels) {
+        painter.setFont(args.label_font);
+        painter.setPen(QColor(args.label_color));
+        painter.drawText(QRectF(m_border_thickness * 0.5 + 3,
+                                m_border_thickness * 0.5 + 3,
+                                p.w,
+                                p.h),
+                         p.label);
+    }
+
+    if (args.is_stereo) {
+        if (args.draw_h_midline) {
             painter.drawLine(0, p.h * 0.25, p.w, p.h * 0.25); // H axis 1
             painter.drawLine(0, p.h * 0.75, p.w, p.h * 0.75); // H axis 2
         }
-        paint_wave(scope.get_left_samples(),
-                   painter,
-                   p.w,
-                   p.h * 0.5,
-                   p.h * 0.25,
-                   p.wave_thickness,
-                   p.wave_color);
-        paint_wave(scope.get_right_samples(),
-                   painter,
-                   p.w,
-                   p.h * 0.5,
-                   p.h * 0.75,
-                   p.wave_thickness,
-                   p.wave_color);
+
+        painter.setPen(p.wave_pen);
+        paint_wave(scope.get_left_samples(), painter, p.w, p.h * 0.5, p.h * 0.25);
+        paint_wave(scope.get_right_samples(), painter, p.w, p.h * 0.5, p.h * 0.75);
     } else {
-        if (p.draw_h_midline) {
+        if (args.draw_h_midline) {
             painter.drawLine(0, p.h * 0.5, p.w, p.h * 0.5);
         }
-        paint_wave(scope.get_left_samples(),
-                   painter,
-                   p.w,
-                   p.h,
-                   p.h * 0.5,
-                   p.wave_thickness,
-                   p.wave_color);
+
+        painter.setPen(p.wave_pen);
+        paint_wave(scope.get_left_samples(), painter, p.w, p.h, p.h * 0.5);
     }
 
     for (const auto& event : m_event_tracker.get_events()) {
-        if (event.chan == p.channel && event.event == MIDI_EVENT_PROGRAM) {
-            p.label = get_instrument_name(event.param, 0, p.channel == 9);
+        if (event.chan == args.channel_number && event.event == MIDI_EVENT_PROGRAM) {
+            p.label = get_instrument_name(event.param, 0, args.channel_number == 9);
         }
     }
-
-    painter.setFont(QFont("Arial", 16));
-    painter.setPen(QPen(QColorConstants::White, 2));
-    painter.drawText(QRect(10, 0, p.w - 10, p.h), p.label);
 
     /*if (m_debug_vis) {
         // DEBUG: nudge window
@@ -239,13 +235,8 @@ QImage ScopeRenderer::paint_subimage(int index) {
     return img;
 }
 
-void ScopeRenderer::paint_wave(const std::vector<float>& wave,
-                               QPainter& painter,
-                               double w,
-                               double h,
-                               double mid_y,
-                               double thickness,
-                               QRgb color) {
+void ScopeRenderer::paint_wave(
+    const std::vector<float>& wave, QPainter& painter, double w, double h, double mid_y) {
     double x_mult = w / (wave.size() - 1);
     double y_mult = h * -0.5; // negative so positive samples are higher
     double y_offs = mid_y;
@@ -258,6 +249,6 @@ void ScopeRenderer::paint_wave(const std::vector<float>& wave,
         polygon << QPointF(x, y);
     }
 
-    painter.setPen(QPen(QColor(color), thickness));
+    // painter.setPen(QPen(QColor(color), thickness));
     painter.drawPolyline(polygon);
 }
