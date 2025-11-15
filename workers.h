@@ -103,6 +103,7 @@ public:
 public slots:
     void work(const QString& input_file,
               const QString& soundfont,
+              const QString& ffmpeg_path,
               const QString& output_file,
               const QList<ChannelArgs>& channel_args,
               const GlobalArgs& global_args);
@@ -129,18 +130,20 @@ private:
 
     GlobalArgs m_global_args;
     QString m_output_path;
+    QString m_ffmpeg_path;
 
     QMutex m_state_mutex;
     State m_state;
     bool m_status;
     QString m_status_message;
 
-    void start_rendering();
+    // void start_rendering();
     QStringList get_ffmpeg_args();
 
 private slots:
     void notify_child_worker_done(bool, const QString&);
     void notify_ffmpeg_done(int);
+    void notify_ffmpeg_error(QProcess::ProcessError);
 };
 
 #endif // WORKERS_H

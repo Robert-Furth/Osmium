@@ -33,7 +33,8 @@ constexpr int toint(ChannelArgRole role) {
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
-      m_render_thread(this) {
+      m_render_thread(this),
+      m_options_dialog(new OptionsDialog(this)) {
     ui->setupUi(this);
 
     // Button group
@@ -54,6 +55,10 @@ MainWindow::MainWindow(QWidget* parent)
     if (cfg.load()) {
         m_input_file_dir.assign(cfg.input_file_dir);
         m_output_file_dir.assign(cfg.output_file_dir);
+        m_use_system_ffmpeg = cfg.use_system_ffmpeg;
+        if (!cfg.use_system_ffmpeg) {
+            m_ffmpeg_path.assign(cfg.ffmpeg_path);
+        }
         m_input_soundfont.assign(cfg.soundfont_path);
         ui->pcInputFile->set_initial_dir(m_input_file_dir);
     }
@@ -232,9 +237,12 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow() {
     delete ui;
+    delete m_options_dialog;
 
     PersistentConfig cfg{
         .soundfont_path = m_input_soundfont.toStdString(),
+        .use_system_ffmpeg = m_use_system_ffmpeg,
+        .ffmpeg_path = m_ffmpeg_path.toStdString(),
         .input_file_dir = m_input_file_dir.toStdString(),
         .output_file_dir = m_output_file_dir.toStdString(),
     };
@@ -406,6 +414,7 @@ void MainWindow::debugStart() {
     set_ui_state(UiState::Rendering);
     emit workerStartRequested(m_input_file,
                               m_input_soundfont,
+                              m_use_system_ffmpeg ? QString() : m_ffmpeg_path,
                               output_file,
                               channel_args_list,
                               global_args);
@@ -420,9 +429,8 @@ void MainWindow::onWorkerStop(bool ok, const QString& message) {
         QString display_message;
         if (!ok) {
             display_message = message.isEmpty()
-                                  ? "An error occurred during rendering."
-                                  : "The following error occurred during rendering:\n"
-                                        + message;
+                                  ? "An unexpected error occurred during rendering."
+                                  : message;
         } else {
             display_message = message;
         }
@@ -434,6 +442,7 @@ void MainWindow::onWorkerStop(bool ok, const QString& message) {
                          display_message,
                          QMessageBox::StandardButton::Ok,
                          this);
+        mbox.setTextFormat(Qt::RichText);
         mbox.exec();
     }
 
@@ -453,9 +462,19 @@ void MainWindow::set_input_file(const QString& filename) {
         m_input_file.isEmpty() /* || m_input_soundfont.isEmpty()*/);
 }
 
+void MainWindow::show_options_dialog() {
+    m_options_dialog->set_use_system_ffmpeg(m_use_system_ffmpeg);
+    m_options_dialog->set_ffmpeg_path(m_ffmpeg_path);
+    m_options_dialog->set_soundfont_path(m_input_soundfont);
 
+    m_options_dialog->open();
 }
 
+void MainWindow::update_options_from_dialog() {
+    m_use_system_ffmpeg = m_options_dialog->use_system_ffmpeg();
+    m_ffmpeg_path = m_options_dialog->ffmpeg_path();
+    m_input_soundfont = m_options_dialog->soundfont_path();
+}
 
 void MainWindow::update_cell_order(int order) {
     switch (static_cast<ChannelOrder>(order)) {

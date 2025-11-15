@@ -203,10 +203,12 @@ RenderWorker::RenderWorker(QObject* parent)
     m_audio_thread.start();
 
     connect(&m_ffmpeg, &QProcess::finished, this, &RenderWorker::notify_ffmpeg_done);
+    connect(&m_ffmpeg, &QProcess::errorOccurred, this, &RenderWorker::notify_ffmpeg_error);
 }
 
 void RenderWorker::work(const QString& input_file,
                         const QString& soundfont,
+                        const QString& ffmpeg_path,
                         const QString& output_file,
                         const QList<ChannelArgs>& channel_args,
                         const GlobalArgs& global_args) {
@@ -219,42 +221,54 @@ void RenderWorker::work(const QString& input_file,
     m_status_message = "";
     m_global_args = global_args;
     m_output_path = output_file;
+    m_ffmpeg_path = ffmpeg_path;
 
     try {
+        if (m_ffmpeg.state() == QProcess::Running) {
+            lock.unlock();
+            m_ffmpeg.kill();
+            m_ffmpeg.waitForFinished();
+            lock.relock();
+        }
+
         m_vs_worker->init(input_file, soundfont, channel_args, global_args);
         m_as_worker->init(input_file, soundfont, global_args.fps);
 
-        if (m_ffmpeg.state() == QProcess::Running) {
-            m_ffmpeg.kill();
-            m_ffmpeg.waitForFinished();
+        if (ffmpeg_path.isNull()) {
+            m_ffmpeg.setProgram("ffmpeg");
+        } else {
+            m_ffmpeg.setProgram(ffmpeg_path);
         }
-
-        m_ffmpeg.setProgram("ffmpeg");
         m_ffmpeg.setArguments(get_ffmpeg_args());
+
         m_state = State::Running;
+        lock.unlock();
         m_ffmpeg.start();
     } catch (const std::exception& e) {
         emit done(false, e.what());
         m_state = State::Idle;
+        return;
     }
 }
 
 void RenderWorker::request_stop() {
     m_vs_worker->request_stop();
     m_as_worker->request_stop();
-    m_status_message = "Rendering aborted.";
+    if (m_status_message.isEmpty()) {
+        m_status_message = "Rendering aborted.";
+    }
     m_ffmpeg.terminate();
 }
 
-void RenderWorker::start_rendering() {
-    if (m_ffmpeg.state() == QProcess::Running) {
-        m_ffmpeg.kill();
-        m_ffmpeg.waitForFinished();
-    }
-    m_ffmpeg.setProgram("ffmpeg");
-    m_ffmpeg.setArguments(get_ffmpeg_args());
-    m_ffmpeg.start();
-}
+// void RenderWorker::start_rendering() {
+//     if (m_ffmpeg.state() == QProcess::Running) {
+//         m_ffmpeg.kill();
+//         m_ffmpeg.waitForFinished();
+//     }
+//     m_ffmpeg.setProgram("ffmpeg");
+//     m_ffmpeg.setArguments(get_ffmpeg_args());
+//     m_ffmpeg.start();
+// }
 
 QStringList RenderWorker::get_ffmpeg_args() {
     int fps = m_global_args.fps;
@@ -282,20 +296,28 @@ QStringList RenderWorker::get_ffmpeg_args() {
 }
 
 void RenderWorker::notify_child_worker_done(bool ok, const QString& message) {
+    QMutexLocker lock(&m_state_mutex);
+    if (m_state != State::Running)
+        return;
+
     m_status = m_status && ok;
     if (m_status_message.isEmpty() && !message.isEmpty()) {
         m_status_message = message;
     }
+
+    if (!m_status) {
+        request_stop();
+    }
 }
 
 void RenderWorker::notify_ffmpeg_done(int status_code) {
+    QMutexLocker lock(&m_state_mutex);
     qDebug() << "ffmpeg exited with status code" << status_code;
     if (m_state == State::Initializing) {
         qDebug() << "(finished while initializing)";
         return;
     }
 
-    QMutexLocker lock(&m_state_mutex);
     if (m_state == State::Running) {
         if (m_vs_worker)
             m_vs_worker->request_stop();
@@ -305,12 +327,38 @@ void RenderWorker::notify_ffmpeg_done(int status_code) {
 
     if (status_code != 0) {
         m_status = false;
-        if (!m_status_message.isEmpty()) {
-            m_status_message = QString("FFmpeg exited with status code %1.")
+        if (m_status_message.isEmpty()) {
+            m_status_message = QString("FFmpeg exited abnormally (status code %1).")
                                    .arg(status_code);
         }
     }
 
     emit done(m_status, m_status_message);
     m_state = State::Idle;
+}
+
+void RenderWorker::notify_ffmpeg_error(QProcess::ProcessError err) {
+    if (err == QProcess::ProcessError::FailedToStart) {
+        QMutexLocker lock(&m_state_mutex);
+
+        QString message;
+        if (m_ffmpeg_path.isNull()) {
+            message = "Could not start FFmpeg; it was not found in the system path. If "
+                      "you've installed FFmpeg already, either specify it manually in "
+                      "the Program Options menu or add it to the system path. If you "
+                      "haven't installed FFmpeg yet, you can download it from <a "
+                      "href='https://ffmpeg.org/download.html'>its website</a>.";
+        } else {
+            message
+                = QString(
+                      "Could not start FFmpeg; the file \"%1\" either does not exist or "
+                      "is not executable. Specify the proper path in the Program Options "
+                      "menu. If you haven't installed FFmpeg yet, you can download it "
+                      "from <a href='https://ffmpeg.org/download.html'>its website</a>.")
+                      .arg(m_ffmpeg_path);
+        }
+
+        emit done(false, message);
+        m_state = State::Idle;
+    }
 }

@@ -31,11 +31,18 @@ bool PersistentConfig::load() {
         return false;
     }
 
-    auto settings = table["paths"];
+    auto settings = table["osmium"];
 
     auto sf_path = settings["soundfont_path"].value<std::string>();
     if (sf_path)
         soundfont_path = *sf_path;
+
+    auto ff_path = settings["ffmpeg_path"].value<std::string>();
+    if (ff_path)
+        ffmpeg_path = *ff_path;
+
+    auto use_sys_ff = settings["use_system_ffmpeg"].value<bool>();
+    use_system_ffmpeg = use_sys_ff ? *use_sys_ff : true;
 
     auto in_dir = settings["input_file_dir"].value<std::string>();
     if (in_dir)
@@ -56,8 +63,10 @@ bool PersistentConfig::save() {
     fs::create_directories(save_path.parent_path());
 
     auto table = toml::table{
-        {"paths",
+        {"osmium",
          toml::table{
+             {"ffmpeg_path", ffmpeg_path},
+             {"use_system_ffmpeg", use_system_ffmpeg},
              {"soundfont_path", soundfont_path},
              {"input_file_dir", input_file_dir},
              {"output_file_dir", output_file_dir},

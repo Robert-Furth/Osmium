@@ -25,6 +25,9 @@ set(PROJECT_SOURCES
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+    optionsdialog.cpp
+    optionsdialog.h
+    optionsdialog.ui
     pathchooser.cpp
     pathchooser.h
     renderargs.h

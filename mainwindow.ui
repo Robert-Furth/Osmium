@@ -1031,6 +1031,8 @@
    </attribute>
    <addaction name="actionOpen"/>
    <addaction name="actionRender"/>
+   <addaction name="separator"/>
+   <addaction name="actionOptions"/>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -1084,15 +1086,15 @@
     <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
-  <action name="actionChooseSoundfont">
+  <action name="actionOptions">
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::AudioCard"/>
    </property>
    <property name="text">
-    <string>Choose Soundfont...</string>
+    <string>Options</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+F</string>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::PreferencesRole</enum>
    </property>
   </action>
  </widget>

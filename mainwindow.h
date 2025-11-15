@@ -8,6 +8,7 @@
 #include <QThread>
 #include <QVariant>
 
+#include "optionsdialog.h"
 #include "workers.h"
 
 namespace Ui {
@@ -72,8 +73,12 @@ private:
 
     QString m_input_file;
     QString m_input_soundfont;
+    bool m_use_system_ffmpeg;
+    QString m_ffmpeg_path;
     QString m_input_file_dir;
     QString m_output_file_dir;
+
+    OptionsDialog* m_options_dialog;
 
     template<typename T>
     void update_model_value(ChannelArgRole role, const T& val);
@@ -130,6 +135,8 @@ public slots:
     void set_input_file(const QString&);
     // void choose_soundfont();
     // void set_soundfont(const QString&);
+    void show_options_dialog();
+    void update_options_from_dialog();
 
     void update_cell_order(int);
     void update_channel_opts_enabled();
@@ -143,6 +150,7 @@ signals:
     void workerStartRequested(const QString& input_file,
                               const QString& soundfont,
                               const QString& output_file,
+                              const QString& ffmpeg_path,
                               const QList<ChannelArgs>&,
                               const GlobalArgs&);
     void workerStopRequested();
