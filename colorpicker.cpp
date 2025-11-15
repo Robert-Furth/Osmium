@@ -28,7 +28,7 @@ void ColorPicker::setColor(const QColor& color) {
     palette.setColor(QPalette::Window, m_color);
     ui->lblColor->setPalette(palette);
 
-    emit valueChanged(m_color);
+    emit colorChanged(m_color);
 }
 
 void ColorPicker::setAllowAlpha(bool allow) {

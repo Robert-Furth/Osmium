@@ -13,7 +13,7 @@ namespace controls {
 class ColorPicker : public QWidget {
     Q_OBJECT
 
-    Q_PROPERTY(QColor color MEMBER m_color READ color WRITE setColor NOTIFY valueChanged);
+    Q_PROPERTY(QColor color MEMBER m_color READ color WRITE setColor NOTIFY colorChanged);
     Q_PROPERTY(bool allowAlpha MEMBER m_allow_alpha READ allowAlpha WRITE setAllowAlpha
                    NOTIFY allowAlphaChanged);
 
@@ -33,7 +33,7 @@ private slots:
     void openPicker();
 
 signals:
-    void valueChanged(const QColor&);
+    void colorChanged(const QColor&);
     void allowAlphaChanged(bool allow);
 
 private:
