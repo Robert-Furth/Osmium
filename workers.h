@@ -6,6 +6,7 @@
 
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QMutex>
 #include <QObject>
 #include <QPixmap>
 #include <QProcess>
@@ -27,7 +28,7 @@ public slots:
 
 protected:
     QLocalServer* m_server;
-    bool m_is_ready;
+    bool m_accept_new_connections;
     std::atomic<bool> m_abort_requested;
 
     virtual void handle_connection(QLocalSocket*) = 0;
@@ -44,8 +45,8 @@ public:
 public slots:
     void init(const QString& filename,
               const QString& soundfont,
-              const QList<ChannelArgs> channel_args,
-              const GlobalArgs global_args);
+              const QList<ChannelArgs>& channel_args,
+              const GlobalArgs& global_args);
 
 signals:
     void ready();
@@ -90,6 +91,9 @@ private:
 
 class RenderWorker : public QObject {
     Q_OBJECT
+
+    enum State { Idle, Initializing, Running };
+
 public:
     RenderWorker(QObject* parent = nullptr);
 
@@ -100,21 +104,19 @@ public slots:
     void work(const QString& input_file,
               const QString& soundfont,
               const QString& output_file,
-              const QList<ChannelArgs> channel_args,
-              const GlobalArgs global_args);
+              const QList<ChannelArgs>& channel_args,
+              const GlobalArgs& global_args);
     void request_stop();
-    void notify_init_error(const QString& msg);
 
 signals:
     void init_video(const QString& input_file,
                     const QString& soundfont,
-                    const QList<ChannelArgs> channel_args,
-                    const GlobalArgs global_args);
+                    const QList<ChannelArgs>& channel_args,
+                    const GlobalArgs& global_args);
     void init_audio(const QString& filename, const QString& soundfont, int fps);
     void error(const QString& msg);
     void progress_changed(int);
     void done(bool, const QString& msg);
-    // void stopped();
 
 private:
     QProcess m_ffmpeg;
@@ -128,20 +130,17 @@ private:
     GlobalArgs m_global_args;
     QString m_output_path;
 
-    bool m_is_running;
-    bool m_video_is_ready;
-    bool m_audio_is_ready;
-    bool m_video_is_done;
-    bool m_audio_is_done;
+    QMutex m_state_mutex;
+    State m_state;
+    bool m_status;
+    QString m_status_message;
 
     void start_rendering();
     QStringList get_ffmpeg_args();
 
 private slots:
-    void set_video_ready();
-    void set_audio_ready();
-    void notify_video_done(bool, const QString&);
-    void notify_audio_done(bool, const QString&);
+    void notify_child_worker_done(bool, const QString&);
+    void notify_ffmpeg_done(int);
 };
 
 #endif // WORKERS_H
