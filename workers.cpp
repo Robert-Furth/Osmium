@@ -260,7 +260,6 @@ QStringList RenderWorker::get_ffmpeg_args() {
     int fps = m_global_args.fps;
     int width = m_global_args.width;
     int height = m_global_args.height;
-    double vol = m_global_args.volume;
     return QStringList() << "-y"
                          // input video format
                          << "-f" << "rawvideo" << "-pixel_format" << "rgb32"
@@ -277,8 +276,7 @@ QStringList RenderWorker::get_ffmpeg_args() {
                          << "libx264"
                          // output audio format
                          << "-c:a" << "aac" << "-b:a"
-                         << "192k" << "-filter:a"
-                         << QString("volume=%1").arg(vol)
+                         << "192k"
                          // output file
                          << m_output_path;
 }

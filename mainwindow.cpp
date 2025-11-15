@@ -83,67 +83,91 @@ MainWindow::MainWindow(QWidget* parent)
     default_item->setData(1.0, toint(ChannelArgRole::SimilarityBias));
     default_item->setData(20, toint(ChannelArgRole::SimilarityWindowMs));
     default_item->setData(0.5, toint(ChannelArgRole::PeakBias));
-    default_item->setData(0.9, toint(ChannelArgRole::PeakBiasFactor));
+    default_item->setData(0.9, toint(ChannelArgRole::PeakThreshold));
 
     default_item->setData(true, toint(ChannelArgRole::InheritDefaults));
     m_channel_model.appendRow(default_item);
-    reinit_channel_model(16); // DEBUG
 
     // Per-channel model: model updaters
     ui->cmbChannel->setModel(&m_channel_model);
+    // connect(ui->chbInheritOpts,
+    //         &QCheckBox::clicked,
+    //         model_updater<bool, ChannelArgRole::InheritDefaults>());
+    bind_to_model<QCheckBox, bool>(ui->chbInheritOpts,
+                                   ChannelArgRole::InheritDefaults,
+                                   &QCheckBox::clicked,
+                                   &QCheckBox::setChecked);
+
+    bind_to_model(ui->sbScopeWidth,
+                  ChannelArgRole::ScopeWidthMs,
+                  &QSpinBox::valueChanged,
+                  &QSpinBox::setValue);
+    bind_to_model(ui->dsbAmplification,
+                  ChannelArgRole::Amplification,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
+    bind_to_model<QCheckBox, bool>(ui->chbStereo,
+                                   ChannelArgRole::IsStereo,
+                                   &QCheckBox::clicked,
+                                   &QCheckBox::setChecked);
+
+    bind_to_model(ui->cpWaveColor,
+                  ChannelArgRole::WaveColor,
+                  &controls::ColorPicker::colorChanged,
+                  &controls::ColorPicker::setColor);
+    bind_to_model(ui->dsbWaveThickness,
+                  ChannelArgRole::WaveThickness,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
+    bind_to_model(ui->cpMidlineColor,
+                  ChannelArgRole::MidlineColor,
+                  &controls::ColorPicker::colorChanged,
+                  &controls::ColorPicker::setColor);
+    bind_to_model(ui->dsbMidlineThickness,
+                  ChannelArgRole::MidlineThickness,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
+    bind_to_model<QCheckBox, bool>(ui->chbHMidline,
+                                   ChannelArgRole::DrawHMidline,
+                                   &QCheckBox::clicked,
+                                   &QCheckBox::setChecked);
+    bind_to_model<QCheckBox, bool>(ui->chbVMidline,
+                                   ChannelArgRole::DrawVMidline,
+                                   &QCheckBox::clicked,
+                                   &QCheckBox::setChecked);
+
+    bind_to_model(ui->dsbTriggerThreshold,
+                  ChannelArgRole::TriggerThreshold,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
+    bind_to_model(ui->sbMaxNudge,
+                  ChannelArgRole::MaxNudgeMs,
+                  &QSpinBox::valueChanged,
+                  &QSpinBox::setValue);
+    bind_to_model(ui->dsbSimilarityBias,
+                  ChannelArgRole::SimilarityBias,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
+    bind_to_model(ui->sbSimilarityWindow,
+                  ChannelArgRole::SimilarityWindowMs,
+                  &QSpinBox::valueChanged,
+                  &QSpinBox::setValue);
+    bind_to_model(ui->dsbPeakBias,
+                  ChannelArgRole::PeakBias,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
+    bind_to_model(ui->dsbPeakThreshold,
+                  ChannelArgRole::PeakThreshold,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
+
+    reinit_channel_model(16); // DEBUG
+
+    // Some other deferred connections
     connect(ui->chbInheritOpts,
             &QCheckBox::clicked,
-            model_updater<bool, ChannelArgRole::InheritDefaults>());
-
-    connect(ui->sbScopeWidth,
-            &QSpinBox::valueChanged,
-            model_updater<int, ChannelArgRole::ScopeWidthMs>());
-    connect(ui->sbMaxNudge,
-            &QSpinBox::valueChanged,
-            model_updater<int, ChannelArgRole::MaxNudgeMs>());
-    connect(ui->dsbAmplification,
-            &QDoubleSpinBox::valueChanged,
-            model_updater<double, ChannelArgRole::Amplification>());
-    connect(ui->dsbTriggerThreshold,
-            &QDoubleSpinBox::valueChanged,
-            model_updater<int, ChannelArgRole::TriggerThreshold>());
-    connect(ui->chbStereo,
-            &QCheckBox::clicked,
-            model_updater<bool, ChannelArgRole::IsStereo>());
-    connect(ui->cpWaveColor,
-            &controls::ColorPicker::valueChanged,
-            model_updater<QColor, ChannelArgRole::WaveColor>());
-    connect(ui->dsbWaveThickness,
-            &QDoubleSpinBox::valueChanged,
-            model_updater<double, ChannelArgRole::WaveThickness>());
-    connect(ui->cpMidlineColor,
-            &controls::ColorPicker::valueChanged,
-            model_updater<QColor, ChannelArgRole::MidlineColor>());
-    connect(ui->dsbMidlineThickness,
-            &QDoubleSpinBox::valueChanged,
-            model_updater<double, ChannelArgRole::MidlineThickness>());
-    connect(ui->chbHMidline,
-            &QCheckBox::clicked,
-            model_updater<bool, ChannelArgRole::DrawHMidline>());
-    connect(ui->chbVMidline,
-            &QCheckBox::clicked,
-            model_updater<bool, ChannelArgRole::DrawVMidline>());
-    connect(ui->dsbSimilarityBias,
-            &QDoubleSpinBox::valueChanged,
-            model_updater<double, ChannelArgRole::SimilarityBias>());
-    connect(ui->sbSimilarityWindow,
-            &QSpinBox::valueChanged,
-            model_updater<int, ChannelArgRole::SimilarityWindowMs>());
-    connect(ui->sbScopeWidth,
-            &QSpinBox::valueChanged,
-            ui->sbSimilarityWindow,
-            &QSpinBox::setMaximum);
-    connect(ui->dsbPeakBias,
-            &QDoubleSpinBox::valueChanged,
-            model_updater<double, ChannelArgRole::PeakBias>());
-    connect(ui->dsbPeakThreshold,
-            &QDoubleSpinBox::valueChanged,
-            model_updater<double, ChannelArgRole::PeakBiasFactor>());
+            this,
+            &MainWindow::update_channel_opts_enabled);
 
     // Set up render thread
     m_r_worker = new RenderWorker();
@@ -192,7 +216,9 @@ void MainWindow::reinit_channel_model(int num_channels) {
     }
 
     m_current_index = 0;
-    syncUiToModel();
+    emit currentItemChanged(m_channel_model.item(m_current_index));
+    update_channel_opts_enabled();
+    // syncUiToModel();
 }
 
 void MainWindow::set_ui_state(UiState state) {
@@ -397,6 +423,17 @@ void MainWindow::update_cell_order(int order) {
     }
 }
 
+void MainWindow::update_channel_opts_enabled() {
+    if (m_current_index == 0) {
+        ui->scraChannelOpts->setEnabled(true);
+        return;
+    }
+
+    auto item = m_channel_model.item(m_current_index);
+    ui->scraChannelOpts->setEnabled(
+        !item->data(toint(ChannelArgRole::InheritDefaults)).toBool());
+}
+
 void MainWindow::setCurrentChannel(int index) {
     m_current_index = index;
     auto item = m_channel_model.item(m_current_index);
@@ -405,9 +442,13 @@ void MainWindow::setCurrentChannel(int index) {
 
     if (inherit_defaults) {
         resetCurrentToDefault();
-    } else {
+    } /*else {
         syncUiToModel();
-    }
+    }*/
+
+    item = m_channel_model.item(m_current_index);
+    emit currentItemChanged(item);
+    update_channel_opts_enabled();
 }
 
 void MainWindow::resetCurrentToDefault() {
@@ -415,51 +456,14 @@ void MainWindow::resetCurrentToDefault() {
     auto current_item = m_channel_model.item(m_current_index);
 
     default_item->setText(current_item->text());
-    int role = toint(ChannelArgRole::InheritDefaults);
-    default_item->setData(current_item->data(role), role);
+    default_item->setData(current_item->data(toint(ChannelArgRole::InheritDefaults)),
+                          toint(ChannelArgRole::InheritDefaults));
+    default_item->setData(current_item->data(toint(ChannelArgRole::IsVisible)),
+                          toint(ChannelArgRole::IsVisible));
 
     m_channel_model.setItem(m_current_index, default_item);
-    syncUiToModel();
-}
-
-void MainWindow::syncUiToModel() {
-    auto item = m_channel_model.item(m_current_index);
-
-    ui->chbInheritOpts->setVisible(m_current_index != 0);
-    ui->btnResetOpts->setVisible(m_current_index != 0);
-
-    bool inherit_defaults = item->data(toint(ChannelArgRole::InheritDefaults)).toBool()
-                            && m_current_index != 0;
-
-    ui->chbStereo->setChecked(item->data(toint(ChannelArgRole::IsStereo)).toBool());
-    ui->cpWaveColor->setValue(
-        item->data(toint(ChannelArgRole::WaveColor)).value<QColor>());
-    ui->dsbWaveThickness->setValue(
-        item->data(toint(ChannelArgRole::WaveThickness)).toDouble());
-    ui->dsbAmplification->setValue(
-        item->data(toint(ChannelArgRole::Amplification)).toDouble());
-    ui->sbScopeWidth->setValue(item->data(toint(ChannelArgRole::ScopeWidthMs)).toInt());
-
-    ui->cpMidlineColor->setValue(
-        item->data(toint(ChannelArgRole::MidlineColor)).value<QColor>());
-    ui->dsbMidlineThickness->setValue(
-        item->data(toint(ChannelArgRole::MidlineThickness)).toDouble());
-    ui->chbHMidline->setChecked(item->data(toint(ChannelArgRole::DrawHMidline)).toBool());
-    ui->chbVMidline->setChecked(item->data(toint(ChannelArgRole::DrawVMidline)).toBool());
-
-    ui->sbMaxNudge->setValue(item->data(toint(ChannelArgRole::MaxNudgeMs)).toInt());
-    ui->dsbTriggerThreshold->setValue(
-        item->data(toint(ChannelArgRole::TriggerThreshold)).toDouble());
-    ui->dsbSimilarityBias->setValue(
-        item->data(toint(ChannelArgRole::SimilarityBias)).toDouble());
-    ui->sbSimilarityWindow->setValue(
-        item->data(toint(ChannelArgRole::SimilarityWindowMs)).toInt());
-    ui->dsbPeakBias->setValue(item->data(toint(ChannelArgRole::PeakBias)).toDouble());
-    ui->dsbPeakThreshold->setValue(
-        item->data(toint(ChannelArgRole::PeakBiasFactor)).toDouble());
-
-    ui->chbInheritOpts->setChecked(inherit_defaults);
-    ui->scraChannelOpts->setDisabled(inherit_defaults);
+    emit currentItemChanged(default_item);
+    // syncUiToModel();
 }
 
 void MainWindow::recalcPreview() {}
