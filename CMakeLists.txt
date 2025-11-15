@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+    pathchooser.cpp
+    pathchooser.h
     renderargs.h
     resizableqlabel.cpp
     resizableqlabel.h

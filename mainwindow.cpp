@@ -35,16 +35,6 @@ MainWindow::MainWindow(QWidget* parent)
       m_render_thread(this) {
     ui->setupUi(this);
 
-    // Set up tool button-action mapping
-    connect(ui->btnChooseFile,
-            &QPushButton::clicked,
-            this,
-            &MainWindow::choose_input_file);
-    connect(ui->btnChooseSoundfont,
-            &QPushButton::clicked,
-            this,
-            &MainWindow::choose_soundfont);
-
     // Button group
     ui->bgrpCellOrder->setId(ui->rbColMajorLayout,
                              static_cast<int>(ChannelOrder::COLUMN_MAJOR));
@@ -63,7 +53,8 @@ MainWindow::MainWindow(QWidget* parent)
     if (cfg.load()) {
         m_input_file_dir.assign(cfg.input_file_dir);
         m_output_file_dir.assign(cfg.output_file_dir);
-        set_soundfont(QString::fromStdString(cfg.soundfont_path));
+        m_input_soundfont.assign(cfg.soundfont_path);
+        ui->pcInputFile->set_initial_dir(m_input_file_dir);
     }
 
     // Per-channel model: default values
@@ -384,33 +375,19 @@ void MainWindow::choose_input_file() {
 void MainWindow::set_input_file(const QString& filename) {
     m_input_file = filename;
     m_input_file_dir = QFileInfo(filename).absoluteDir().path();
-    ui->leInputFile->setText(filename);
-
-    ui->btnStartRender->setDisabled(m_input_file.isEmpty() || m_input_soundfont.isEmpty());
-}
-
-void MainWindow::choose_soundfont() {
-    QString soundfont_dir;
-    if (!m_input_soundfont.isEmpty()) {
-        soundfont_dir = QFileInfo(m_input_soundfont).absoluteDir().path();
+    ui->pcInputFile->set_initial_dir(m_input_file_dir);
+    // ui->leInputFile->setText(filename);
+    if (ui->pcInputFile->current_path() != filename) {
+        ui->pcInputFile->set_current_path(filename);
     }
 
-    QString filename = QFileDialog::getOpenFileName(this,
-                                                    "Choose Soundfont",
-                                                    soundfont_dir,
-                                                    "Soundfonts (*.sf2 *.sfz)");
-    if (filename.isNull())
-        return;
-
-    set_soundfont(filename);
+    ui->btnStartRender->setDisabled(
+        m_input_file.isEmpty() /* || m_input_soundfont.isEmpty()*/);
 }
 
-void MainWindow::set_soundfont(const QString& filename) {
-    m_input_soundfont = filename;
-    ui->leSoundfont->setText(filename);
 
-    ui->btnStartRender->setDisabled(m_input_file.isEmpty() || m_input_soundfont.isEmpty());
 }
+
 
 void MainWindow::update_cell_order(int order) {
     switch (static_cast<ChannelOrder>(order)) {

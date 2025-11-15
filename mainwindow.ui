@@ -28,6 +28,45 @@
       </property>
      </widget>
     </item>
+    <item row="0" column="0" colspan="2">
+     <widget class="QWidget" name="wgtFileChoosers" native="true">
+      <layout class="QGridLayout" name="gridLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Input File</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="controls::PathChooser" name="pcInputFile" native="true">
+         <property name="focusPolicy">
+          <enum>Qt::FocusPolicy::TabFocus</enum>
+         </property>
+         <property name="filter" stdset="0">
+          <string>MIDI Files (*.mid *.midi)</string>
+         </property>
+         <property name="icon" stdset="0">
+          <iconset resource="resources.qrc">
+           <normaloff>:/icons/folder-open</normaloff>:/icons/folder-open</iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
     <item row="1" column="0">
      <widget class="QGroupBox" name="gbGlobalOpts">
       <property name="minimumSize">
@@ -314,7 +353,7 @@
                </widget>
               </item>
               <item row="3" column="1">
-               <widget class="controls::LabeledSlider" name="horizontalSlider">
+               <widget class="controls::LabeledSlider" name="slVolume">
                 <property name="maximum">
                  <number>200</number>
                 </property>
@@ -394,41 +433,59 @@
        </property>
        <item>
         <widget class="QWidget" name="widget" native="true">
-         <layout class="QGridLayout" name="gridLayout_2">
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item row="2" column="0" colspan="2">
-           <widget class="Line" name="line_2">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="btnResetOpts">
-            <property name="text">
-             <string>Reset to Default</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="chbInheritOpts">
-            <property name="statusTip">
-             <string>Whether this channel should inherit the below values from the default settings.</string>
-            </property>
-            <property name="text">
-             <string>Use Default</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="2">
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
            <widget class="QComboBox" name="cmbChannel"/>
           </item>
+          <item>
+           <widget class="QWidget" name="wgtNonDefaultControls" native="true">
+            <layout class="QGridLayout" name="lytNonDefaultControls">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <property name="verticalSpacing">
+              <number>3</number>
+             </property>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="chbInheritOpts">
+               <property name="statusTip">
+                <string>Whether this channel should inherit the below values from the default settings.</string>
+               </property>
+               <property name="text">
+                <string>Use Default</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="btnResetOpts">
+               <property name="text">
+                <string>Reset to Default</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_2">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
         </widget>
        </item>
        <item>
@@ -451,307 +508,449 @@
             <x>0</x>
             <y>0</y>
             <width>230</width>
-            <height>456</height>
+            <height>609</height>
            </rect>
           </property>
-          <layout class="QFormLayout" name="formLayout">
+          <layout class="QVBoxLayout" name="verticalLayout_6">
            <property name="topMargin">
             <number>0</number>
            </property>
-           <item row="0" column="0">
-            <widget class="QCheckBox" name="chbStereo">
-             <property name="text">
-              <string>Stereo</string>
-             </property>
-            </widget>
+           <property name="bottomMargin">
+            <number>6</number>
+           </property>
+           <item>
+            <layout class="QFormLayout" name="formLayout">
+             <item row="0" column="0" colspan="2">
+              <widget class="QCheckBox" name="chbStereo">
+               <property name="text">
+                <string>Stereo</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Wave Color</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="controls::ColorPicker" name="cpWaveColor" native="true">
+               <property name="focusPolicy">
+                <enum>Qt::FocusPolicy::TabFocus</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_12">
+               <property name="text">
+                <string>Wave Thickness</string>
+               </property>
+               <property name="buddy">
+                <cstring>dsbWaveThickness</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="dsbWaveThickness">
+               <property name="suffix">
+                <string>px</string>
+               </property>
+               <property name="minimum">
+                <double>0.500000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>2.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>Amplification</string>
+               </property>
+               <property name="buddy">
+                <cstring>dsbAmplification</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QDoubleSpinBox" name="dsbAmplification">
+               <property name="minimum">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Scope Width</string>
+               </property>
+               <property name="buddy">
+                <cstring>sbScopeWidth</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QSpinBox" name="sbScopeWidth">
+               <property name="suffix">
+                <string>ms</string>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="value">
+                <number>40</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Wave Color</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="controls::ColorPicker" name="cpWaveColor" native="true">
-             <property name="focusPolicy">
-              <enum>Qt::FocusPolicy::TabFocus</enum>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_12">
-             <property name="text">
-              <string>Wave Thickness</string>
-             </property>
-             <property name="buddy">
-              <cstring>dsbWaveThickness</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QDoubleSpinBox" name="dsbWaveThickness">
-             <property name="suffix">
-              <string>px</string>
-             </property>
-             <property name="minimum">
-              <double>0.500000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="value">
-              <double>2.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>Amplification</string>
-             </property>
-             <property name="buddy">
-              <cstring>dsbAmplification</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QDoubleSpinBox" name="dsbAmplification">
-             <property name="minimum">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="value">
-              <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>Scope Width</string>
-             </property>
-             <property name="buddy">
-              <cstring>sbScopeWidth</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QSpinBox" name="sbScopeWidth">
-             <property name="suffix">
-              <string>ms</string>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>1000</number>
-             </property>
-             <property name="value">
-              <number>40</number>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0" colspan="2">
+           <item>
             <widget class="Line" name="line">
              <property name="orientation">
               <enum>Qt::Orientation::Horizontal</enum>
              </property>
             </widget>
            </item>
-           <item row="11" column="0">
-            <widget class="QLabel" name="label_8">
-             <property name="statusTip">
-              <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
-             </property>
-             <property name="text">
-              <string>Maximum Nudge</string>
-             </property>
-             <property name="buddy">
-              <cstring>sbMaxNudge</cstring>
+           <item>
+            <layout class="QFormLayout" name="formLayout_3">
+             <item row="0" column="0" colspan="2">
+              <widget class="QCheckBox" name="chbHMidline">
+               <property name="text">
+                <string>Show Horizontal Midline</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="2">
+              <widget class="QCheckBox" name="chbVMidline">
+               <property name="text">
+                <string>Show Vertical Midline</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_22">
+               <property name="text">
+                <string>Midline Color</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="controls::ColorPicker" name="cpMidlineColor" native="true">
+               <property name="focusPolicy">
+                <enum>Qt::FocusPolicy::TabFocus</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_23">
+               <property name="text">
+                <string>Midline Thickness</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QDoubleSpinBox" name="dsbMidlineThickness">
+               <property name="suffix">
+                <string>px</string>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="Line" name="line_6">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
             </widget>
            </item>
-           <item row="11" column="1">
-            <widget class="QSpinBox" name="sbMaxNudge">
-             <property name="statusTip">
-              <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
-             </property>
-             <property name="suffix">
-              <string>ms</string>
-             </property>
-             <property name="minimum">
-              <number>0</number>
-             </property>
-             <property name="maximum">
-              <number>100</number>
-             </property>
-             <property name="value">
-              <number>30</number>
-             </property>
-            </widget>
+           <item>
+            <layout class="QFormLayout" name="formLayout_4">
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>Label Font</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QFontComboBox" name="fcbLabelFont">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_25">
+               <property name="text">
+                <string>Font Size</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="dsbFontSize">
+               <property name="suffix">
+                <string>pt</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_24">
+               <property name="text">
+                <string>Font Color</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="controls::ColorPicker" name="cpFontColor" native="true">
+               <property name="focusPolicy">
+                <enum>Qt::FocusPolicy::TabFocus</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" colspan="2">
+              <widget class="QCheckBox" name="chbShowLabels">
+               <property name="text">
+                <string>Show Instrument Labels</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="2">
+              <widget class="QWidget" name="widget_4" native="true">
+               <layout class="QHBoxLayout" name="horizontalLayout">
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item alignment="Qt::AlignmentFlag::AlignLeft">
+                 <widget class="QToolButton" name="tbLabelBold">
+                  <property name="text">
+                   <string>Bold</string>
+                  </property>
+                  <property name="icon">
+                   <iconset theme="QIcon::ThemeIcon::FormatTextBold"/>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item alignment="Qt::AlignmentFlag::AlignLeft">
+                 <widget class="QToolButton" name="tbLabelItalic">
+                  <property name="text">
+                   <string>Italic</string>
+                  </property>
+                  <property name="icon">
+                   <iconset theme="QIcon::ThemeIcon::FormatTextItalic"/>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Orientation::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item row="12" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="statusTip">
-              <string>Minimum amplitude of a sample for it to trigger a rising edge.</string>
-             </property>
-             <property name="text">
-              <string>Trigger Threshold</string>
-             </property>
-             <property name="buddy">
-              <cstring>dsbTriggerThreshold</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="1">
-            <widget class="QDoubleSpinBox" name="dsbTriggerThreshold">
-             <property name="statusTip">
-              <string>Minimum amplitude of a sample for it to trigger a rising edge.</string>
-             </property>
-             <property name="maximum">
-              <double>1.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.010000000000000</double>
-             </property>
-             <property name="value">
-              <double>0.100000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="0">
-            <widget class="QLabel" name="label_21">
-             <property name="text">
-              <string>Similarity Bias</string>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="1">
-            <widget class="QDoubleSpinBox" name="dsbSimilarityBias">
-             <property name="maximum">
-              <double>1.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.010000000000000</double>
-             </property>
-             <property name="value">
-              <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="14" column="0">
-            <widget class="QLabel" name="label_15">
-             <property name="text">
-              <string>Similarity Window</string>
-             </property>
-             <property name="buddy">
-              <cstring>sbSimilarityWindow</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="14" column="1">
-            <widget class="QSpinBox" name="sbSimilarityWindow">
-             <property name="suffix">
-              <string>ms</string>
-             </property>
-             <property name="maximum">
-              <number>1000</number>
-             </property>
-             <property name="value">
-              <number>40</number>
-             </property>
-            </widget>
-           </item>
-           <item row="15" column="0">
-            <widget class="QLabel" name="label_18">
-             <property name="text">
-              <string>Peak Bias</string>
-             </property>
-            </widget>
-           </item>
-           <item row="15" column="1">
-            <widget class="QDoubleSpinBox" name="dsbPeakBias">
-             <property name="maximum">
-              <double>1.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.010000000000000</double>
-             </property>
-             <property name="value">
-              <double>0.100000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="16" column="0">
-            <widget class="QLabel" name="label_19">
-             <property name="text">
-              <string>Peak Threshold</string>
-             </property>
-            </widget>
-           </item>
-           <item row="16" column="1">
-            <widget class="QDoubleSpinBox" name="dsbPeakThreshold">
-             <property name="maximum">
-              <double>1.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.010000000000000</double>
-             </property>
-             <property name="value">
-              <double>0.900000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_22">
-             <property name="text">
-              <string>Midline Color</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="0" colspan="2">
+           <item>
             <widget class="Line" name="line_5">
              <property name="orientation">
               <enum>Qt::Orientation::Horizontal</enum>
              </property>
             </widget>
            </item>
-           <item row="6" column="1">
-            <widget class="controls::ColorPicker" name="cpMidlineColor" native="true"/>
-           </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="label_23">
-             <property name="text">
-              <string>Midline Thickness</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QDoubleSpinBox" name="dsbMidlineThickness">
-             <property name="suffix">
-              <string>px</string>
-             </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="0" colspan="2">
-            <widget class="QCheckBox" name="chbVMidline">
-             <property name="text">
-              <string>Vertical Midline</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0" colspan="2">
-            <widget class="QCheckBox" name="chbHMidline">
-             <property name="text">
-              <string>Horizontal Midline</string>
-             </property>
-            </widget>
+           <item>
+            <layout class="QFormLayout" name="formLayout_5">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="statusTip">
+                <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
+               </property>
+               <property name="text">
+                <string>Maximum Nudge</string>
+               </property>
+               <property name="buddy">
+                <cstring>sbMaxNudge</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="sbMaxNudge">
+               <property name="statusTip">
+                <string>How far forward the scope can &quot;nudge&quot; waveforms so they line up from frame to frame.</string>
+               </property>
+               <property name="suffix">
+                <string>ms</string>
+               </property>
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>30</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_11">
+               <property name="statusTip">
+                <string>Minimum amplitude of a sample for it to trigger a rising edge.</string>
+               </property>
+               <property name="text">
+                <string>Trigger Threshold</string>
+               </property>
+               <property name="buddy">
+                <cstring>dsbTriggerThreshold</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="dsbTriggerThreshold">
+               <property name="statusTip">
+                <string>Minimum amplitude of a sample for it to trigger a rising edge.</string>
+               </property>
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_21">
+               <property name="text">
+                <string>Similarity Bias</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="dsbSimilarityBias">
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_15">
+               <property name="text">
+                <string>Similarity Window</string>
+               </property>
+               <property name="buddy">
+                <cstring>sbSimilarityWindow</cstring>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QSpinBox" name="sbSimilarityWindow">
+               <property name="suffix">
+                <string>ms</string>
+               </property>
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="value">
+                <number>40</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_18">
+               <property name="text">
+                <string>Peak Bias</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QDoubleSpinBox" name="dsbPeakBias">
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.100000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_19">
+               <property name="text">
+                <string>Peak Threshold</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QDoubleSpinBox" name="dsbPeakThreshold">
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.900000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -768,72 +967,6 @@
       <property name="default">
        <bool>true</bool>
       </property>
-     </widget>
-    </item>
-    <item row="0" column="0" colspan="2">
-     <widget class="QWidget" name="wgtFileChoosers" native="true">
-      <layout class="QGridLayout" name="gridLayout_3">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="leInputFile">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_13">
-         <property name="text">
-          <string>Input File</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_14">
-         <property name="text">
-          <string>Soundfont</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="leSoundfont">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QPushButton" name="btnChooseFile">
-         <property name="text">
-          <string>Choose...</string>
-         </property>
-         <property name="icon">
-          <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QPushButton" name="btnChooseSoundfont">
-         <property name="text">
-          <string>Choose...</string>
-         </property>
-         <property name="icon">
-          <iconset theme="QIcon::ThemeIcon::AudioCard"/>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
     <item row="0" column="2" rowspan="2">
@@ -976,12 +1109,19 @@
    <extends>QSlider</extends>
    <header>labeledslider.h</header>
   </customwidget>
+  <customwidget>
+   <class>controls::PathChooser</class>
+   <extends>QWidget</extends>
+   <header>pathchooser.h</header>
+   <container>1</container>
+   <slots>
+    <signal>path_changed(QString)</signal>
+    <slot>open_file_chooser()</slot>
+   </slots>
+  </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>leInputFile</tabstop>
-  <tabstop>btnChooseFile</tabstop>
-  <tabstop>leSoundfont</tabstop>
-  <tabstop>btnChooseSoundfont</tabstop>
+  <tabstop>pcInputFile</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>cmbFrameRate</tabstop>
   <tabstop>sbRenderWidth</tabstop>
@@ -992,7 +1132,6 @@
   <tabstop>cpBackground</tabstop>
   <tabstop>cpGridlineColor</tabstop>
   <tabstop>dsbGridlineThickness</tabstop>
-  <tabstop>chbDebugVis</tabstop>
   <tabstop>cmbChannel</tabstop>
   <tabstop>chbInheritOpts</tabstop>
   <tabstop>btnResetOpts</tabstop>
@@ -1002,12 +1141,23 @@
   <tabstop>dsbWaveThickness</tabstop>
   <tabstop>dsbAmplification</tabstop>
   <tabstop>sbScopeWidth</tabstop>
+  <tabstop>chbHMidline</tabstop>
+  <tabstop>chbVMidline</tabstop>
+  <tabstop>cpMidlineColor</tabstop>
+  <tabstop>dsbMidlineThickness</tabstop>
+  <tabstop>chbShowLabels</tabstop>
+  <tabstop>fcbLabelFont</tabstop>
+  <tabstop>dsbFontSize</tabstop>
+  <tabstop>cpFontColor</tabstop>
+  <tabstop>tbLabelBold</tabstop>
+  <tabstop>tbLabelItalic</tabstop>
   <tabstop>sbMaxNudge</tabstop>
   <tabstop>dsbTriggerThreshold</tabstop>
   <tabstop>dsbSimilarityBias</tabstop>
   <tabstop>sbSimilarityWindow</tabstop>
   <tabstop>dsbPeakBias</tabstop>
   <tabstop>dsbPeakThreshold</tabstop>
+  <tabstop>chbDebugVis</tabstop>
   <tabstop>btnStartRender</tabstop>
   <tabstop>btnStopRender</tabstop>
  </tabstops>
@@ -1020,8 +1170,8 @@
    <slot>setCurrentChannel(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>452</x>
-     <y>175</y>
+     <x>502</x>
+     <y>137</y>
     </hint>
     <hint type="destinationlabel">
      <x>363</x>
@@ -1030,98 +1180,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>sbRenderWidth</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>recalcPreview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>221</x>
-     <y>206</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>558</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbRenderHeight</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>recalcPreview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>221</x>
-     <y>237</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>558</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbRowColCount</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>recalcPreview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>193</x>
-     <y>308</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>558</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>btnStartRender</sender>
    <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>debugStart()</slot>
+   <receiver>actionRender</receiver>
+   <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>165</x>
-     <y>643</y>
+     <x>185</x>
+     <y>596</y>
     </hint>
     <hint type="destinationlabel">
-     <x>143</x>
-     <y>576</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btnResetOpts</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>resetCurrentToDefault()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>452</x>
-     <y>205</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>403</x>
-     <y>59</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chbInheritOpts</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>scraChannelOpts</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>349</x>
-     <y>203</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>461</x>
-     <y>441</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>
@@ -1132,60 +1202,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>464</x>
-     <y>643</y>
+     <x>514</x>
+     <y>601</y>
     </hint>
     <hint type="destinationlabel">
-     <x>464</x>
-     <y>643</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionOpen</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>choose_input_file()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>558</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionChooseSoundfont</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>choose_soundfont()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>558</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>bgrpCellOrder</sender>
-   <signal>idClicked(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>recalcPreview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>558</x>
-     <y>299</y>
+     <x>514</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -1205,6 +1227,70 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pcInputFile</sender>
+   <signal>path_changed(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>set_input_file(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>436</x>
+     <y>73</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>520</x>
+     <y>78</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRender</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>debugStart()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>539</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpen</sender>
+   <signal>triggered()</signal>
+   <receiver>pcInputFile</receiver>
+   <slot>open_file_chooser()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>389</x>
+     <y>68</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOptions</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>show_options_dialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>539</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>debugStart()</slot>
@@ -1215,6 +1301,10 @@
   <slot>choose_input_file()</slot>
   <slot>choose_soundfont()</slot>
   <slot>update_cell_order(int)</slot>
+  <slot>update_channel_opts_enabled()</slot>
+  <slot>set_soundfont(QString)</slot>
+  <slot>set_input_file(QString)</slot>
+  <slot>show_options_dialog()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="bgrpCellOrder"/>
