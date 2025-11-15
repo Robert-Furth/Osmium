@@ -261,15 +261,24 @@ void MainWindow::reinit_channel_model(int num_channels) {
 }
 
 void MainWindow::set_ui_state(UiState state) {
+    m_state = state;
     switch (state) {
     case UiState::Editing:
         ui->wgtFileChoosers->setEnabled(true);
         ui->gbChannelOpts->setEnabled(true);
         ui->gbGlobalOpts->setEnabled(true);
+
+        ui->btnStartRender->setEnabled(!m_input_file.isEmpty()
+                                       && !m_input_soundfont.isEmpty());
+        ui->btnStopRender->setEnabled(false);
         break;
     case UiState::Rendering:
+        ui->btnStartRender->setEnabled(false);
+        ui->btnStopRender->setEnabled(true);
         break;
     case UiState::Canceling:
+        ui->btnStartRender->setEnabled(false);
+        ui->btnStopRender->setEnabled(false);
         break;
     }
 }
@@ -283,6 +292,9 @@ void MainWindow::update_model_value(ChannelArgRole role, const T& val) {
 }
 
 void MainWindow::debugStart() {
+    if (m_state != UiState::Editing)
+        return;
+
     if (m_input_file.isEmpty()) {
         QMessageBox::warning(this, "Error", "Please choose a file to render.");
         return;
@@ -307,13 +319,17 @@ void MainWindow::debugStart() {
                                   "file. Please choose a new file.")
                               .arg(m_input_soundfont);
         QMessageBox::warning(this, "Error", message);
-        set_soundfont("");
         return;
     }
 
+    auto outfile_name
+        = std::filesystem::path(m_input_file.toStdString()).stem().concat(".mp4");
+    auto outfile_path = std::filesystem::path(m_output_file_dir.toStdString())
+                        / outfile_name;
+
     QString output_file = QFileDialog::getSaveFileName(this,
                                                        "Render File",
-                                                       m_output_file_dir,
+                                                       QString(outfile_path.c_str()),
                                                        "MP4 Files (*.mp4)");
     if (output_file.isNull())
         return;
@@ -387,12 +403,12 @@ void MainWindow::debugStart() {
         };
     }
 
+    set_ui_state(UiState::Rendering);
     emit workerStartRequested(m_input_file,
                               m_input_soundfont,
                               output_file,
                               channel_args_list,
                               global_args);
-    ui->btnStopRender->setEnabled(true);
 }
 
 void MainWindow::onWorkerStop(bool ok, const QString& message) {
@@ -421,19 +437,7 @@ void MainWindow::onWorkerStop(bool ok, const QString& message) {
         mbox.exec();
     }
 
-    ui->btnStartRender->setEnabled(true);
-    ui->btnStopRender->setEnabled(false);
-}
-
-void MainWindow::choose_input_file() {
-    QString filename = QFileDialog::getOpenFileName(this,
-                                                    "Choose File",
-                                                    m_input_file_dir,
-                                                    "MIDI Files (*.mid *.midi)");
-    if (filename.isNull())
-        return;
-
-    set_input_file(filename);
+    set_ui_state(UiState::Editing);
 }
 
 void MainWindow::set_input_file(const QString& filename) {
@@ -482,11 +486,11 @@ void MainWindow::setCurrentChannel(int index) {
     bool inherit_defaults = item->data(toint(ChannelArgRole::InheritDefaults)).toBool()
                             && m_current_index != 0;
 
+    ui->wgtNonDefaultControls->setVisible(m_current_index != 0);
+
     if (inherit_defaults) {
         resetCurrentToDefault();
-    } /*else {
-        syncUiToModel();
-    }*/
+    }
 
     item = m_channel_model.item(m_current_index);
     emit currentItemChanged(item);
