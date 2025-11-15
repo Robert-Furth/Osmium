@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1080</width>
-    <height>675</height>
+    <height>633</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -117,7 +117,7 @@
             <x>0</x>
             <y>0</y>
             <width>244</width>
-            <height>468</height>
+            <height>464</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -354,6 +354,9 @@
               </item>
               <item row="3" column="1">
                <widget class="controls::LabeledSlider" name="slVolume">
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::StrongFocus</enum>
+                </property>
                 <property name="maximum">
                  <number>200</number>
                 </property>
@@ -1011,17 +1014,32 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
+   <property name="contextMenuPolicy">
+    <enum>Qt::ContextMenuPolicy::ActionsContextMenu</enum>
+   </property>
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
    <property name="movable">
     <bool>false</bool>
    </property>
+   <property name="allowedAreas">
+    <set>Qt::ToolBarArea::TopToolBarArea</set>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Orientation::Horizontal</enum>
+   </property>
    <property name="iconSize">
     <size>
      <width>16</width>
      <height>16</height>
     </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -1054,13 +1072,13 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
-    <addaction name="actionChooseSoundfont"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::FolderOpen"/>
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/folder-open</normaloff>:/icons/folder-open</iconset>
    </property>
    <property name="text">
     <string>Open MIDI</string>
@@ -1074,7 +1092,8 @@
   </action>
   <action name="actionRender">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::CameraVideo"/>
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/render</normaloff>:/icons/render</iconset>
    </property>
    <property name="text">
     <string>Render</string>
@@ -1088,7 +1107,8 @@
   </action>
   <action name="actionOptions">
    <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::AudioCard"/>
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/gear</normaloff>:/icons/gear</iconset>
    </property>
    <property name="text">
     <string>Options</string>
@@ -1172,7 +1192,9 @@
   <tabstop>btnStartRender</tabstop>
   <tabstop>btnStopRender</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>cmbChannel</sender>

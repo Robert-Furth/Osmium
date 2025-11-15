@@ -5,6 +5,7 @@ project(Osmium VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTORCC ON)
 set(AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Widgets Network)
@@ -33,6 +34,7 @@ set(PROJECT_SOURCES
     renderargs.h
     resizableqlabel.cpp
     resizableqlabel.h
+    resources.qrc
     saveload.cpp
     saveload.h
     scoperenderer.cpp
