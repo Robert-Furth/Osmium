@@ -5,8 +5,9 @@ project(Osmium VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
-set(AUTOMOC ON)
+set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Widgets Network)
 qt_standard_project_setup()
@@ -15,32 +16,32 @@ add_subdirectory(osmium)
 # add_subdirectory(cli)
 
 set(PROJECT_SOURCES
-    colorpicker.cpp
-    colorpicker.h
-    colorpicker.ui
-    instrumentnames.cpp
-    instrumentnames.h
-    labeledslider.cpp
-    labeledslider.h
-    main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-    optionsdialog.cpp
-    optionsdialog.h
-    optionsdialog.ui
-    pathchooser.cpp
-    pathchooser.h
-    renderargs.h
-    resizableqlabel.cpp
-    resizableqlabel.h
-    resources.qrc
-    saveload.cpp
-    saveload.h
-    scoperenderer.cpp
-    scoperenderer.h
-    workers.cpp
-    workers.h
+    src/colorpicker.cpp
+    src/colorpicker.h
+    src/colorpicker.ui
+    src/instrumentnames.cpp
+    src/instrumentnames.h
+    src/labeledslider.cpp
+    src/labeledslider.h
+    src/main.cpp
+    src/mainwindow.cpp
+    src/mainwindow.h
+    src/mainwindow.ui
+    src/optionsdialog.cpp
+    src/optionsdialog.h
+    src/optionsdialog.ui
+    src/pathchooser.cpp
+    src/pathchooser.h
+    src/renderargs.h
+    src/resizableqlabel.cpp
+    src/resizableqlabel.h
+    src/resources.qrc
+    src/saveload.cpp
+    src/saveload.h
+    src/scoperenderer.cpp
+    src/scoperenderer.h
+    src/workers.cpp
+    src/workers.h
 )
 
 qt_add_executable(OsmiumGui ${PROJECT_SOURCES})
