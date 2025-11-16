@@ -20,6 +20,7 @@ PathChooser::PathChooser(QWidget* parent) : QWidget(parent) {
     connect(m_choose_button, &QPushButton::clicked, this, &PathChooser::open_file_chooser);
 
     setLayout(layout);
+    setFocusProxy(m_line_edit);
 }
 
 void PathChooser::set_current_path(const QString& s) {

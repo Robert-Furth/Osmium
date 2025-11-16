@@ -62,6 +62,9 @@
           <height>5</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::TabFocus</enum>
+        </property>
        </widget>
       </item>
       <item row="1" column="0">
@@ -101,6 +104,9 @@ color: red;
    </item>
    <item>
     <widget class="controls::PathChooser" name="pcSoundfontPath" native="true">
+     <property name="focusPolicy">
+      <enum>Qt::FocusPolicy::TabFocus</enum>
+     </property>
      <property name="filter" stdset="0">
       <string>Soundfonts (*.sf2 *.sfz)</string>
      </property>
@@ -143,6 +149,12 @@ color: red;
    </slots>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>rbFfAuto</tabstop>
+  <tabstop>rbFfManual</tabstop>
+  <tabstop>pcFfmpegPath</tabstop>
+  <tabstop>pcSoundfontPath</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
