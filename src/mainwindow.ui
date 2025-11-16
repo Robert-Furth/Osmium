@@ -285,6 +285,9 @@
                 <property name="text">
                  <string>Background Color</string>
                 </property>
+                <property name="buddy">
+                 <cstring>cpBackground</cstring>
+                </property>
                </widget>
               </item>
               <item row="7" column="1">
@@ -309,6 +312,9 @@
                 <property name="text">
                  <string>Gridline Color</string>
                 </property>
+                <property name="buddy">
+                 <cstring>cpGridlineColor</cstring>
+                </property>
                </widget>
               </item>
               <item row="8" column="1">
@@ -329,6 +335,9 @@
                <widget class="QLabel" name="label_20">
                 <property name="text">
                  <string>Gridline Thickness</string>
+                </property>
+                <property name="buddy">
+                 <cstring>dsbGridlineThickness</cstring>
                 </property>
                </widget>
               </item>
@@ -516,7 +525,7 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
+            <y>-256</y>
             <width>230</width>
             <height>609</height>
            </rect>
@@ -541,6 +550,9 @@
               <widget class="QLabel" name="label_5">
                <property name="text">
                 <string>Wave Color</string>
+               </property>
+               <property name="buddy">
+                <cstring>cpWaveColor</cstring>
                </property>
               </widget>
              </item>
@@ -656,6 +668,9 @@
                <property name="text">
                 <string>Midline Color</string>
                </property>
+               <property name="buddy">
+                <cstring>cpMidlineColor</cstring>
+               </property>
               </widget>
              </item>
              <item row="2" column="1">
@@ -669,6 +684,9 @@
               <widget class="QLabel" name="label_23">
                <property name="text">
                 <string>Midline Thickness</string>
+               </property>
+               <property name="buddy">
+                <cstring>dsbMidlineThickness</cstring>
                </property>
               </widget>
              </item>
@@ -698,6 +716,9 @@
                <property name="text">
                 <string>Label Font</string>
                </property>
+               <property name="buddy">
+                <cstring>fcbLabelFont</cstring>
+               </property>
               </widget>
              </item>
              <item row="1" column="1">
@@ -715,6 +736,9 @@
                <property name="text">
                 <string>Font Size</string>
                </property>
+               <property name="buddy">
+                <cstring>dsbFontSize</cstring>
+               </property>
               </widget>
              </item>
              <item row="2" column="1">
@@ -728,6 +752,9 @@
               <widget class="QLabel" name="label_24">
                <property name="text">
                 <string>Font Color</string>
+               </property>
+               <property name="buddy">
+                <cstring>cpFontColor</cstring>
                </property>
               </widget>
              </item>
@@ -882,6 +909,9 @@
                <property name="text">
                 <string>Similarity Bias</string>
                </property>
+               <property name="buddy">
+                <cstring>dsbSimilarityBias</cstring>
+               </property>
               </widget>
              </item>
              <item row="2" column="1">
@@ -925,6 +955,9 @@
                <property name="text">
                 <string>Peak Bias</string>
                </property>
+               <property name="buddy">
+                <cstring>dsbPeakBias</cstring>
+               </property>
               </widget>
              </item>
              <item row="4" column="1">
@@ -944,6 +977,9 @@
               <widget class="QLabel" name="label_19">
                <property name="text">
                 <string>Peak Threshold</string>
+               </property>
+               <property name="buddy">
+                <cstring>dsbPeakThreshold</cstring>
                </property>
               </widget>
              </item>
