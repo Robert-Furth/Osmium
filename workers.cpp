@@ -245,7 +245,7 @@ void RenderWorker::work(const QString& input_file,
         lock.unlock();
         m_ffmpeg.start();
     } catch (const std::exception& e) {
-        emit done(false, e.what());
+        emit done(false, QString(e.what()).toHtmlEscaped());
         m_state = State::Idle;
         return;
     }
@@ -333,7 +333,7 @@ void RenderWorker::notify_ffmpeg_done(int status_code) {
         }
     }
 
-    emit done(m_status, m_status_message);
+    emit done(m_status, m_status_message.toHtmlEscaped());
     m_state = State::Idle;
 }
 
@@ -355,7 +355,7 @@ void RenderWorker::notify_ffmpeg_error(QProcess::ProcessError err) {
                       "is not executable. Specify the proper path in the Program Options "
                       "menu. If you haven't installed FFmpeg yet, you can download it "
                       "from <a href='https://ffmpeg.org/download.html'>its website</a>.")
-                      .arg(m_ffmpeg_path);
+                      .arg(m_ffmpeg_path.toHtmlEscaped());
         }
 
         emit done(false, message);

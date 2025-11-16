@@ -56,9 +56,7 @@ MainWindow::MainWindow(QWidget* parent)
         m_input_file_dir.assign(cfg.input_file_dir);
         m_output_file_dir.assign(cfg.output_file_dir);
         m_use_system_ffmpeg = cfg.use_system_ffmpeg;
-        if (!cfg.use_system_ffmpeg) {
-            m_ffmpeg_path.assign(cfg.ffmpeg_path);
-        }
+        m_ffmpeg_path.assign(cfg.ffmpeg_path);
         m_input_soundfont.assign(cfg.soundfont_path);
         ui->pcInputFile->set_initial_dir(m_input_file_dir);
     }
@@ -309,7 +307,10 @@ void MainWindow::debugStart() {
     }
 
     if (m_input_soundfont.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Please choose a soundfont to use.");
+        QMessageBox::warning(this,
+                             "Error",
+                             "You have not chosen a soundfont to use. Specify a "
+                             "soundfont in the Program Options menu.");
         return;
     }
 
@@ -323,9 +324,10 @@ void MainWindow::debugStart() {
     }
 
     if (!std::filesystem::is_regular_file(m_input_soundfont.toStdString())) {
-        QString message = QString("The file \"%1\" does not exist or is not a regular "
-                                  "file. Please choose a new file.")
-                              .arg(m_input_soundfont);
+        QString message
+            = QString("The file \"%1\" does not exist or is not a regular file. Please "
+                      "choose a new soundfont in the Program Options menu.")
+                  .arg(m_input_soundfont);
         QMessageBox::warning(this, "Error", message);
         return;
     }

@@ -1111,7 +1111,10 @@
      <normaloff>:/icons/gear</normaloff>:/icons/gear</iconset>
    </property>
    <property name="text">
-    <string>Options</string>
+    <string>Program Options</string>
+   </property>
+   <property name="shortcut">
+    <string>F12</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::PreferencesRole</enum>
