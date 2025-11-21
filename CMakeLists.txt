@@ -32,6 +32,8 @@ set(PROJECT_SOURCES
     src/optionsdialog.ui
     src/pathchooser.cpp
     src/pathchooser.h
+    src/previewer.cpp
+    src/previewer.h
     src/renderargs.h
     src/resizableqlabel.cpp
     src/resizableqlabel.h

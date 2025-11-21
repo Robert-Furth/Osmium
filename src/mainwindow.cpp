@@ -196,6 +196,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     reinit_channel_model(16); // DEBUG
 
+    connect(&m_channel_model,
+            &QStandardItemModel::itemChanged,
+            this,
+            &MainWindow::recalc_preview);
+
     // Some other deferred connections
     connect(ui->chbIsVisible,
             &QCheckBox::clicked,
@@ -226,9 +231,13 @@ MainWindow::MainWindow(QWidget* parent)
             &QProgressBar::setValue);
     connect(m_r_worker->video_worker(),
             &VideoSocketWorker::preview_image_changed,
-            ui->lbCanvas,
-            &controls::ResizableQLabel::setPixmap);
+            ui->previewer,
+            &controls::Previewer::set_pixmap);
     connect(m_r_worker, &RenderWorker::done, this, &MainWindow::onWorkerStop);
+    connect(m_r_worker,
+            &RenderWorker::done,
+            ui->previewer,
+            &controls::Previewer::clear_pixmap);
 
     m_render_thread.start();
 }
@@ -251,6 +260,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::reinit_channel_model(int num_channels) {
+    set_ui_state(UiState::Resetting);
     m_channel_model.setRowCount(num_channels + 1);
 
     auto default_item = m_channel_model.item(0);
@@ -263,6 +273,7 @@ void MainWindow::reinit_channel_model(int num_channels) {
     m_current_index = 0;
     emit currentItemChanged(m_channel_model.item(m_current_index));
     update_channel_opts_enabled();
+    set_ui_state(UiState::Editing);
     // syncUiToModel();
 }
 
@@ -277,6 +288,7 @@ void MainWindow::set_ui_state(UiState state) {
         ui->btnStartRender->setEnabled(!m_input_file.isEmpty()
                                        && !m_input_soundfont.isEmpty());
         ui->btnStopRender->setEnabled(false);
+        recalc_preview();
         break;
     case UiState::Rendering:
         ui->btnStartRender->setEnabled(false);
@@ -286,16 +298,13 @@ void MainWindow::set_ui_state(UiState state) {
         ui->btnStartRender->setEnabled(false);
         ui->btnStopRender->setEnabled(false);
         break;
+    case UiState::Resetting:
+        break;
     }
 }
 
 // -- MainWindow slots --
 
-template<typename T>
-void MainWindow::update_model_value(ChannelArgRole role, const T& val) {
-    int index = ui->cmbChannel->currentIndex();
-    m_channel_model.item(index)->setData(val, toint(role));
-}
 
 void MainWindow::debugStart() {
     if (m_state != UiState::Editing)
@@ -345,73 +354,8 @@ void MainWindow::debugStart() {
         return;
     m_output_file_dir = QFileInfo(output_file).absoluteDir().path();
 
-    ui->btnStartRender->setEnabled(false);
-
-    // Set up args
-    auto channel_order = static_cast<ChannelOrder>(ui->bgrpCellOrder->checkedId());
-
-    GlobalArgs global_args{
-        .width = ui->sbRenderWidth->value(),
-        .height = ui->sbRenderHeight->value(),
-        .num_rows_or_cols = ui->sbRowColCount->value(),
-        .order = channel_order,
-        .fps = ui->cmbFrameRate->currentData().toInt(),
-        .volume = ui->slVolume->value() / 100.0,
-        .border_color = ui->cpGridlineColor->color().rgb(),
-        .border_thickness = ui->dsbGridlineThickness->value(),
-        .background_color = ui->cpBackground->color().rgb(),
-        .debug_vis = ui->chbDebugVis->isChecked(),
-    };
-
-    QList<ChannelArgs> channel_args_list;
-
-    auto default_args = m_channel_model.item(0);
-    for (int i = 1; i < m_channel_model.rowCount(); i++) {
-        auto args = m_channel_model.item(i);
-
-        if (!args->data(toint(ChannelArgRole::IsVisible)).toBool())
-            continue;
-
-        if (args->data(toint(ChannelArgRole::InheritDefaults)).toBool()) {
-            args = default_args;
-        }
-
-        auto font = args->data(toint(ChannelArgRole::LabelFontFamily)).value<QFont>();
-        font.setPointSizeF(args->data(toint(ChannelArgRole::LabelFontSize)).toDouble());
-        font.setBold(args->data(toint(ChannelArgRole::LabelBold)).toBool());
-        font.setItalic(args->data(toint(ChannelArgRole::LabelItalic)).toBool());
-
-        channel_args_list << ChannelArgs{
-            .channel_number = i - 1,
-            .scope_width_ms = args->data(toint(ChannelArgRole::ScopeWidthMs)).toInt(),
-
-            .amplification = args->data(toint(ChannelArgRole::Amplification)).toDouble(),
-            .is_stereo = args->data(toint(ChannelArgRole::IsStereo)).toBool(),
-
-            .color = args->data(toint(ChannelArgRole::WaveColor)).value<QColor>().rgb(),
-            .thickness = args->data(toint(ChannelArgRole::WaveThickness)).toDouble(),
-            .midline_color
-            = args->data(toint(ChannelArgRole::MidlineColor)).value<QColor>().rgb(),
-            .midline_thickness = args->data(toint(ChannelArgRole::MidlineThickness))
-                                     .toDouble(),
-            .draw_h_midline = args->data(toint(ChannelArgRole::DrawHMidline)).toBool(),
-            .draw_v_midline = args->data(toint(ChannelArgRole::DrawVMidline)).toBool(),
-
-            .draw_labels = args->data(toint(ChannelArgRole::ShowInstrumentLabels)).toBool(),
-            .label_font = font,
-            .label_color
-            = args->data(toint(ChannelArgRole::LabelFontColor)).value<QColor>().rgb(),
-
-            .max_nudge_ms = args->data(toint(ChannelArgRole::MaxNudgeMs)).toInt(),
-            .trigger_threshold = args->data(toint(ChannelArgRole::TriggerThreshold))
-                                     .toDouble(),
-            .similarity_bias = args->data(toint(ChannelArgRole::SimilarityBias)).toDouble(),
-            .similarity_window_ms = args->data(toint(ChannelArgRole::SimilarityWindowMs))
-                                        .toInt(),
-            .peak_bias = args->data(toint(ChannelArgRole::PeakBias)).toDouble(),
-            .peak_threshold = args->data(toint(ChannelArgRole::PeakThreshold)).toDouble(),
-        };
-    }
+    auto global_args = create_global_args();
+    auto channel_args_list = create_channel_args();
 
     set_ui_state(UiState::Rendering);
     emit workerStartRequested(m_input_file,
@@ -530,7 +474,88 @@ void MainWindow::resetCurrentToDefault() {
 
     m_channel_model.setItem(m_current_index, default_item);
     emit currentItemChanged(default_item);
-    // syncUiToModel();
 }
 
-void MainWindow::recalcPreview() {}
+void MainWindow::recalc_preview() {
+    ui->previewer->update_args(create_global_args(), create_channel_args());
+}
+
+template<typename T>
+void MainWindow::update_model_value(ChannelArgRole role, const T& val) {
+    int index = ui->cmbChannel->currentIndex();
+    m_channel_model.item(index)->setData(val, toint(role));
+}
+
+GlobalArgs MainWindow::create_global_args() {
+    auto channel_order = static_cast<ChannelOrder>(ui->bgrpCellOrder->checkedId());
+
+    return GlobalArgs{
+        .width = ui->sbRenderWidth->value(),
+        .height = ui->sbRenderHeight->value(),
+        .num_rows_or_cols = ui->sbRowColCount->value(),
+        .order = channel_order,
+        .fps = ui->cmbFrameRate->currentData().toInt(),
+        .volume = ui->slVolume->value() / 100.0,
+        .border_color = ui->cpGridlineColor->color().rgb(),
+        .border_thickness = ui->dsbGridlineThickness->value(),
+        .background_color = ui->cpBackground->color().rgb(),
+        .debug_vis = ui->chbDebugVis->isChecked(),
+    };
+}
+
+QList<ChannelArgs> MainWindow::create_channel_args() {
+    QList<ChannelArgs> channel_args_list;
+
+    auto default_item = m_channel_model.item(0);
+    int num_rows = m_channel_model.rowCount();
+    for (int i = 1; i < num_rows; i++) {
+        auto item = m_channel_model.item(i);
+
+        if (!item->data(toint(ChannelArgRole::IsVisible)).toBool())
+            continue;
+
+        if (item->data(toint(ChannelArgRole::InheritDefaults)).toBool()) {
+            channel_args_list << create_channel_args(default_item, i);
+        } else {
+            channel_args_list << create_channel_args(item, i);
+        }
+    }
+
+    return channel_args_list;
+}
+
+ChannelArgs MainWindow::create_channel_args(QStandardItem* args, int index) {
+    auto font = args->data(toint(ChannelArgRole::LabelFontFamily)).value<QFont>();
+    font.setPointSizeF(args->data(toint(ChannelArgRole::LabelFontSize)).toDouble());
+    font.setBold(args->data(toint(ChannelArgRole::LabelBold)).toBool());
+    font.setItalic(args->data(toint(ChannelArgRole::LabelItalic)).toBool());
+
+    return ChannelArgs{
+        .channel_number = index - 1,
+        .scope_width_ms = args->data(toint(ChannelArgRole::ScopeWidthMs)).toInt(),
+
+        .amplification = args->data(toint(ChannelArgRole::Amplification)).toDouble(),
+        .is_stereo = args->data(toint(ChannelArgRole::IsStereo)).toBool(),
+
+        .color = args->data(toint(ChannelArgRole::WaveColor)).value<QColor>().rgb(),
+        .thickness = args->data(toint(ChannelArgRole::WaveThickness)).toDouble(),
+        .midline_color
+        = args->data(toint(ChannelArgRole::MidlineColor)).value<QColor>().rgb(),
+        .midline_thickness = args->data(toint(ChannelArgRole::MidlineThickness)).toDouble(),
+        .draw_h_midline = args->data(toint(ChannelArgRole::DrawHMidline)).toBool(),
+        .draw_v_midline = args->data(toint(ChannelArgRole::DrawVMidline)).toBool(),
+
+        .draw_labels = args->data(toint(ChannelArgRole::ShowInstrumentLabels)).toBool(),
+        .label_font = font,
+        .label_color
+        = args->data(toint(ChannelArgRole::LabelFontColor)).value<QColor>().rgb(),
+
+        .max_nudge_ms = args->data(toint(ChannelArgRole::MaxNudgeMs)).toInt(),
+        .trigger_threshold = args->data(toint(ChannelArgRole::TriggerThreshold)).toDouble(),
+        .similarity_bias = args->data(toint(ChannelArgRole::SimilarityBias)).toDouble(),
+        .similarity_window_ms = args->data(toint(ChannelArgRole::SimilarityWindowMs))
+                                    .toInt(),
+        .peak_bias = args->data(toint(ChannelArgRole::PeakBias)).toDouble(),
+        .peak_threshold = args->data(toint(ChannelArgRole::PeakThreshold)).toDouble(),
+    };
+}

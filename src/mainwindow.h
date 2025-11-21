@@ -47,6 +47,7 @@ enum class ChannelArgRole {
 
 enum class UiState {
     Editing,
+    Resetting,
     Rendering,
     Canceling,
 };
@@ -60,6 +61,25 @@ public:
 
     void reinit_channel_model(int num_channels);
     void set_ui_state(UiState state);
+
+public slots:
+    void debugStart();
+    void onWorkerStop(bool, const QString&);
+
+    // void choose_input_file();
+    void set_input_file(const QString&);
+    // void choose_soundfont();
+    // void set_soundfont(const QString&);
+    void show_options_dialog();
+    void update_options_from_dialog();
+
+    void update_cell_order(int);
+    void update_channel_opts_enabled();
+
+    void setCurrentChannel(int);
+    void resetCurrentToDefault();
+    // void syncUiToModel();
+    void recalc_preview();
 
 private:
     Ui::MainWindow* ui;
@@ -127,24 +147,9 @@ private:
                 control_setter(role, control, setter));
     }
 
-public slots:
-    void debugStart();
-    void onWorkerStop(bool, const QString&);
-
-    // void choose_input_file();
-    void set_input_file(const QString&);
-    // void choose_soundfont();
-    // void set_soundfont(const QString&);
-    void show_options_dialog();
-    void update_options_from_dialog();
-
-    void update_cell_order(int);
-    void update_channel_opts_enabled();
-
-    void setCurrentChannel(int);
-    void resetCurrentToDefault();
-    // void syncUiToModel();
-    void recalcPreview();
+    GlobalArgs create_global_args();
+    QList<ChannelArgs> create_channel_args();
+    ChannelArgs create_channel_args(QStandardItem*, int);
 
 signals:
     void workerStartRequested(const QString& input_file,
