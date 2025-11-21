@@ -87,7 +87,7 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
     auto render_start = clock.now();
     while (m_renderer->has_frames_remaining() && !m_abort_requested) {
         auto frame_start = clock.now();
-        auto frame = m_renderer->paint_frame();
+        auto frame = m_renderer->paint_next_frame();
         auto frame_dur = std::chrono::duration_cast<ms>(clock.now() - frame_start);
         elapsed_ms += frame_dur.count();
 

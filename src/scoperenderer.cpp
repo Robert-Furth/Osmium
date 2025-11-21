@@ -1,6 +1,7 @@
 #include "scoperenderer.h"
 
 #include <cmath>
+#include <numbers>
 #include <numeric>
 #include <vector>
 
@@ -16,17 +17,13 @@
 
 #include "instrumentnames.h"
 
-ScopeRenderer::ScopeRenderer(const QString& filename,
-                             const QString& soundfont,
-                             const QList<ChannelArgs>& channel_args,
-                             const GlobalArgs& global_args)
+BaseRenderer::BaseRenderer(const QList<ChannelArgs>& channel_args,
+                           const GlobalArgs& global_args)
     : m_width(global_args.width),
       m_height(global_args.height),
-      m_debug_vis(global_args.debug_vis),
-      m_background_color(global_args.background_color),
       m_border_color(global_args.border_color),
       m_border_thickness(global_args.border_thickness),
-      m_event_tracker(filename.toUtf8(), global_args.fps),
+      m_background_color(global_args.background_color),
       m_channel_args(channel_args.cbegin(), channel_args.cend()) {
     int num_channels = channel_args.size();
     switch (global_args.order) {
@@ -43,42 +40,18 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
     // total_width / num_cols - (border_thickness * (num_cols - 1))
     double w = (static_cast<float>(m_width) / m_num_cols);
     double h = (static_cast<float>(m_height) / m_num_rows);
-
     int row = 0;
     int col = 0;
 
     for (int i = 0; i < num_channels; i++) {
         auto& args = channel_args[i];
-        auto scope = osmium::ScopeBuilder()
-                         .amplification(args.amplification)
-                         .display_window_ms(args.scope_width_ms)
-                         .frame_rate(global_args.fps)
-                         .max_nudge_ms(args.max_nudge_ms)
-                         .peak_bias(args.peak_bias)
-                         .peak_threshold(args.peak_threshold)
-                         .similarity_bias(args.similarity_bias)
-                         .similarity_window_ms(args.similarity_window_ms)
-                         .soundfonts({soundfont.toStdString()})
-                         .stereo(args.is_stereo)
-                         .trigger_threshold(args.trigger_threshold)
-                         .build_from_midi_channel(filename.toUtf8(), args.channel_number);
-
-        m_scopes.emplace_back(std::move(scope));
         m_paint_infos.emplace_back(PaintInfo{
-            // .channel = args.channel_number,
             .x = col * w,
             .y = row * h,
             .w = w,
             .h = h,
             .wave_pen = QPen(QColor(args.color), args.thickness),
             .midline_pen = QPen(QColor(args.midline_color), args.midline_thickness),
-            /*.is_stereo = args.is_stereo,
-            .wave_color = args.color,
-            .wave_thickness = args.thickness,
-            .midline_color = args.midline_color,
-            .midline_thickness = args.midline_thickness,
-            .draw_h_midline = args.draw_h_midline,
-            .draw_v_midline = args.draw_v_midline,*/
             .label = get_instrument_name(0, 0, args.channel_number == 9),
         });
 
@@ -98,54 +71,26 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
     }
 }
 
-double ScopeRenderer::get_progress() {
-    double acc = 0.0;
-    for (const auto& scope : m_scopes) {
-        acc += static_cast<double>(scope.get_current_progress())
-               / scope.get_total_samples();
+void BaseRenderer::paint(QPainter& painter) {
+    painter.fillRect(0, 0, m_width, m_height, m_background_color);
+    const auto orig_transform = painter.worldTransform();
+    for (int i = 0; i < m_paint_infos.size(); i++) {
+        painter.translate(m_paint_infos[i].x, m_paint_infos[i].y);
+        paint_subframe(painter, i);
+        painter.setWorldTransform(orig_transform);
     }
-    return acc / m_scopes.size();
+    paint_borders(painter);
 }
 
-bool ScopeRenderer::has_frames_remaining() const {
-    for (const auto& scope : m_scopes) {
-        if (scope.is_playing())
-            return true;
-    }
-    return false;
+int BaseRenderer::width() const {
+    return m_width;
 }
 
-QImage ScopeRenderer::paint_frame() {
-    std::vector<int> indices(m_scopes.size());
-    std::iota(indices.begin(), indices.end(), 0);
+int BaseRenderer::height() const {
+    return m_height;
+}
 
-    m_event_tracker.next_events();
-    auto subimages = QtConcurrent::blockingMapped(indices, [this](int index) {
-        m_scopes[index].next_wave_data();
-        return paint_subimage(index);
-
-        /*QImage subimage(picture.width(), picture.height(), QImage::Format_RGB32);
-        subimage.fill(m_background_color);
-
-        QPainter subimage_painter(&subimage);
-        subimage_painter.setRenderHint(QPainter::Antialiasing);
-        picture.play(&subimage_painter);
-        return subimage;*/
-    });
-
-    QImage full_frame(m_width, m_height, QImage::Format_RGB32);
-    full_frame.fill(m_background_color);
-    QPainter painter(&full_frame);
-    // painter.fillRect(0, 0, m_width, m_height, m_background_color);
-
-    // Draw subimages
-    for (int i = 0; i < subimages.size(); i++) {
-        auto& meta = m_paint_infos[i];
-        auto& subimage = subimages[i];
-        painter.drawImage(QPointF(meta.x, meta.y), subimage);
-    }
-
-    // Draw borders
+void BaseRenderer::paint_borders(QPainter& painter) {
     if (m_border_thickness) {
         painter.setPen(QPen(m_border_color, m_border_thickness));
         for (int i = 1; i < m_num_rows; i++) {
@@ -157,36 +102,14 @@ QImage ScopeRenderer::paint_frame() {
             painter.drawLine(QLineF(x, 0, x, m_height));
         }
     }
-
-    return full_frame;
 }
 
-QImage ScopeRenderer::paint_subimage(int index) {
-    auto& scope = m_scopes[index];
-    auto& p = m_paint_infos[index];
-    auto& args = m_channel_args[index];
-    QImage img(std::ceil(p.w), std::ceil(p.h), QImage::Format_RGB32);
+void BaseRenderer::paint_subframe(QPainter& painter, int index) {
+    const auto& p = m_paint_infos[index];
+    const auto& args = m_channel_args[index];
 
-    if (m_debug_vis) {
-        if (scope.get_no_nudges_found()) {
-            img.fill(QColor(0x40, 0, 0));
-        } else {
-            QRgb rgb = qRgb(0, 0, 0);
-            if (scope.m_flag1)
-                rgb |= qRgb(0, 0x40, 0);
-            if (scope.m_flag2)
-                rgb |= qRgb(0, 0, 0x40);
-
-            img.fill(QColor(rgb));
-        }
-    } else {
-        img.fill(m_background_color);
-    }
-    QPainter painter(&img);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    painter.setPen(p.midline_pen);
     if (args.draw_v_midline) {
+        painter.setPen(p.midline_pen);
         painter.drawLine(p.w * 0.5, 0, p.w * 0.5, p.h); // Vertical axis
     }
 
@@ -202,41 +125,27 @@ QImage ScopeRenderer::paint_subimage(int index) {
 
     if (args.is_stereo) {
         if (args.draw_h_midline) {
+            painter.setPen(p.midline_pen);
             painter.drawLine(0, p.h * 0.25, p.w, p.h * 0.25); // H axis 1
             painter.drawLine(0, p.h * 0.75, p.w, p.h * 0.75); // H axis 2
         }
 
         painter.setPen(p.wave_pen);
-        paint_wave(scope.get_left_samples(), painter, p.w, p.h * 0.5, p.h * 0.25);
-        paint_wave(scope.get_right_samples(), painter, p.w, p.h * 0.5, p.h * 0.75);
+        paint_wave(painter, get_left_wave(index), p.w, p.h * 0.5, p.h * 0.25);
+        paint_wave(painter, get_right_wave(index), p.w, p.h * 0.5, p.h * 0.75);
     } else {
         if (args.draw_h_midline) {
+            painter.setPen(p.midline_pen);
             painter.drawLine(0, p.h * 0.5, p.w, p.h * 0.5);
         }
 
         painter.setPen(p.wave_pen);
-        paint_wave(scope.get_left_samples(), painter, p.w, p.h, p.h * 0.5);
+        paint_wave(painter, get_left_wave(index), p.w, p.h, p.h * 0.5);
     }
-
-    for (const auto& event : m_event_tracker.get_events()) {
-        if (event.chan == args.channel_number && event.event == MIDI_EVENT_PROGRAM) {
-            p.label = get_instrument_name(event.param, 0, args.channel_number == 9);
-        }
-    }
-
-    /*if (m_debug_vis) {
-        // DEBUG: nudge window
-        double nudge_px = p.w * scope.get_this_nudge_ms() / scope.get_window_size_ms();
-        double max_nudge_px = p.w * scope.get_max_nudge_ms() / scope.get_window_size_ms();
-        painter.setPen(QColor(0xff, 0xff, 0));
-        painter.drawRect(p.w * 0.5 - nudge_px, 0, max_nudge_px, p.h);
-    }*/
-
-    return img;
 }
 
-void ScopeRenderer::paint_wave(
-    const std::vector<float>& wave, QPainter& painter, double w, double h, double mid_y) {
+void BaseRenderer::paint_wave(
+    QPainter& painter, const std::vector<float>& wave, double w, double h, double mid_y) {
     double x_mult = w / (wave.size() - 1);
     double y_mult = h * -0.5; // negative so positive samples are higher
     double y_offs = mid_y;
@@ -249,6 +158,129 @@ void ScopeRenderer::paint_wave(
         polygon << QPointF(x, y);
     }
 
-    // painter.setPen(QPen(QColor(color), thickness));
     painter.drawPolyline(polygon);
+}
+
+// -- ScopeRenderer --
+
+ScopeRenderer::ScopeRenderer(const QString& filename,
+                             const QString& soundfont,
+                             const QList<ChannelArgs>& channel_args,
+                             const GlobalArgs& global_args)
+    : BaseRenderer(channel_args, global_args),
+      m_event_tracker(filename.toUtf8(), global_args.fps) {
+    for (int i = 0; i < channel_args.size(); i++) {
+        auto& args = channel_args[i];
+        auto scope = osmium::ScopeBuilder()
+                         .amplification(args.amplification)
+                         .display_window_ms(args.scope_width_ms)
+                         .frame_rate(global_args.fps)
+                         .max_nudge_ms(args.max_nudge_ms)
+                         .peak_bias(args.peak_bias)
+                         .peak_threshold(args.peak_threshold)
+                         .similarity_bias(args.similarity_bias)
+                         .similarity_window_ms(args.similarity_window_ms)
+                         .soundfonts({soundfont.toStdString()})
+                         .stereo(args.is_stereo)
+                         .trigger_threshold(args.trigger_threshold)
+                         .build_from_midi_channel(filename.toUtf8(), args.channel_number);
+        m_scopes.emplace_back(std::move(scope));
+    }
+}
+
+QImage ScopeRenderer::paint_next_frame() {
+    // Update events (for tracking instrument changes)
+    m_event_tracker.next_events();
+
+    auto render_hints = QPainter::Antialiasing | QPainter::TextAntialiasing;
+
+    // Run each subimage in parallel
+    std::vector<int> indices(m_scopes.size());
+    std::iota(indices.begin(), indices.end(), 0);
+    auto subframes = QtConcurrent::blockingMapped(indices, [this, render_hints](int index) {
+        const auto& args = m_channel_args[index];
+        auto& pinfo = m_paint_infos[index];
+
+        // Update wave data
+        m_scopes[index].next_wave_data();
+
+        // Update label if necessary
+        if (args.draw_labels) {
+            for (const auto& event : m_event_tracker.get_events()) {
+                if (event.chan == args.channel_number
+                    && event.event == MIDI_EVENT_PROGRAM) {
+                    pinfo.label = get_instrument_name(event.param,
+                                                      0,
+                                                      args.channel_number == 9);
+                }
+            }
+        }
+
+        // Paint
+        QImage subimg(std::ceil(pinfo.w), std::ceil(pinfo.h), QImage::Format_RGB32);
+        subimg.fill(m_background_color);
+        QPainter painter(&subimg);
+        painter.setRenderHints(render_hints);
+        paint_subframe(painter, index);
+
+        return subimg;
+    });
+
+    QImage full_frame(m_width, m_height, QImage::Format_RGB32);
+    full_frame.fill(m_background_color);
+    QPainter painter(&full_frame);
+    painter.setRenderHints(render_hints);
+
+    for (int i = 0; i < subframes.size(); i++) {
+        const auto& pinfo = m_paint_infos[i];
+        const auto& subimg = subframes[i];
+        painter.drawImage(QPointF(pinfo.x, pinfo.y), subimg);
+    }
+    paint_borders(painter);
+
+    return full_frame;
+}
+
+bool ScopeRenderer::has_frames_remaining() const {
+    for (const auto& scope : m_scopes) {
+        if (scope.is_playing())
+            return true;
+    }
+    return false;
+}
+
+double ScopeRenderer::get_progress() {
+    double acc = 0.0;
+    for (const auto& scope : m_scopes) {
+        acc += static_cast<double>(scope.get_current_progress())
+               / scope.get_total_samples();
+    }
+    return acc / m_scopes.size();
+}
+
+const std::vector<float>& ScopeRenderer::get_left_wave(int index) const {
+    return m_scopes[index].get_left_samples();
+}
+const std::vector<float>& ScopeRenderer::get_right_wave(int index) const {
+    return m_scopes[index].get_right_samples();
+}
+
+// -- PreviewRenderer --
+
+PreviewRenderer::PreviewRenderer(const QList<ChannelArgs>& channel_args,
+                                 const GlobalArgs& global_args)
+    : BaseRenderer(channel_args, global_args) {
+    m_wave_data.reserve(120);
+
+    for (int i = 0; i < 120; i++) {
+        m_wave_data.push_back(std::sin(i * 0.16 * std::numbers::pi) * 0.5);
+    }
+}
+
+const std::vector<float>& PreviewRenderer::get_left_wave(int index) const {
+    return m_wave_data;
+}
+
+const std::vector<float>& PreviewRenderer::get_right_wave(int index) const {
+    return m_wave_data;
 }
