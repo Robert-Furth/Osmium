@@ -3,14 +3,6 @@
 #include <array>
 #include <unordered_map>
 
-// const std::unordered_map<std::pair<int, int>, std::string> g_instrument_names = {
-//     {{0, 0}, "Grand Piano"},
-//     {{0, 1}, "Wide Grand Piano"},
-//     {{0, 2}, "Dark Grand Piano"},
-//     {{1, 0}, "Bright Piano"},
-//     {{1, 1}, "Wide Bright Piano"},
-// };
-
 // Instrument names (not taking into account instrument banks)
 const std::array g_instrument_names = {
     // Piano

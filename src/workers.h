@@ -137,7 +137,6 @@ private:
     bool m_status;
     QString m_status_message;
 
-    // void start_rendering();
     QStringList get_ffmpeg_args();
 
 private slots:

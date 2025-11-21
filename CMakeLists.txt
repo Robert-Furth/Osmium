@@ -49,7 +49,6 @@ qt_add_executable(OsmiumGui ${PROJECT_SOURCES})
 target_link_libraries(OsmiumGui
     PRIVATE Qt6::Core
     PRIVATE Qt6::Widgets
-    # PRIVATE Qt6::OpenGLWidgets
     PRIVATE Qt6::Concurrent
     PRIVATE Qt6::Network
     PRIVATE OsmiumLib

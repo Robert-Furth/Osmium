@@ -260,16 +260,6 @@ void RenderWorker::request_stop() {
     m_ffmpeg.terminate();
 }
 
-// void RenderWorker::start_rendering() {
-//     if (m_ffmpeg.state() == QProcess::Running) {
-//         m_ffmpeg.kill();
-//         m_ffmpeg.waitForFinished();
-//     }
-//     m_ffmpeg.setProgram("ffmpeg");
-//     m_ffmpeg.setArguments(get_ffmpeg_args());
-//     m_ffmpeg.start();
-// }
-
 QStringList RenderWorker::get_ffmpeg_args() {
     int fps = m_global_args.fps;
     int width = m_global_args.width;

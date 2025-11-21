@@ -21,7 +21,6 @@
 #include <QWaitCondition>
 
 #include "saveload.h"
-// #include "scoperenderer.h"
 #include "renderargs.h"
 #include "workers.h"
 
@@ -94,9 +93,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Per-channel model: model updaters
     ui->cmbChannel->setModel(&m_channel_model);
-    // connect(ui->chbInheritOpts,
-    //         &QCheckBox::clicked,
-    //         model_updater<bool, ChannelArgRole::InheritDefaults>());
+
     bind_to_model<QCheckBox, bool>(ui->chbInheritOpts,
                                    ChannelArgRole::InheritDefaults,
                                    &QCheckBox::clicked,
@@ -274,7 +271,6 @@ void MainWindow::reinit_channel_model(int num_channels) {
     emit currentItemChanged(m_channel_model.item(m_current_index));
     update_channel_opts_enabled();
     set_ui_state(UiState::Editing);
-    // syncUiToModel();
 }
 
 void MainWindow::set_ui_state(UiState state) {
@@ -399,13 +395,11 @@ void MainWindow::set_input_file(const QString& filename) {
     m_input_file = filename;
     m_input_file_dir = QFileInfo(filename).absoluteDir().path();
     ui->pcInputFile->set_initial_dir(m_input_file_dir);
-    // ui->leInputFile->setText(filename);
     if (ui->pcInputFile->current_path() != filename) {
         ui->pcInputFile->set_current_path(filename);
     }
 
-    ui->btnStartRender->setDisabled(
-        m_input_file.isEmpty() /* || m_input_soundfont.isEmpty()*/);
+    ui->btnStartRender->setDisabled(m_input_file.isEmpty());
 }
 
 void MainWindow::show_options_dialog() {
@@ -480,10 +474,42 @@ void MainWindow::recalc_preview() {
     ui->previewer->update_args(create_global_args(), create_channel_args());
 }
 
+// -- MainWindow private methods --
+
 template<typename T>
 void MainWindow::update_model_value(ChannelArgRole role, const T& val) {
     int index = ui->cmbChannel->currentIndex();
     m_channel_model.item(index)->setData(val, toint(role));
+}
+
+template<typename T>
+constexpr auto MainWindow::model_updater(ChannelArgRole role) {
+    return std::bind(&MainWindow::update_model_value<T>,
+                     this,
+                     role,
+                     std::placeholders::_1);
+}
+
+template<typename Control, typename T>
+constexpr auto MainWindow::control_setter(ChannelArgRole role,
+                                          Control* control,
+                                          void (Control::*setter)(T)) const {
+    // If T is e.g. a const ref, then item->data(...).value<T> won't compile.
+    // So, we have to remove the reference and the const qualifiers.
+    using ValT = std::remove_cv_t<std::remove_reference_t<T>>;
+    return [role, control, setter](const QStandardItem* item) {
+        const auto& value = item->data(static_cast<int>(role)).value<ValT>();
+        (control->*setter)(value);
+    };
+}
+
+template<typename Control, typename T>
+void MainWindow::bind_to_model(Control* control,
+                               ChannelArgRole role,
+                               void (Control::*notifier)(T),
+                               void (Control::*setter)(T)) {
+    connect(control, notifier, this, model_updater<T>(role));
+    connect(this, &MainWindow::currentItemChanged, control_setter(role, control, setter));
 }
 
 GlobalArgs MainWindow::create_global_args() {

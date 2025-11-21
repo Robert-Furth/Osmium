@@ -66,10 +66,7 @@ public slots:
     void debugStart();
     void onWorkerStop(bool, const QString&);
 
-    // void choose_input_file();
     void set_input_file(const QString&);
-    // void choose_soundfont();
-    // void set_soundfont(const QString&);
     void show_options_dialog();
     void update_options_from_dialog();
 
@@ -78,7 +75,6 @@ public slots:
 
     void setCurrentChannel(int);
     void resetCurrentToDefault();
-    // void syncUiToModel();
     void recalc_preview();
 
 private:
@@ -104,12 +100,7 @@ private:
     void update_model_value(ChannelArgRole role, const T& val);
 
     template<typename T>
-    constexpr auto model_updater(ChannelArgRole role) {
-        return std::bind(&MainWindow::update_model_value<T>,
-                         this,
-                         role,
-                         std::placeholders::_1);
-    }
+    constexpr auto model_updater(ChannelArgRole role);
 
     /** @brief Returns a function that takes in a `QStandardItem*` and calls `control->*setter`
      *  with the value stored in the `role` role of the item.
@@ -125,27 +116,13 @@ private:
     template<typename Control, typename T>
     constexpr auto control_setter(ChannelArgRole role,
                                   Control* control,
-                                  void (Control::*setter)(T)) const {
-        // If T is e.g. a const ref, then item->data(...).value<T> won't compile.
-        // So, we have to remove the reference and the const qualifiers.
-        using ValT = std::remove_cv_t<std::remove_reference_t<T>>;
-        return [role, control, setter](const QStandardItem* item) {
-            const auto& value = item->data(static_cast<int>(role)).value<ValT>();
-            (control->*setter)(value);
-        };
-    }
+                                  void (Control::*setter)(T)) const;
 
     template<typename Control, typename T>
     void bind_to_model(Control* control,
                        ChannelArgRole role,
                        void (Control::*notifier)(T),
-                       void (Control::*setter)(T)) {
-        // auto asdf = &MainWindow::debugStart;
-        connect(control, notifier, this, model_updater<T>(role));
-        connect(this,
-                &MainWindow::currentItemChanged,
-                control_setter(role, control, setter));
-    }
+                       void (Control::*setter)(T));
 
     GlobalArgs create_global_args();
     QList<ChannelArgs> create_channel_args();
