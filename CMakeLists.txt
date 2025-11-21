@@ -35,8 +35,6 @@ set(PROJECT_SOURCES
     src/previewer.cpp
     src/previewer.h
     src/renderargs.h
-    src/resizableqlabel.cpp
-    src/resizableqlabel.h
     src/resources.qrc
     src/saveload.cpp
     src/saveload.h
