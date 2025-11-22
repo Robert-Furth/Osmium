@@ -75,7 +75,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     default_item->setData(true, toint(ChannelArgRole::ShowInstrumentLabels));
     default_item->setData(QFont(), toint(ChannelArgRole::LabelFontFamily));
-    default_item->setData(QFont().pointSizeF(), toint(ChannelArgRole::LabelFontSize));
+    default_item->setData(13.0, toint(ChannelArgRole::LabelFontSize));
     default_item->setData(QColor(255, 255, 255), toint(ChannelArgRole::LabelFontColor));
     default_item->setData(false, toint(ChannelArgRole::LabelBold));
     default_item->setData(false, toint(ChannelArgRole::LabelItalic));
@@ -284,6 +284,7 @@ void MainWindow::set_ui_state(UiState state) {
         ui->btnStartRender->setEnabled(!m_input_file.isEmpty()
                                        && !m_input_soundfont.isEmpty());
         ui->btnStopRender->setEnabled(false);
+        ui->progressBar->setValue(0);
         recalc_preview();
         break;
     case UiState::Rendering:

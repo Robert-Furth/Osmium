@@ -278,8 +278,8 @@
                 </property>
                 <property name="color" stdset="0">
                  <color>
-                  <red>0</red>
-                  <green>128</green>
+                  <red>97</red>
+                  <green>160</green>
                   <blue>160</blue>
                  </color>
                 </property>
@@ -1137,6 +1137,9 @@
    <property name="text">
     <string>Open MIDI</string>
    </property>
+   <property name="toolTip">
+    <string>Open MIDI (Ctrl+O)</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
@@ -1152,6 +1155,9 @@
    <property name="text">
     <string>Render</string>
    </property>
+   <property name="toolTip">
+    <string>Render (Ctrl+R)</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
    </property>
@@ -1166,6 +1172,9 @@
    </property>
    <property name="text">
     <string>Program Options</string>
+   </property>
+   <property name="toolTip">
+    <string>Program Options (F12)</string>
    </property>
    <property name="shortcut">
     <string>F12</string>
