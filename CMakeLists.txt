@@ -16,13 +16,17 @@ add_subdirectory(osmium)
 # add_subdirectory(cli)
 
 set(PROJECT_SOURCES
-    src/colorpicker.cpp
-    src/colorpicker.h
-    src/colorpicker.ui
+    src/controls/colorpicker.cpp
+    src/controls/colorpicker.h
+    src/controls/colorpicker.ui
+    src/controls/labeledslider.cpp
+    src/controls/labeledslider.h
+    src/controls/pathchooser.cpp
+    src/controls/pathchooser.h
+    src/controls/previewer.cpp
+    src/controls/previewer.h
     src/instrumentnames.cpp
     src/instrumentnames.h
-    src/labeledslider.cpp
-    src/labeledslider.h
     src/main.cpp
     src/mainwindow.cpp
     src/mainwindow.h
@@ -30,10 +34,6 @@ set(PROJECT_SOURCES
     src/optionsdialog.cpp
     src/optionsdialog.h
     src/optionsdialog.ui
-    src/pathchooser.cpp
-    src/pathchooser.h
-    src/previewer.cpp
-    src/previewer.h
     src/renderargs.h
     src/resources.qrc
     src/saveload.cpp
@@ -44,9 +44,9 @@ set(PROJECT_SOURCES
     src/workers.h
 )
 
-qt_add_executable(OsmiumGui ${PROJECT_SOURCES})
+qt_add_executable(Osmium ${PROJECT_SOURCES})
 
-target_link_libraries(OsmiumGui
+target_link_libraries(Osmium
     PRIVATE Qt6::Core
     PRIVATE Qt6::Widgets
     PRIVATE Qt6::Concurrent
@@ -54,7 +54,7 @@ target_link_libraries(OsmiumGui
     PRIVATE OsmiumLib
 )
 
-target_include_directories(OsmiumGui
+target_include_directories(Osmium
     PRIVATE "${PROJECT_SOURCE_DIR}/include"
     PRIVATE "${PROJECT_SOURCE_DIR}/osmium"
 )
@@ -66,7 +66,7 @@ target_include_directories(OsmiumGui
 #   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.Osmium)
 # endif()
 
-set_target_properties(OsmiumGui PROPERTIES
+set_target_properties(Osmium PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -74,14 +74,14 @@ set_target_properties(OsmiumGui PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-install(TARGETS OsmiumGui OsmiumLib
+install(TARGETS Osmium OsmiumLib
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 qt_generate_deploy_app_script(
-    TARGET OsmiumGui
+    TARGET Osmium
     OUTPUT_SCRIPT deploy_script
     NO_UNSUPPORTED_PLATFORM_ERROR
 )

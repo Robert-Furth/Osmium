@@ -141,7 +141,7 @@ color: red;
   <customwidget>
    <class>controls::PathChooser</class>
    <extends>QWidget</extends>
-   <header>src/pathchooser.h</header>
+   <header>src/controls/pathchooser.h</header>
    <container>1</container>
    <slots>
     <signal>path_changed(QString)</signal>

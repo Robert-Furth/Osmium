@@ -7,8 +7,8 @@
 #include <QPixmap>
 #include <QWidget>
 
-#include "renderargs.h"
-#include "scoperenderer.h"
+#include "../renderargs.h"
+#include "../scoperenderer.h"
 
 namespace controls {
 

@@ -1188,7 +1188,7 @@
   <customwidget>
    <class>controls::PathChooser</class>
    <extends>QWidget</extends>
-   <header>src/pathchooser.h</header>
+   <header>src/controls/pathchooser.h</header>
    <container>1</container>
    <slots>
     <signal>path_changed(QString)</signal>
@@ -1198,7 +1198,7 @@
   <customwidget>
    <class>controls::ColorPicker</class>
    <extends>QWidget</extends>
-   <header>src/colorpicker.h</header>
+   <header>src/controls/colorpicker.h</header>
    <container>1</container>
    <slots>
     <signal>colorChanged(QColor)</signal>
@@ -1207,12 +1207,12 @@
   <customwidget>
    <class>controls::LabeledSlider</class>
    <extends>QSlider</extends>
-   <header>src/labeledslider.h</header>
+   <header>src/controls/labeledslider.h</header>
   </customwidget>
   <customwidget>
    <class>controls::Previewer</class>
    <extends>QWidget</extends>
-   <header>src/previewer.h</header>
+   <header>src/controls/previewer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
