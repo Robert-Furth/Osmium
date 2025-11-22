@@ -1,47 +1,43 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.18)
 
-project(OsmiumLib VERSION 0.1 LANGUAGES CXX)
+project(OsmiumLib VERSION ${CMAKE_PROJECT_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(PROJECT_SOURCES
-    error.h
-    eventtracker.cpp
-    eventtracker.h
-    handlewrapper.cpp
-    handlewrapper.h
-    osmium.cpp
-    osmium.h
-    player.cpp
-    player.h
-    scope.cpp
-    scope.h
-    scopebuilder.cpp
-    scopebuilder.h
-)
+set(local_lib_path "${PROJECT_SOURCE_DIR}/libs/${CMAKE_SYSTEM_PROCESSOR}")
 
-add_library(OsmiumLib STATIC ${PROJECT_SOURCES})
+add_library(OsmiumLib STATIC
+    src/error.h
+    src/eventtracker.cpp
+    src/eventtracker.h
+    src/handlewrapper.cpp
+    src/handlewrapper.h
+    src/osmium.cpp
+    src/osmium.h
+    src/player.cpp
+    src/player.h
+    src/scope.cpp
+    src/scope.h
+    src/scopebuilder.cpp
+    src/scopebuilder.h
+)
 
 target_include_directories(OsmiumLib
     PUBLIC ${PROJECT_SOURCE_DIR}/include
+    INTERFACE ${PROJECT_SOURCE_DIR}/src
 )
 
-target_link_directories(OsmiumLib
-    PUBLIC ${PROJECT_SOURCE_DIR}/libs
+find_library(bass_lib
+    NAMES bass
+    PATHS ${local_lib_path}
+)
+
+find_library(bassmidi_lib
+    NAMES bassmidi
+    PATHS ${local_lib_path}
 )
 
 target_link_libraries(OsmiumLib
-    PUBLIC bass
-    PUBLIC bassmidi
+    PUBLIC ${bass_lib} ${bassmidi_lib}
 )
-
-# Copy relevant DLLs to the build dir on Windows
-# if(WIN32)
-#     add_custom_command(
-#         TARGET OsmiumLib POST_BUILD
-#         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#             "${CMAKE_SOURCE_DIR}/libs/bass24-x64/bass.dll"
-#             $<TARGET_FILE_DIR:OsmiumLib>
-#     )
-# endif()

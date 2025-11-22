@@ -16,7 +16,6 @@ class LabeledSlider : public QAbstractSlider {
     Q_PROPERTY(Qt::Alignment labelAlignment READ labelAlignment WRITE setLabelAlignment
                    NOTIFY labelAlignmentChanged);
     Q_PROPERTY(QSlider::TickPosition tickPosition READ tickPosition WRITE setTickPosition)
-    Q_PROPERTY(QSlider::TickPosition tickPosition READ tickPosition WRITE setTickPosition)
     Q_PROPERTY(int tickInterval READ tickInterval WRITE setTickInterval)
 
 public:

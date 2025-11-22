@@ -6,7 +6,7 @@
 #include <QStyle>
 #include <QStyleFactory>
 
-#include "osmium/osmium.h"
+#include <osmium.h>
 
 int main(int argc, char *argv[]) {
     if (!osmium::init()) {
