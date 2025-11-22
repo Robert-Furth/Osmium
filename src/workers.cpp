@@ -91,9 +91,6 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
         auto frame_dur = std::chrono::duration_cast<ms>(clock.now() - frame_start);
         elapsed_ms += frame_dur.count();
 
-        if (frame_counter % 4 == 0) {
-            connection->flush();
-        }
         qint64 write_result = connection->write(reinterpret_cast<const char*>(
                                                     frame.constBits()),
                                                 frame.sizeInBytes());
