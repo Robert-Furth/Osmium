@@ -89,6 +89,9 @@ if(WIN32)
     cmake_path(REPLACE_EXTENSION bass_lib ".dll" OUTPUT_VARIABLE bass_dll)
     cmake_path(REPLACE_EXTENSION bassmidi_lib ".dll" OUTPUT_VARIABLE bassmidi_dll)
     install(FILES ${bass_dll} ${bassmidi_dll} TYPE BIN)
+
+    add_custom_command(TARGET OsmiumGui POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${bass_dll} ${bassmidi_dll} $<TARGET_FILE_DIR:OsmiumGui>)
 endif()
 
 qt_generate_deploy_app_script(
