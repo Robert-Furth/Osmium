@@ -4,7 +4,7 @@ An oscilliscope visualizer for MIDIs inspired by [corrscope](https://github.com/
 
 ## Download
 
-Download the executable for your system in the Releases page.
+Download the executable for your system in the [Releases](https://github.com/Robert-Furth/Osmium/releases) page.
 You'll also need to download [FFmpeg](https://ffmpeg.org/download.html) if you don't have it already.
 
 ## First-Time Setup
@@ -17,6 +17,9 @@ You'll also need to download [FFmpeg](https://ffmpeg.org/download.html) if you d
 4. You're all set! Find some MIDIs and get visualizin'!
 
 ## Roadmap
+
+This is a project I'm building in my spare time, so progress might be slow.
+Nevertheless, here are some things I'd like to add in the future:
 
 - [ ] Saving/loading presets
 - [ ] More rendering options (codec, CRF, etc.)
