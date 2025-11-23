@@ -19,8 +19,10 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Widgets Network)
 qt_standard_project_setup()
 
-# set(app_icon_resource_windows "${PROJECT_SOURCE_DIR}/res.rc")
+set(app_icon_resource_windows "${PROJECT_SOURCE_DIR}/res.rc")
 qt_add_executable(OsmiumGui
+    ${app_icon_resource_windows}
+    .gitignore
     src/controls/colorpicker.cpp
     src/controls/colorpicker.h
     src/controls/colorpicker.ui
@@ -47,7 +49,6 @@ qt_add_executable(OsmiumGui
     src/scoperenderer.h
     src/workers.cpp
     src/workers.h
-    # ${app_icon_resource_windows}
 )
 
 target_link_libraries(OsmiumGui
