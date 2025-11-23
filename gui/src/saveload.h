@@ -12,7 +12,6 @@ struct PersistentConfig {
 
     bool save();
     bool load();
-    void init_default();
 };
 
 #endif // SAVELOAD_H

@@ -20,8 +20,8 @@
 #include <QProcess>
 #include <QWaitCondition>
 
-#include "saveload.h"
 #include "renderargs.h"
+#include "saveload.h"
 #include "workers.h"
 
 // Because typing "static_cast<int>(...)" every time gets old fast
@@ -301,7 +301,6 @@ void MainWindow::set_ui_state(UiState state) {
 }
 
 // -- MainWindow slots --
-
 
 void MainWindow::debugStart() {
     if (m_state != UiState::Editing)

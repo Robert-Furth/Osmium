@@ -26,27 +26,4 @@ void uninit() {
     BASS_Free();
 }
 
-// bool set_soundfonts(const std::vector<std::string> soundfonts) {
-//     // Unload loaded fonts
-//     for (HSOUNDFONT handle : g_loaded_fonts) {
-//         BASS_MIDI_FontFree(handle);
-//     }
-//     g_loaded_fonts.clear();
-
-//     // Create handles for each font
-//     for (const auto& filepath : soundfonts) {
-//         HSOUNDFONT handle = BASS_MIDI_FontInit(filepath.c_str(), 0);
-//         if (!handle)
-//             return false;
-//         g_loaded_fonts.push_back(handle);
-//     }
-
-//     //
-//     std::vector<BASS_MIDI_FONT> fonts;
-//     for (HSOUNDFONT handle : g_loaded_fonts) {
-//         fonts.push_back({handle, 0, 0});
-//     }
-//     return BASS_MIDI_StreamSetFonts(0, fonts.data(), fonts.size());
-// }
-
 } // namespace osmium
