@@ -43,6 +43,10 @@ qt_add_executable(OsmiumGui
     src/optionsdialog.ui
     src/renderargs.h
     src/resources.qrc
+    src/resources/icon-folder-open.png
+    src/resources/icon-gear.png
+    src/resources/icon-render.png
+    src/resources/osmium.ico
     src/saveload.cpp
     src/saveload.h
     src/scoperenderer.cpp
@@ -52,7 +56,8 @@ qt_add_executable(OsmiumGui
 )
 
 target_link_libraries(OsmiumGui
-    PRIVATE Qt6::Core
+    PRIVATE
+    Qt6::Core
     Qt6::Widgets
     Qt6::Concurrent
     Qt6::Network
