@@ -1244,7 +1244,7 @@
    <sender>cmbChannel</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>MainWindow</receiver>
-   <slot>setCurrentChannel(int)</slot>
+   <slot>set_current_channel(int)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>502</x>
@@ -1324,7 +1324,7 @@
    <sender>actionRender</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>debugStart()</slot>
+   <slot>start_rendering()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1372,7 +1372,7 @@
    <sender>btnResetOpts</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>resetCurrentToDefault()</slot>
+   <slot>reset_current_channel()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>460</x>
@@ -1498,11 +1498,10 @@
   </connection>
  </connections>
  <slots>
-  <slot>debugStart()</slot>
-  <slot>debugStop()</slot>
-  <slot>setCurrentChannel(int)</slot>
+  <slot>start_rendering()</slot>
+  <slot>set_current_channel(int)</slot>
   <slot>recalc_preview()</slot>
-  <slot>resetCurrentToDefault()</slot>
+  <slot>reset_current_channel()</slot>
   <slot>choose_input_file()</slot>
   <slot>choose_soundfont()</slot>
   <slot>update_cell_order(int)</slot>

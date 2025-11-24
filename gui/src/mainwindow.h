@@ -63,8 +63,8 @@ public:
     void set_ui_state(UiState state);
 
 public slots:
-    void debugStart();
-    void onWorkerStop(bool, const QString&);
+    void start_rendering();
+    void handle_render_stop(bool, const QString&);
 
     void set_input_file(const QString&);
     void show_options_dialog();
@@ -73,8 +73,8 @@ public slots:
     void update_cell_order(int);
     void update_channel_opts_enabled();
 
-    void setCurrentChannel(int);
-    void resetCurrentToDefault();
+    void set_current_channel(int);
+    void reset_current_channel();
     void recalc_preview();
 
 private:
@@ -129,15 +129,14 @@ private:
     ChannelArgs create_channel_args(QStandardItem*, int);
 
 signals:
-    void workerStartRequested(const QString& input_file,
-                              const QString& soundfont,
-                              const QString& output_file,
-                              const QString& ffmpeg_path,
-                              const QList<ChannelArgs>&,
-                              const GlobalArgs&);
-    void workerStopRequested();
+    void worker_start_requested(const QString& input_file,
+                                const QString& soundfont,
+                                const QString& output_file,
+                                const QString& ffmpeg_path,
+                                const QList<ChannelArgs>&,
+                                const GlobalArgs&);
 
-    void currentItemChanged(const QStandardItem* item);
+    void current_item_changed(const QStandardItem* item);
 };
 
 #endif // MAINWINDOW_H

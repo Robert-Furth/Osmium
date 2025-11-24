@@ -217,7 +217,7 @@ MainWindow::MainWindow(QWidget* parent)
     m_r_worker = new RenderWorker();
     m_r_worker->moveToThread(&m_render_thread);
 
-    connect(this, &MainWindow::workerStartRequested, m_r_worker, &RenderWorker::work);
+    connect(this, &MainWindow::worker_start_requested, m_r_worker, &RenderWorker::work);
     connect(ui->btnStopRender,
             &QPushButton::clicked,
             m_r_worker,
@@ -230,7 +230,7 @@ MainWindow::MainWindow(QWidget* parent)
             &VideoSocketWorker::preview_image_changed,
             ui->previewer,
             &controls::Previewer::set_pixmap);
-    connect(m_r_worker, &RenderWorker::done, this, &MainWindow::onWorkerStop);
+    connect(m_r_worker, &RenderWorker::done, this, &MainWindow::handle_render_stop);
     connect(m_r_worker,
             &RenderWorker::done,
             ui->previewer,
@@ -268,7 +268,7 @@ void MainWindow::reinit_channel_model(int num_channels) {
     }
 
     m_current_index = 0;
-    emit currentItemChanged(m_channel_model.item(m_current_index));
+    emit current_item_changed(m_channel_model.item(m_current_index));
     update_channel_opts_enabled();
     set_ui_state(UiState::Editing);
 }
@@ -302,7 +302,7 @@ void MainWindow::set_ui_state(UiState state) {
 
 // -- MainWindow slots --
 
-void MainWindow::debugStart() {
+void MainWindow::start_rendering() {
     if (m_state != UiState::Editing)
         return;
 
@@ -354,15 +354,15 @@ void MainWindow::debugStart() {
     auto channel_args_list = create_channel_args();
 
     set_ui_state(UiState::Rendering);
-    emit workerStartRequested(m_input_file,
-                              m_input_soundfont,
-                              m_use_system_ffmpeg ? QString() : m_ffmpeg_path,
-                              output_file,
-                              channel_args_list,
-                              global_args);
+    emit worker_start_requested(m_input_file,
+                                m_input_soundfont,
+                                m_use_system_ffmpeg ? QString() : m_ffmpeg_path,
+                                output_file,
+                                channel_args_list,
+                                global_args);
 }
 
-void MainWindow::onWorkerStop(bool ok, const QString& message) {
+void MainWindow::handle_render_stop(bool ok, const QString& message) {
     if (!message.isEmpty()) {
         qDebug() << message;
     }
@@ -439,7 +439,7 @@ void MainWindow::update_channel_opts_enabled() {
         && item->data(toint(ChannelArgRole::IsVisible)).toBool());
 }
 
-void MainWindow::setCurrentChannel(int index) {
+void MainWindow::set_current_channel(int index) {
     m_current_index = index;
     auto item = m_channel_model.item(m_current_index);
     bool inherit_defaults = item->data(toint(ChannelArgRole::InheritDefaults)).toBool()
@@ -448,15 +448,15 @@ void MainWindow::setCurrentChannel(int index) {
     ui->wgtNonDefaultControls->setVisible(m_current_index != 0);
 
     if (inherit_defaults) {
-        resetCurrentToDefault();
+        reset_current_channel();
     }
 
     item = m_channel_model.item(m_current_index);
-    emit currentItemChanged(item);
+    emit current_item_changed(item);
     update_channel_opts_enabled();
 }
 
-void MainWindow::resetCurrentToDefault() {
+void MainWindow::reset_current_channel() {
     auto default_item = m_channel_model.item(0)->clone();
     auto current_item = m_channel_model.item(m_current_index);
 
@@ -467,7 +467,7 @@ void MainWindow::resetCurrentToDefault() {
                           toint(ChannelArgRole::IsVisible));
 
     m_channel_model.setItem(m_current_index, default_item);
-    emit currentItemChanged(default_item);
+    emit current_item_changed(default_item);
 }
 
 void MainWindow::recalc_preview() {
@@ -509,7 +509,9 @@ void MainWindow::bind_to_model(Control* control,
                                void (Control::*notifier)(T),
                                void (Control::*setter)(T)) {
     connect(control, notifier, this, model_updater<T>(role));
-    connect(this, &MainWindow::currentItemChanged, control_setter(role, control, setter));
+    connect(this,
+            &MainWindow::current_item_changed,
+            control_setter(role, control, setter));
 }
 
 GlobalArgs MainWindow::create_global_args() {
