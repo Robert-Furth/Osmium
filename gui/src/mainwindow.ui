@@ -346,20 +346,6 @@
              </layout>
             </widget>
            </item>
-           <item>
-            <widget class="Line" name="line_3">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="chbDebugVis">
-             <property name="text">
-              <string>Debug Visualization</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
         </widget>

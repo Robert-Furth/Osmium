@@ -532,7 +532,7 @@ GlobalArgs MainWindow::create_global_args() {
         .border_color = ui->cpGridlineColor->color().rgb(),
         .border_thickness = ui->dsbGridlineThickness->value(),
         .background_color = ui->cpBackground->color().rgb(),
-        .debug_vis = ui->chbDebugVis->isChecked(),
+        .debug_vis = false, //ui->chbDebugVis->isChecked(),
     };
 }
 
