@@ -107,7 +107,9 @@ private:
      *  with the value stored in the `role` role of the item.
      *
      *  @tparam Control The type of the control to call the setter of.
-     *  @tparam T       The type of the parameter of the setter method.
+     *  @tparam T       The type of the parameter of the setter method. `std::remove_cvref_t<T>`
+     *                  should be convertible to the value stored in the `QStandardItem` under the
+     *                  given `role`.
      *
      *  @param role    The `ChannelArgRole` of the data to call the setter with.
      *  @param control A pointer to the control to call the setter of.

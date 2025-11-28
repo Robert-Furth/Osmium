@@ -501,7 +501,7 @@ constexpr auto MainWindow::control_setter(ChannelArgRole role,
                                           void (Control::*setter)(T)) const {
     // If T is e.g. a const ref, then item->data(...).value<T> won't compile.
     // So, we have to remove the reference and the const qualifiers.
-    using ValT = std::remove_cv_t<std::remove_reference_t<T>>;
+    using ValT = std::remove_cvref_t<T>;
     return [role, control, setter](const QStandardItem* item) {
         const auto& value = item->data(static_cast<int>(role)).value<ValT>();
         (control->*setter)(value);
