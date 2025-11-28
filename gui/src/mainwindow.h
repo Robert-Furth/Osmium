@@ -28,6 +28,7 @@ enum class ChannelArgRole {
     DrawVMidline,
 
     ShowInstrumentLabels,
+    LabelTemplate,
     LabelFontFamily,
     LabelFontSize,
     LabelFontColor,

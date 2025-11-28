@@ -74,6 +74,7 @@ MainWindow::MainWindow(QWidget* parent)
     default_item->setData(true, toint(ChannelArgRole::DrawVMidline));
 
     default_item->setData(true, toint(ChannelArgRole::ShowInstrumentLabels));
+    default_item->setData("Channel %n: %i", toint(ChannelArgRole::LabelTemplate));
     default_item->setData(QFont(), toint(ChannelArgRole::LabelFontFamily));
     default_item->setData(13.0, toint(ChannelArgRole::LabelFontSize));
     default_item->setData(QColor(255, 255, 255), toint(ChannelArgRole::LabelFontColor));
@@ -145,6 +146,10 @@ MainWindow::MainWindow(QWidget* parent)
                                    ChannelArgRole::ShowInstrumentLabels,
                                    &QCheckBox::clicked,
                                    &QCheckBox::setChecked);
+    bind_to_model(ui->leLabelTemplate,
+                  ChannelArgRole::LabelTemplate,
+                  &QLineEdit::textChanged,
+                  &QLineEdit::setText);
     bind_to_model(ui->fcbLabelFont,
                   ChannelArgRole::LabelFontFamily,
                   &QFontComboBox::currentFontChanged,
@@ -574,6 +579,7 @@ ChannelArgs MainWindow::create_channel_args(QStandardItem* args, int index) {
         .draw_v_midline = args->data(toint(ChannelArgRole::DrawVMidline)).toBool(),
 
         .draw_labels = args->data(toint(ChannelArgRole::ShowInstrumentLabels)).toBool(),
+        .label_template = args->data(toint(ChannelArgRole::LabelTemplate)).toString(),
         .label_font = font,
         .label_color
         = args->data(toint(ChannelArgRole::LabelFontColor)).value<QColor>().rgb(),

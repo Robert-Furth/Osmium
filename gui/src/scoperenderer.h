@@ -32,6 +32,10 @@ protected:
         QPen wave_pen;
         QPen midline_pen;
         QString label;
+        int program_num;
+        int bank_num;
+
+        void update_label(const ChannelArgs& args);
     };
 
     QColor m_border_color;

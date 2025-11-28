@@ -10,6 +10,7 @@
 #include <QPicture>
 #include <QPointF>
 #include <QPolygonF>
+#include <QRegularExpression>
 #include <QStandardItemModel>
 #include <QtConcurrentMap>
 
@@ -52,8 +53,11 @@ BaseRenderer::BaseRenderer(const QList<ChannelArgs>& channel_args,
             .h = h,
             .wave_pen = QPen(QColor(args.color), args.thickness),
             .midline_pen = QPen(QColor(args.midline_color), args.midline_thickness),
-            .label = get_instrument_name(0, 0, args.channel_number == 9),
+            .label = "",
+            .program_num = 0,
+            .bank_num = 0,
         });
+        m_paint_infos.back().update_label(args);
 
         switch (global_args.order) {
         case ChannelOrder::ROW_MAJOR:
@@ -161,6 +165,37 @@ void BaseRenderer::paint_wave(
     painter.drawPolyline(polygon);
 }
 
+// -- BaseRenderer::PaintInfo --
+
+void BaseRenderer::PaintInfo::update_label(const ChannelArgs& args) {
+    label = "";
+    QRegularExpression re("%.");
+
+    int lastMatchEnd = 0;
+    for (const auto& match : re.globalMatch(args.label_template)) {
+        label += args.label_template.sliced(lastMatchEnd,
+                                            match.capturedStart() - lastMatchEnd);
+        lastMatchEnd = match.capturedEnd();
+
+        auto mstr = match.captured();
+        switch (mstr[1].unicode()) {
+        case 'i': // _i_nstrument name
+            label += get_instrument_name(program_num, bank_num, args.channel_number == 9);
+            break;
+        case 'n': // channel _n_umber
+            label += QString::number(args.channel_number + 1);
+            break;
+        case '%':
+            label += '%';
+            break;
+        default:
+            label += mstr;
+        }
+    }
+
+    label += args.label_template.sliced(lastMatchEnd);
+}
+
 // -- ScopeRenderer --
 
 ScopeRenderer::ScopeRenderer(const QString& filename,
@@ -209,9 +244,8 @@ QImage ScopeRenderer::paint_next_frame() {
             for (const auto& event : m_event_tracker.get_events()) {
                 if (event.chan == args.channel_number
                     && event.event == MIDI_EVENT_PROGRAM) {
-                    pinfo.label = get_instrument_name(event.param,
-                                                      0,
-                                                      args.channel_number == 9);
+                    pinfo.program_num = event.param;
+                    pinfo.update_label(args);
                 }
             }
         }

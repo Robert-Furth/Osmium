@@ -68,7 +68,7 @@
             <x>0</x>
             <y>0</y>
             <width>244</width>
-            <height>485</height>
+            <height>487</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -560,9 +560,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
-            <width>230</width>
-            <height>607</height>
+            <y>-261</y>
+            <width>232</width>
+            <height>637</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -769,14 +769,14 @@
               <property name="bottomMargin">
                <number>0</number>
               </property>
-              <item row="1" column="0">
+              <item row="2" column="0">
                <widget class="QLabel" name="label_10">
                 <property name="text">
-                 <string>Label Font</string>
+                 <string>Font Family</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item row="2" column="1">
                <widget class="QFontComboBox" name="fcbLabelFont">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
@@ -786,28 +786,28 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
+              <item row="3" column="0">
                <widget class="QLabel" name="label_25">
                 <property name="text">
                  <string>Font Size</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="3" column="1">
                <widget class="QDoubleSpinBox" name="dsbFontSize">
                 <property name="suffix">
                  <string>pt</string>
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
+              <item row="4" column="0">
                <widget class="QLabel" name="label_24">
                 <property name="text">
                  <string>Font Color</string>
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="4" column="1">
                <widget class="controls::ColorPicker" name="cpFontColor" native="true">
                 <property name="focusPolicy">
                  <enum>Qt::FocusPolicy::TabFocus</enum>
@@ -817,11 +817,11 @@
               <item row="0" column="0" colspan="2">
                <widget class="QCheckBox" name="chbShowLabels">
                 <property name="text">
-                 <string>Show Instrument Labels</string>
+                 <string>Show Channel Labels</string>
                 </property>
                </widget>
               </item>
-              <item row="4" column="0" colspan="2">
+              <item row="5" column="0" colspan="2">
                <widget class="QWidget" name="widget_4" native="true">
                 <layout class="QHBoxLayout" name="horizontalLayout">
                  <property name="spacing">
@@ -841,6 +841,9 @@
                  </property>
                  <item alignment="Qt::AlignmentFlag::AlignLeft">
                   <widget class="QToolButton" name="tbLabelBold">
+                   <property name="toolTip">
+                    <string>Bold</string>
+                   </property>
                    <property name="text">
                     <string>Bold</string>
                    </property>
@@ -854,6 +857,9 @@
                  </item>
                  <item alignment="Qt::AlignmentFlag::AlignLeft">
                   <widget class="QToolButton" name="tbLabelItalic">
+                   <property name="toolTip">
+                    <string>Italic</string>
+                   </property>
                    <property name="text">
                     <string>Italic</string>
                    </property>
@@ -879,6 +885,35 @@
                   </spacer>
                  </item>
                 </layout>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_14">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Template for the channel label.&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&amp;quot;%i&amp;quot; will be replaced with the &lt;span style=&quot; font-weight:700; text-decoration: underline;&quot;&gt;i&lt;/span&gt;nstrument name.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&amp;quot;%n&amp;quot; will be replaced with the channel &lt;span style=&quot; font-weight:700; text-decoration: underline;&quot;&gt;n&lt;/span&gt;umber.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&amp;quot;%%&amp;quot; will be replaced with a single &amp;quot;%&amp;quot; character.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>999999999</number>
+                </property>
+                <property name="statusTip">
+                 <string>Template for the channel label. Some &quot;%&quot; escape sequences are supported.</string>
+                </property>
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Template&lt;span style=&quot; text-decoration: underline; vertical-align:super;&quot;&gt;?&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="leLabelTemplate">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Template for the channel label.&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&amp;quot;%i&amp;quot; will be replaced with the &lt;span style=&quot; font-weight:700; text-decoration: underline;&quot;&gt;i&lt;/span&gt;nstrument name.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&amp;quot;%n&amp;quot; will be replaced with the channel &lt;span style=&quot; font-weight:700; text-decoration: underline;&quot;&gt;n&lt;/span&gt;umber.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&amp;quot;%%&amp;quot; will be replaced with a single &amp;quot;%&amp;quot; character.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>999999999</number>
+                </property>
+                <property name="statusTip">
+                 <string>Template for the channel label. Some &quot;%&quot; escape sequences are supported.</string>
+                </property>
                </widget>
               </item>
              </layout>
@@ -1221,6 +1256,7 @@
   <tabstop>cpMidlineColor</tabstop>
   <tabstop>dsbMidlineThickness</tabstop>
   <tabstop>chbShowLabels</tabstop>
+  <tabstop>leLabelTemplate</tabstop>
   <tabstop>fcbLabelFont</tabstop>
   <tabstop>dsbFontSize</tabstop>
   <tabstop>cpFontColor</tabstop>
@@ -1232,7 +1268,6 @@
   <tabstop>sbSimilarityWindow</tabstop>
   <tabstop>dsbPeakBias</tabstop>
   <tabstop>dsbPeakThreshold</tabstop>
-  <tabstop>chbDebugVis</tabstop>
   <tabstop>btnStartRender</tabstop>
   <tabstop>btnStopRender</tabstop>
  </tabstops>
@@ -1248,7 +1283,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>502</x>
-     <y>137</y>
+     <y>115</y>
     </hint>
     <hint type="destinationlabel">
      <x>363</x>
@@ -1311,8 +1346,8 @@
    <slot>set_input_file(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>436</x>
-     <y>73</y>
+     <x>514</x>
+     <y>54</y>
     </hint>
     <hint type="destinationlabel">
      <x>520</x>
@@ -1347,8 +1382,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>389</x>
-     <y>68</y>
+     <x>514</x>
+     <y>54</y>
     </hint>
    </hints>
   </connection>
@@ -1375,44 +1410,12 @@
    <slot>reset_current_channel()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>460</x>
-     <y>184</y>
+     <x>502</x>
+     <y>169</y>
     </hint>
     <hint type="destinationlabel">
      <x>480</x>
      <y>575</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbRenderWidth</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>recalc_preview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>210</x>
-     <y>151</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>262</x>
-     <y>155</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbRenderHeight</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>recalc_preview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>234</x>
-     <y>179</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>262</x>
-     <y>188</y>
     </hint>
    </hints>
   </connection>
@@ -1433,18 +1436,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>sbRowColCount</sender>
+   <sender>sbRenderWidth</sender>
    <signal>valueChanged(int)</signal>
    <receiver>MainWindow</receiver>
    <slot>recalc_preview()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>222</x>
-     <y>299</y>
+     <x>246</x>
+     <y>146</y>
     </hint>
     <hint type="destinationlabel">
      <x>262</x>
-     <y>309</y>
+     <y>155</y>
     </hint>
    </hints>
   </connection>
@@ -1455,12 +1458,44 @@
    <slot>recalc_preview()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>219</x>
-     <y>329</y>
+     <x>246</x>
+     <y>316</y>
     </hint>
     <hint type="destinationlabel">
      <x>262</x>
      <y>335</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbRenderHeight</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>recalc_preview()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>246</x>
+     <y>177</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>188</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbRowColCount</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>recalc_preview()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>246</x>
+     <y>294</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>309</y>
     </hint>
    </hints>
   </connection>
@@ -1471,8 +1506,8 @@
    <slot>recalc_preview()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>349</y>
+     <x>246</x>
+     <y>338</y>
     </hint>
     <hint type="destinationlabel">
      <x>264</x>
@@ -1487,8 +1522,8 @@
    <slot>recalc_preview()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>223</x>
-     <y>380</y>
+     <x>246</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
      <x>262</x>

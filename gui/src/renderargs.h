@@ -36,6 +36,7 @@ struct ChannelArgs {
     bool draw_v_midline;
 
     bool draw_labels;
+    QString label_template;
     QFont label_font;
     QRgb label_color;
 
