@@ -32,6 +32,10 @@ qt_add_executable(OsmiumGui
     src/controls/pathchooser.h
     src/controls/previewer.cpp
     src/controls/previewer.h
+    src/xmacro/h26x_preset.txt
+    src/xmacro/video_codec.txt
+    src/config.cpp
+    src/config.h
     src/instrumentnames.cpp
     src/instrumentnames.h
     src/main.cpp
@@ -47,8 +51,6 @@ qt_add_executable(OsmiumGui
     src/resources/icon-gear.png
     src/resources/icon-render.png
     src/resources/osmium.ico
-    src/saveload.cpp
-    src/saveload.h
     src/scoperenderer.cpp
     src/scoperenderer.h
     src/workers.cpp

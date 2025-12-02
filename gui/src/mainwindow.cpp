@@ -20,8 +20,8 @@
 #include <QProcess>
 #include <QWaitCondition>
 
+#include "config.h"
 #include "renderargs.h"
-#include "saveload.h"
 #include "workers.h"
 
 // Because typing "static_cast<int>(...)" every time gets old fast
@@ -50,15 +50,13 @@ MainWindow::MainWindow(QWidget* parent)
     ui->cmbFrameRate->setCurrentIndex(1);
 
     // Read in config
-    PersistentConfig cfg;
-    if (cfg.load()) {
-        m_input_file_dir.assign(cfg.input_file_dir);
-        m_output_file_dir.assign(cfg.output_file_dir);
-        m_use_system_ffmpeg = cfg.use_system_ffmpeg;
-        m_ffmpeg_path.assign(cfg.ffmpeg_path);
-        m_input_soundfont.assign(cfg.soundfont_path);
-        ui->pcInputFile->set_initial_dir(m_input_file_dir);
-    }
+    m_config = load_config();
+    m_input_file_dir.assign(m_config.path_config.input_file_dir);
+    m_output_file_dir.assign(m_config.path_config.output_file_dir);
+    m_use_system_ffmpeg = m_config.path_config.use_system_ffmpeg;
+    m_ffmpeg_path.assign(m_config.path_config.ffmpeg_path);
+    m_input_soundfont.assign(m_config.path_config.soundfont_path);
+    ui->pcInputFile->set_initial_dir(QString(m_config.path_config.input_file_dir.c_str()));
 
     // Per-channel model: default values
     QStandardItem* default_item = new QStandardItem("Default");
@@ -248,14 +246,7 @@ MainWindow::~MainWindow() {
     delete ui;
     delete m_options_dialog;
 
-    PersistentConfig cfg{
-        .soundfont_path = m_input_soundfont.toStdString(),
-        .use_system_ffmpeg = m_use_system_ffmpeg,
-        .ffmpeg_path = m_ffmpeg_path.toStdString(),
-        .input_file_dir = m_input_file_dir.toStdString(),
-        .output_file_dir = m_output_file_dir.toStdString(),
-    };
-    cfg.save();
+    save_config(m_config);
 
     m_render_thread.quit();
     m_render_thread.wait();

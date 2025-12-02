@@ -8,6 +8,7 @@
 #include <QThread>
 #include <QVariant>
 
+#include "config.h"
 #include "optionsdialog.h"
 #include "workers.h"
 
@@ -88,6 +89,7 @@ private:
     QStandardItemModel m_channel_model;
     int m_current_index = -1;
 
+    PersistentConfig m_config;
     QString m_input_file;
     QString m_input_soundfont;
     bool m_use_system_ffmpeg;
