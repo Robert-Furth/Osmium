@@ -22,7 +22,12 @@ qt_standard_project_setup()
 set(app_icon_resource_windows "${PROJECT_SOURCE_DIR}/res.rc")
 qt_add_executable(OsmiumGui
     ${app_icon_resource_windows}
-    .gitignore
+    src/resources.qrc
+    src/resources/icon-folder-open.png
+    src/resources/icon-gear.png
+    src/resources/icon-render.png
+    src/resources/osmium.ico
+
     src/controls/colorpicker.cpp
     src/controls/colorpicker.h
     src/controls/colorpicker.ui
@@ -46,11 +51,6 @@ qt_add_executable(OsmiumGui
     src/optionsdialog.h
     src/optionsdialog.ui
     src/renderargs.h
-    src/resources.qrc
-    src/resources/icon-folder-open.png
-    src/resources/icon-gear.png
-    src/resources/icon-render.png
-    src/resources/osmium.ico
     src/scoperenderer.cpp
     src/scoperenderer.h
     src/workers.cpp
@@ -95,10 +95,15 @@ install(TARGETS OsmiumGui
 if(WIN32)
     cmake_path(REPLACE_EXTENSION bass_lib ".dll" OUTPUT_VARIABLE bass_dll)
     cmake_path(REPLACE_EXTENSION bassmidi_lib ".dll" OUTPUT_VARIABLE bassmidi_dll)
+    cmake_path(GET bass_dll FILENAME bass_dll_filename)
+    cmake_path(GET bassmidi_dll FILENAME bassmidi_dll_filename)
+
     install(FILES ${bass_dll} ${bassmidi_dll} TYPE BIN)
 
     add_custom_command(TARGET OsmiumGui POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${bass_dll} ${bassmidi_dll} $<TARGET_FILE_DIR:OsmiumGui>)
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${bass_dll} ${bassmidi_dll} $<TARGET_FILE_DIR:OsmiumGui>
+        BYPRODUCTS ${bass_dll_filename} ${bassmidi_dll_filename}
+    )
 endif()
 
 qt_generate_deploy_app_script(
