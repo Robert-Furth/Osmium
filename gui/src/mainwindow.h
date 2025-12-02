@@ -91,11 +91,6 @@ private:
 
     PersistentConfig m_config;
     QString m_input_file;
-    QString m_input_soundfont;
-    bool m_use_system_ffmpeg;
-    QString m_ffmpeg_path;
-    QString m_input_file_dir;
-    QString m_output_file_dir;
 
     OptionsDialog* m_options_dialog;
 

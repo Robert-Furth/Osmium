@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>432</width>
-    <height>300</height>
+    <width>440</width>
+    <height>400</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>440</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>440</width>
+    <height>400</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -16,6 +28,12 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QGroupBox" name="groupBox_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>FFmpeg Path</string>
      </property>
@@ -96,20 +114,220 @@ color: red;
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
       <string>Soundfont Path</string>
      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="controls::PathChooser" name="pcSoundfontPath" native="true">
+        <property name="focusPolicy">
+         <enum>Qt::FocusPolicy::TabFocus</enum>
+        </property>
+        <property name="filter" stdset="0">
+         <string>Soundfonts (*.sf2 *.sfz)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
-    <widget class="controls::PathChooser" name="pcSoundfontPath" native="true">
-     <property name="focusPolicy">
-      <enum>Qt::FocusPolicy::TabFocus</enum>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Encoding Options</string>
      </property>
-     <property name="filter" stdset="0">
-      <string>Soundfonts (*.sf2 *.sfz)</string>
-     </property>
+     <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,0,1">
+      <property name="horizontalSpacing">
+       <number>12</number>
+      </property>
+      <item row="1" column="0">
+       <widget class="QWidget" name="widget" native="true">
+        <layout class="QFormLayout" name="formLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Codec</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="cmbVideoCodec">
+           <item>
+            <property name="text">
+             <string>H.264</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>H.265 (HEVC)</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Encoding speed (aka the ffmpeg &amp;quot;-preset&amp;quot; flag). Higher speeds generally correlate with less efficient encoding/larger file sizes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Speed&lt;span style=&quot; text-decoration: underline; vertical-align:super;&quot;&gt;?&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="cmbEncodeSpeed">
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>Ultra Fast</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Super Fast</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Very Fast</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Faster</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Fast</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Medium</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Slow</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Slower</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Very Slow</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Short for &amp;quot;constant rate factor.&amp;quot; Lower values result in higher video quality but larger file sizes. Should generally be set between 17 and 32ish. The default value is 23 for H.264 and 28 for H.265.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;CRF&lt;span style=&quot; text-decoration: underline; vertical-align:super;&quot;&gt;?&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::TextFormat::RichText</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QSpinBox" name="sbCrf">
+           <property name="maximum">
+            <number>51</number>
+           </property>
+           <property name="value">
+            <number>23</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>&lt;b&gt;Video&lt;/b&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>&lt;b&gt;Audio&lt;/b&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QWidget" name="widget_2" native="true">
+        <layout class="QFormLayout" name="formLayout_2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Bitrate</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="sbAudioBitrate">
+           <property name="suffix">
+            <string> kbps</string>
+           </property>
+           <property name="minimum">
+            <number>128</number>
+           </property>
+           <property name="maximum">
+            <number>256</number>
+           </property>
+           <property name="value">
+            <number>192</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="1" rowspan="2">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -153,7 +371,6 @@ color: red;
   <tabstop>rbFfAuto</tabstop>
   <tabstop>rbFfManual</tabstop>
   <tabstop>pcFfmpegPath</tabstop>
-  <tabstop>pcSoundfontPath</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -164,8 +381,8 @@ color: red;
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>257</x>
-     <y>290</y>
+     <x>266</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -180,8 +397,8 @@ color: red;
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>325</x>
-     <y>290</y>
+     <x>334</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -221,9 +438,26 @@ color: red;
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cmbVideoCodec</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>OptionsDialog</receiver>
+   <slot>reset_crf_to_default()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>233</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>219</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>enable_ffmpeg_check_timer(bool)</slot>
+  <slot>reset_crf_to_default()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="bgpSoundfontPath"/>

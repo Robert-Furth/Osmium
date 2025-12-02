@@ -6,6 +6,8 @@
 #include <QProcessEnvironment>
 #include <QTimer>
 
+#include "config.h"
+
 namespace Ui {
 class OptionsDialog;
 }
@@ -20,22 +22,22 @@ public:
     void showEvent(QShowEvent*) override;
     void hideEvent(QHideEvent*) override;
 
-    QString ffmpeg_path() const;
-    void set_ffmpeg_path(const QString& path);
-    bool use_system_ffmpeg() const;
-    void set_use_system_ffmpeg(bool);
-    QString soundfont_path() const;
-    void set_soundfont_path(const QString& path);
+    void set_config(const PersistentConfig& config);
+    PersistentConfig get_config();
+    void update_config();
 
 public slots:
     void enable_ffmpeg_check_timer(bool);
     void check_path_for_ffmpeg();
+
+    void reset_crf_to_default();
 
 private:
     Ui::OptionsDialog* ui;
 
     QTimer m_timer;
     QProcessEnvironment m_env;
+    PersistentConfig m_config;
 
     QString search_path(const QString& exe);
 };

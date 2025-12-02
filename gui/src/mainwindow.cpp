@@ -51,11 +51,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Read in config
     m_config = load_config();
-    m_input_file_dir.assign(m_config.path_config.input_file_dir);
-    m_output_file_dir.assign(m_config.path_config.output_file_dir);
-    m_use_system_ffmpeg = m_config.path_config.use_system_ffmpeg;
-    m_ffmpeg_path.assign(m_config.path_config.ffmpeg_path);
-    m_input_soundfont.assign(m_config.path_config.soundfont_path);
     ui->pcInputFile->set_initial_dir(QString(m_config.path_config.input_file_dir.c_str()));
 
     // Per-channel model: default values
@@ -277,8 +272,7 @@ void MainWindow::set_ui_state(UiState state) {
         ui->gbChannelOpts->setEnabled(true);
         ui->gbGlobalOpts->setEnabled(true);
 
-        ui->btnStartRender->setEnabled(!m_input_file.isEmpty()
-                                       && !m_input_soundfont.isEmpty());
+        ui->btnStartRender->setEnabled(!m_input_file.isEmpty());
         ui->btnStopRender->setEnabled(false);
         ui->progressBar->setValue(0);
         recalc_preview();
@@ -307,7 +301,11 @@ void MainWindow::start_rendering() {
         return;
     }
 
-    if (m_input_soundfont.isEmpty()) {
+    const auto& soundfont_path = m_config.path_config.soundfont_path;
+    QString ffmpeg_path(m_config.path_config.ffmpeg_path.c_str());
+    bool use_system_ffmpeg = m_config.path_config.use_system_ffmpeg;
+
+    if (soundfont_path.empty()) {
         QMessageBox::warning(this,
                              "Error",
                              "You have not chosen a soundfont to use. Specify a "
@@ -324,18 +322,18 @@ void MainWindow::start_rendering() {
         return;
     }
 
-    if (!std::filesystem::is_regular_file(m_input_soundfont.toStdString())) {
+    if (!std::filesystem::is_regular_file(soundfont_path)) {
         QString message
             = QString("The file \"%1\" does not exist or is not a regular file. Please "
                       "choose a new soundfont in the Program Options menu.")
-                  .arg(m_input_soundfont);
+                  .arg(soundfont_path);
         QMessageBox::warning(this, "Error", message);
         return;
     }
 
     auto outfile_name
         = std::filesystem::path(m_input_file.toStdString()).stem().concat(".mp4");
-    auto outfile_path = std::filesystem::path(m_output_file_dir.toStdString())
+    auto outfile_path = std::filesystem::path(m_config.path_config.output_file_dir)
                         / outfile_name;
 
     QString output_file = QFileDialog::getSaveFileName(this,
@@ -344,15 +342,16 @@ void MainWindow::start_rendering() {
                                                        "MP4 Files (*.mp4)");
     if (output_file.isNull())
         return;
-    m_output_file_dir = QFileInfo(output_file).absoluteDir().path();
+    m_config.path_config.output_file_dir
+        = QFileInfo(output_file).absoluteDir().path().toStdString();
 
     auto global_args = create_global_args();
     auto channel_args_list = create_channel_args();
 
     set_ui_state(UiState::Rendering);
     emit worker_start_requested(m_input_file,
-                                m_input_soundfont,
-                                m_use_system_ffmpeg ? QString() : m_ffmpeg_path,
+                                QString(soundfont_path.c_str()),
+                                use_system_ffmpeg ? QString() : ffmpeg_path,
                                 output_file,
                                 channel_args_list,
                                 global_args);
@@ -389,27 +388,23 @@ void MainWindow::handle_render_stop(bool ok, const QString& message) {
 
 void MainWindow::set_input_file(const QString& filename) {
     m_input_file = filename;
-    m_input_file_dir = QFileInfo(filename).absoluteDir().path();
-    ui->pcInputFile->set_initial_dir(m_input_file_dir);
-    if (ui->pcInputFile->current_path() != filename) {
-        ui->pcInputFile->set_current_path(filename);
-    }
+
+    auto input_file_dir = QFileInfo(filename).absoluteDir().path();
+    m_config.path_config.input_file_dir = input_file_dir.toStdString();
+    ui->pcInputFile->set_initial_dir(input_file_dir);
+    ui->pcInputFile->set_current_path(filename);
 
     ui->btnStartRender->setDisabled(m_input_file.isEmpty());
 }
 
 void MainWindow::show_options_dialog() {
-    m_options_dialog->set_use_system_ffmpeg(m_use_system_ffmpeg);
-    m_options_dialog->set_ffmpeg_path(m_ffmpeg_path);
-    m_options_dialog->set_soundfont_path(m_input_soundfont);
-
+    m_options_dialog->set_config(m_config);
     m_options_dialog->open();
 }
 
 void MainWindow::update_options_from_dialog() {
-    m_use_system_ffmpeg = m_options_dialog->use_system_ffmpeg();
-    m_ffmpeg_path = m_options_dialog->ffmpeg_path();
-    m_input_soundfont = m_options_dialog->soundfont_path();
+    m_options_dialog->update_config();
+    m_config = m_options_dialog->get_config();
 }
 
 void MainWindow::update_cell_order(int order) {

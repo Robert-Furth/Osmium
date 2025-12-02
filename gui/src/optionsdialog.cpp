@@ -38,32 +38,43 @@ void OptionsDialog::hideEvent(QHideEvent* e) {
     enable_ffmpeg_check_timer(false);
 }
 
-QString OptionsDialog::ffmpeg_path() const {
-    return ui->pcFfmpegPath->current_path();
-}
+void OptionsDialog::set_config(const PersistentConfig& config) {
+    m_config = config;
 
-void OptionsDialog::set_ffmpeg_path(const QString& path) {
-    ui->pcFfmpegPath->set_current_path(path);
-}
-
-bool OptionsDialog::use_system_ffmpeg() const {
-    return ui->rbFfAuto->isChecked();
-}
-
-void OptionsDialog::set_use_system_ffmpeg(bool b) {
-    if (b) {
+    if (config.path_config.use_system_ffmpeg) {
         ui->rbFfAuto->setChecked(true);
     } else {
         ui->rbFfManual->setChecked(true);
     }
+
+    ui->pcFfmpegPath->set_current_path(
+        QString::fromStdString(config.path_config.ffmpeg_path));
+    ui->pcSoundfontPath->set_current_path(
+        QString::fromStdString(config.path_config.soundfont_path));
+
+    ui->cmbVideoCodec->setCurrentIndex(static_cast<int>(config.video_config.codec));
+    ui->cmbEncodeSpeed->setCurrentIndex(static_cast<int>(config.video_config.preset));
+    ui->sbCrf->setValue(config.video_config.crf);
+
+    ui->sbAudioBitrate->setValue(config.audio_config.bitrate_kbps);
 }
 
-QString OptionsDialog::soundfont_path() const {
-    return ui->pcSoundfontPath->current_path();
+PersistentConfig OptionsDialog::get_config() {
+    return m_config;
 }
 
-void OptionsDialog::set_soundfont_path(const QString& path) {
-    ui->pcSoundfontPath->set_current_path(path);
+void OptionsDialog::update_config() {
+    m_config.path_config.use_system_ffmpeg = ui->rbFfAuto->isChecked();
+    m_config.path_config.ffmpeg_path = ui->pcFfmpegPath->current_path().toStdString();
+    m_config.path_config.soundfont_path = ui->pcSoundfontPath->current_path().toStdString();
+
+    m_config.video_config.codec = static_cast<VideoCodec>(
+        ui->cmbVideoCodec->currentIndex());
+    m_config.video_config.preset = static_cast<H26xPreset>(
+        ui->cmbEncodeSpeed->currentIndex());
+    m_config.video_config.crf = ui->sbCrf->value();
+
+    m_config.audio_config.bitrate_kbps = ui->sbAudioBitrate->value();
 }
 
 void OptionsDialog::enable_ffmpeg_check_timer(bool enable) {
@@ -86,6 +97,18 @@ void OptionsDialog::check_path_for_ffmpeg() {
         ui->lbFfmpegFound->setText(QString("FFmpeg found at %1").arg(ffmpeg_path));
         ui->lbFfmpegNotFound->hide();
         ui->lbFfmpegFound->show();
+    }
+}
+
+void OptionsDialog::reset_crf_to_default() {
+    VideoCodec codec = static_cast<VideoCodec>(ui->cmbVideoCodec->currentIndex());
+    switch (codec) {
+    case VideoCodec::H264:
+        ui->sbCrf->setValue(23);
+        break;
+    case VideoCodec::H265:
+        ui->sbCrf->setValue(28);
+        break;
     }
 }
 
