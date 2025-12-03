@@ -35,7 +35,7 @@ H26xPreset h26x_preset(const std::string& key) {
     return preset_map.contains(key) ? preset_map.at(key) : H26xPreset::Invalid;
 }
 
-std::string to_string(VideoCodec codec) {
+QString to_string(VideoCodec codec) {
     switch (codec) {
 #define X(f, s) \
     case VideoCodec::f: \
@@ -48,7 +48,7 @@ std::string to_string(VideoCodec codec) {
     }
 }
 
-std::string to_string(H26xPreset preset) {
+QString to_string(H26xPreset preset) {
     switch (preset) {
 #define X(f, s) \
     case H26xPreset::f: \
@@ -70,12 +70,16 @@ fs::path config_path() {
 }
 
 PathConfig load_path_config(const toml::node_view<toml::node>& v) {
+    auto x = QString::fromStdString(v["soundfont_path"].value_or<std::string>(""));
     return PathConfig{
-        .soundfont_path = v["soundfont_path"].value_or(""),
+        .soundfont_path = QString::fromStdString(
+            v["soundfont_path"].value_or<std::string>("")),
         .use_system_ffmpeg = v["use_system_ffmpeg"].value_or(true),
-        .ffmpeg_path = v["ffmpeg_path"].value_or(""),
-        .input_file_dir = v["input_file_dir"].value_or(""),
-        .output_file_dir = v["output_file_dir"].value_or(""),
+        .ffmpeg_path = QString::fromStdString(v["ffmpeg_path"].value_or<std::string>("")),
+        .input_file_dir = QString::fromStdString(
+            v["input_file_dir"].value_or<std::string>("")),
+        .output_file_dir = QString::fromStdString(
+            v["output_file_dir"].value_or<std::string>("")),
     };
 }
 
@@ -135,8 +139,6 @@ bool save_config(const PersistentConfig& config) {
     return save_config(config, config_path());
 }
 
-#include <iostream>
-
 bool save_config(const PersistentConfig& config, const fs::path& save_path) {
     if (save_path.empty())
         return false;
@@ -146,17 +148,17 @@ bool save_config(const PersistentConfig& config, const fs::path& save_path) {
     toml::table table{
         {"paths",
          toml::table{
-             {"soundfont_path", config.path_config.soundfont_path},
+             {"soundfont_path", config.path_config.soundfont_path.toStdString()},
              {"use_system_ffmpeg", config.path_config.use_system_ffmpeg},
-             {"ffmpeg_path", config.path_config.ffmpeg_path},
-             {"input_file_dir", config.path_config.input_file_dir},
-             {"output_file_dir", config.path_config.output_file_dir},
+             {"ffmpeg_path", config.path_config.ffmpeg_path.toStdString()},
+             {"input_file_dir", config.path_config.input_file_dir.toStdString()},
+             {"output_file_dir", config.path_config.output_file_dir.toStdString()},
          }},
 
         {"video",
          toml::table{
-             {"codec", to_string(config.video_config.codec)},
-             {"h26x_preset", to_string(config.video_config.preset)},
+             {"codec", to_string(config.video_config.codec).toStdString()},
+             {"h26x_preset", to_string(config.video_config.preset).toStdString()},
              {"crf", config.video_config.crf},
          }},
 

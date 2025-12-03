@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Read in config
     m_config = load_config();
-    ui->pcInputFile->set_initial_dir(QString(m_config.path_config.input_file_dir.c_str()));
+    ui->pcInputFile->set_initial_dir(m_config.path_config.input_file_dir);
 
     // Per-channel model: default values
     QStandardItem* default_item = new QStandardItem("Default");
@@ -302,10 +302,10 @@ void MainWindow::start_rendering() {
     }
 
     const auto& soundfont_path = m_config.path_config.soundfont_path;
-    QString ffmpeg_path(m_config.path_config.ffmpeg_path.c_str());
+    const auto& ffmpeg_path = m_config.path_config.ffmpeg_path;
     bool use_system_ffmpeg = m_config.path_config.use_system_ffmpeg;
 
-    if (soundfont_path.empty()) {
+    if (soundfont_path.isEmpty()) {
         QMessageBox::warning(this,
                              "Error",
                              "You have not chosen a soundfont to use. Specify a "
@@ -322,7 +322,7 @@ void MainWindow::start_rendering() {
         return;
     }
 
-    if (!std::filesystem::is_regular_file(soundfont_path)) {
+    if (!std::filesystem::is_regular_file(soundfont_path.toStdString())) {
         QString message
             = QString("The file \"%1\" does not exist or is not a regular file. Please "
                       "choose a new soundfont in the Program Options menu.")
@@ -333,7 +333,8 @@ void MainWindow::start_rendering() {
 
     auto outfile_name
         = std::filesystem::path(m_input_file.toStdString()).stem().concat(".mp4");
-    auto outfile_path = std::filesystem::path(m_config.path_config.output_file_dir)
+    auto outfile_path = std::filesystem::path(
+                            m_config.path_config.output_file_dir.toStdString())
                         / outfile_name;
 
     QString output_file = QFileDialog::getSaveFileName(this,
@@ -342,15 +343,14 @@ void MainWindow::start_rendering() {
                                                        "MP4 Files (*.mp4)");
     if (output_file.isNull())
         return;
-    m_config.path_config.output_file_dir
-        = QFileInfo(output_file).absoluteDir().path().toStdString();
+    m_config.path_config.output_file_dir = QFileInfo(output_file).absoluteDir().path();
 
     auto global_args = create_global_args();
     auto channel_args_list = create_channel_args();
 
     set_ui_state(UiState::Rendering);
     emit worker_start_requested(m_input_file,
-                                QString(soundfont_path.c_str()),
+                                soundfont_path,
                                 use_system_ffmpeg ? QString() : ffmpeg_path,
                                 output_file,
                                 channel_args_list,
@@ -390,7 +390,7 @@ void MainWindow::set_input_file(const QString& filename) {
     m_input_file = filename;
 
     auto input_file_dir = QFileInfo(filename).absoluteDir().path();
-    m_config.path_config.input_file_dir = input_file_dir.toStdString();
+    m_config.path_config.input_file_dir = input_file_dir;
     ui->pcInputFile->set_initial_dir(input_file_dir);
     ui->pcInputFile->set_current_path(filename);
 

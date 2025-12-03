@@ -47,10 +47,8 @@ void OptionsDialog::set_config(const PersistentConfig& config) {
         ui->rbFfManual->setChecked(true);
     }
 
-    ui->pcFfmpegPath->set_current_path(
-        QString::fromStdString(config.path_config.ffmpeg_path));
-    ui->pcSoundfontPath->set_current_path(
-        QString::fromStdString(config.path_config.soundfont_path));
+    ui->pcFfmpegPath->set_current_path(config.path_config.ffmpeg_path);
+    ui->pcSoundfontPath->set_current_path(config.path_config.soundfont_path);
 
     ui->cmbVideoCodec->setCurrentIndex(static_cast<int>(config.video_config.codec));
     ui->cmbEncodeSpeed->setCurrentIndex(static_cast<int>(config.video_config.preset));
@@ -65,8 +63,8 @@ PersistentConfig OptionsDialog::get_config() {
 
 void OptionsDialog::update_config() {
     m_config.path_config.use_system_ffmpeg = ui->rbFfAuto->isChecked();
-    m_config.path_config.ffmpeg_path = ui->pcFfmpegPath->current_path().toStdString();
-    m_config.path_config.soundfont_path = ui->pcSoundfontPath->current_path().toStdString();
+    m_config.path_config.ffmpeg_path = ui->pcFfmpegPath->current_path();
+    m_config.path_config.soundfont_path = ui->pcSoundfontPath->current_path();
 
     m_config.video_config.codec = static_cast<VideoCodec>(
         ui->cmbVideoCodec->currentIndex());

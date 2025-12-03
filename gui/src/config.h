@@ -2,7 +2,8 @@
 #define CONFIG_H
 
 #include <filesystem>
-#include <string>
+
+#include <QString>
 
 enum class VideoCodec {
 // I dislike X-macros, but I dislike repeating myself more.
@@ -21,15 +22,15 @@ enum class H26xPreset {
 
 VideoCodec video_codec(const std::string&);
 H26xPreset h26x_preset(const std::string&);
-std::string to_string(VideoCodec);
-std::string to_string(H26xPreset);
+QString to_string(VideoCodec);
+QString to_string(H26xPreset);
 
 struct PathConfig {
-    std::string soundfont_path;
+    QString soundfont_path;
     bool use_system_ffmpeg;
-    std::string ffmpeg_path;
-    std::string input_file_dir;
-    std::string output_file_dir;
+    QString ffmpeg_path;
+    QString input_file_dir;
+    QString output_file_dir;
 };
 
 struct VideoConfig {
