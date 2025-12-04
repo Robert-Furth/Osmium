@@ -19,8 +19,8 @@ public:
     explicit OptionsDialog(QWidget* parent = nullptr);
     ~OptionsDialog();
 
-    void showEvent(QShowEvent*) override;
-    void hideEvent(QHideEvent*) override;
+    void showEvent(QShowEvent* e) override;
+    void hideEvent(QHideEvent* e) override;
 
     void set_config(const PersistentConfig& config);
     PersistentConfig get_config();

@@ -251,9 +251,9 @@ void MainWindow::reinit_channel_model(int num_channels) {
     set_ui_state(UiState::Resetting);
     m_channel_model.setRowCount(num_channels + 1);
 
-    auto default_item = m_channel_model.item(0);
+    auto* default_item = m_channel_model.item(0);
     for (int i = 1; i <= num_channels; i++) {
-        auto item = default_item->clone();
+        auto* item = default_item->clone();
         item->setText(QString("Channel %1").arg(i));
         m_channel_model.setItem(i, item);
     }
@@ -424,7 +424,7 @@ void MainWindow::update_channel_opts_enabled() {
         return;
     }
 
-    auto item = m_channel_model.item(m_current_index);
+    auto* item = m_channel_model.item(m_current_index);
     ui->scraChannelOpts->setEnabled(
         !item->data(toint(ChannelArgRole::InheritDefaults)).toBool()
         && item->data(toint(ChannelArgRole::IsVisible)).toBool());
@@ -432,7 +432,7 @@ void MainWindow::update_channel_opts_enabled() {
 
 void MainWindow::set_current_channel(int index) {
     m_current_index = index;
-    auto item = m_channel_model.item(m_current_index);
+    auto* item = m_channel_model.item(m_current_index);
     bool inherit_defaults = item->data(toint(ChannelArgRole::InheritDefaults)).toBool()
                             && m_current_index != 0;
 
@@ -448,8 +448,8 @@ void MainWindow::set_current_channel(int index) {
 }
 
 void MainWindow::reset_current_channel() {
-    auto default_item = m_channel_model.item(0)->clone();
-    auto current_item = m_channel_model.item(m_current_index);
+    auto* default_item = m_channel_model.item(0)->clone();
+    auto* current_item = m_channel_model.item(m_current_index);
 
     default_item->setText(current_item->text());
     default_item->setData(current_item->data(toint(ChannelArgRole::InheritDefaults)),
@@ -525,10 +525,10 @@ GlobalArgs MainWindow::create_global_args() {
 QList<ChannelArgs> MainWindow::create_channel_args() {
     QList<ChannelArgs> channel_args_list;
 
-    auto default_item = m_channel_model.item(0);
+    auto* default_item = m_channel_model.item(0);
     int num_rows = m_channel_model.rowCount();
     for (int i = 1; i < num_rows; i++) {
-        auto item = m_channel_model.item(i);
+        auto* item = m_channel_model.item(i);
 
         if (!item->data(toint(ChannelArgRole::IsVisible)).toBool())
             continue;

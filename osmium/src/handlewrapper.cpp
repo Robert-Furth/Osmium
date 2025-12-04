@@ -52,6 +52,7 @@ void HandleWrapper::set_soundfonts(const std::vector<HSOUNDFONT>& soundfonts) {
     m_soundfont_handles = soundfonts;
 
     std::vector<BASS_MIDI_FONT> font_structs;
+    font_structs.reserve(soundfonts.size());
     for (auto hsf : soundfonts) {
         font_structs.emplace_back(BASS_MIDI_FONT{hsf, -1, 0});
     }

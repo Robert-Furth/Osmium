@@ -5,6 +5,7 @@
 #include "scope.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <limits>
@@ -110,7 +111,7 @@ void Scope::next_wave_data() {
 }
 
 void Scope::update_buffers() {
-    std::vector<float> data(m_samples_per_frame * m_src_num_channels);
+    std::vector<float> data(static_cast<size_t>(m_samples_per_frame) * m_src_num_channels);
 
     // Read the stream data
     uint32_t bytes_read = BASS_ChannelGetData(*m_stream_handle,
@@ -130,7 +131,7 @@ void Scope::update_buffers() {
 
     m_frame_num++;
     uint32_t samples_read = bytes_read / sizeof(float) / m_src_num_channels;
-    m_total_samples_read += samples_read * m_src_num_channels;
+    m_total_samples_read += static_cast<uint64_t>(samples_read) * m_src_num_channels;
 
     // Demux the data into left and right channels
     std::vector<float> new_left_samples(samples_read);
@@ -224,11 +225,10 @@ std::optional<int32_t> Scope::find_best_nudge(const std::vector<float>& floats,
     }
 
     // Early exits if 0 or 1 candidate nudges were found
-    if (nudges.size() == 0) {
+    if (nudges.size() == 0)
         return std::nullopt;
-    } else if (nudges.size() == 1) {
+    if (nudges.size() == 1)
         return nudges[0];
-    }
 
     // Compute an error value for each candidate nudge. This is based on
     // multiple factors that can be weighted individually by the user.
@@ -292,94 +292,6 @@ std::optional<int32_t> Scope::find_best_nudge(const std::vector<float>& floats,
 
     return best_nudge;
 }
-
-// std::optional<size_t> Scope::find_best_startpoint(const std::vector<float>& floats,
-//                                                   const std::vector<float>& prev) {
-//     // floats.size() == m_window_size + m_max_nudge
-//     size_t midpoint = m_window_size / 2;
-//     size_t similarity_window_start = (m_window_size - m_similarity_window) / 2;
-
-//     float max_in_window = *std::max_element(floats.cbegin(), floats.cend());
-
-//     const float EPSILON = 0.01;
-
-//     // Find all rising edges within the window
-//     float lower_bound = std::max(0.0f * max_in_window, EPSILON);
-//     float upper_bound = std::max(m_trigger_threshold * max_in_window, EPSILON);
-
-//     bool flag = 0;
-//     float last_f = 0.0;
-//     float max_f = 0.0;
-//     int64_t last_zero_cross = 0;
-//     int64_t zero_before_peak = 0;
-//     std::vector<int64_t> nudges;
-//     // int64_t minimum_nudge_found = std::numeric_limits<int64_t>::max();
-
-//     for (int64_t offs = 0; offs < m_max_nudge; offs++) {
-//         float f = floats[midpoint + offs];
-//         if (last_f < EPSILON && f >= EPSILON) {
-//             last_zero_cross = offs;
-//         }
-
-//         if (f < lower_bound) {
-//             flag = false;
-//         }
-//         if (last_f < lower_bound && f >= lower_bound) {
-//             flag = true;
-//         }
-//         if (flag && last_f < upper_bound && f >= upper_bound) {
-//             nudges.push_back(last_zero_cross);
-//             // if (std::abs(last_zero_cross) < std::abs(minimum_nudge_found))
-//             //     minimum_nudge_found = last_zero_cross;
-//             flag = false;
-//         }
-
-//         if (max_f < f) {
-//             max_f = f;
-//             zero_before_peak = last_zero_cross;
-//         }
-
-//         last_f = f;
-//     }
-
-//     if (nudges.size() == 0) {
-//         m_nudge_amount = 0;
-//         return std::optional<size_t>();
-//     }
-//     if (nudges.size() == 1) {
-//         m_nudge_amount = nudges[0];
-//         return nudges[0];
-//     }
-
-//     // Out of all candidate startpoints, find the one with the minimum difference to the previous one
-//     size_t candidate_start = 0;
-//     double min_error = std::numeric_limits<double>::infinity();
-//     for (int64_t nudge : nudges) {
-//         size_t prev_start = (m_window_size - m_similarity_window) / 2;
-//         size_t floats_start = nudge + prev_start;
-//         double error = 0;
-//         for (size_t i = 0; i < m_similarity_window; i++) {
-//             error += std::abs(floats[floats_start + i]
-//                               - prev[prev_start + i]) /* / max_in_window*/;
-//         }
-
-//         if (error < min_error) {
-//             candidate_start = nudge;
-//             min_error = error;
-//         }
-//     }
-
-//     if (min_error / m_similarity_window > 0.1) {
-//         m_flag = true;
-//         candidate_start = zero_before_peak;
-//     } else {
-//         m_flag = false;
-//     }
-
-//     m_nudge_amount = candidate_start;
-
-//     return candidate_start;
-// }
 
 uint64_t Scope::get_total_samples() const {
     return BASS_ChannelGetLength(*m_stream_handle, BASS_POS_BYTE) / sizeof(float);

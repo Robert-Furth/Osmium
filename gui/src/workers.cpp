@@ -78,17 +78,17 @@ void VideoSocketWorker::init(const QString& filename,
 }
 
 void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
-    typedef std::chrono::milliseconds ms;
+    using ms = std::chrono::milliseconds;
+    using clock = std::chrono::steady_clock;
 
     int frame_counter = 0;
     int preview_update_freq = std::max(1, m_fps / 2);
     unsigned long long elapsed_ms = 0;
-    std::chrono::steady_clock clock;
-    auto render_start = clock.now();
+    auto render_start = clock::now();
     while (m_renderer->has_frames_remaining() && !m_abort_requested) {
-        auto frame_start = clock.now();
+        auto frame_start = clock::now();
         auto frame = m_renderer->paint_next_frame();
-        auto frame_dur = std::chrono::duration_cast<ms>(clock.now() - frame_start);
+        auto frame_dur = std::chrono::duration_cast<ms>(clock::now() - frame_start);
         elapsed_ms += frame_dur.count();
 
         qint64 write_result = connection->write(reinterpret_cast<const char*>(
@@ -110,7 +110,7 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
         frame_counter += 1;
     }
 
-    auto render_dur = std::chrono::duration_cast<ms>(clock.now() - render_start);
+    auto render_dur = std::chrono::duration_cast<ms>(clock::now() - render_start);
 
     qDebug() << "VIDEO:" << frame_counter << "frames";
     qDebug() << "Average frame render time:"
@@ -149,7 +149,7 @@ void AudioSocketWorker::handle_connection(QLocalSocket* connection) {
     int frame_no = 0;
     while (m_player->is_playing() && !m_abort_requested) {
         m_player->next_wave_data();
-        auto& samples = m_player->get_samples();
+        const auto& samples = m_player->get_samples();
         qint64 write_result = connection->write(reinterpret_cast<const char*>(
                                                     samples.data()),
                                                 samples.size() * sizeof(float));

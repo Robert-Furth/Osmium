@@ -1,8 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <type_traits>
-
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QThread>

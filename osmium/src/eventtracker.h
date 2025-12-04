@@ -15,7 +15,7 @@ public:
     EventTracker(const char* filename, uint32_t fps);
 
     void next_events();
-    const std::vector<BASS_MIDI_EVENT> get_events() const { return m_event_window; }
+    const std::vector<BASS_MIDI_EVENT>& get_events() const { return m_event_window; }
 
 private:
     // HandleWrapper m_stream_handle;

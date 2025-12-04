@@ -1,5 +1,6 @@
 #include "scoperenderer.h"
 
+#include <algorithm>
 #include <cmath>
 #include <numbers>
 #include <numeric>
@@ -45,7 +46,7 @@ BaseRenderer::BaseRenderer(const QList<ChannelArgs>& channel_args,
     int col = 0;
 
     for (int i = 0; i < num_channels; i++) {
-        auto& args = channel_args[i];
+        const auto& args = channel_args[i];
         m_paint_infos.emplace_back(PaintInfo{
             .x = col * w,
             .y = row * h,
@@ -205,7 +206,7 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
     : BaseRenderer(channel_args, global_args),
       m_event_tracker(filename.toUtf8(), global_args.fps) {
     for (int i = 0; i < channel_args.size(); i++) {
-        auto& args = channel_args[i];
+        const auto& args = channel_args[i];
         auto scope = osmium::ScopeBuilder()
                          .amplification(args.amplification)
                          .display_window_ms(args.scope_width_ms)
@@ -276,11 +277,12 @@ QImage ScopeRenderer::paint_next_frame() {
 }
 
 bool ScopeRenderer::has_frames_remaining() const {
-    for (const auto& scope : m_scopes) {
-        if (scope.is_playing())
-            return true;
-    }
-    return false;
+    // for (const auto& scope : m_scopes) {
+    //     if (scope.is_playing())
+    //         return true;
+    // }
+    // return false;
+    return std::ranges::any_of(m_scopes, &osmium::Scope::is_playing);
 }
 
 double ScopeRenderer::get_progress() {

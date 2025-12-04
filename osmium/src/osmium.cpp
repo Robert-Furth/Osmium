@@ -8,7 +8,6 @@
 namespace osmium {
 
 static HPLUGIN g_midi_plugin = 0;
-// static std::vector<HSOUNDFONT> g_loaded_fonts;
 
 bool init() {
     g_midi_plugin = BASS_PluginLoad("bassmidi", 0);

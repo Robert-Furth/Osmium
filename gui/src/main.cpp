@@ -20,10 +20,9 @@ int main(int argc, char *argv[]) {
     // The windows11 style is hideous; override it here
     a.setStyle("Fusion");
 
+    a.connect(&a, &QApplication::aboutToQuit, osmium::uninit);
+
     MainWindow w;
     w.show();
-    int status_code = a.exec();
-
-    osmium::uninit();
-    return status_code;
+    return a.exec();
 }

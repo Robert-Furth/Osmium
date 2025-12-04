@@ -5,6 +5,8 @@
 #include <QDirListing>
 #include <QtSystemDetection>
 
+#include "config.h"
+
 OptionsDialog::OptionsDialog(QWidget* parent)
     : QDialog(parent),
       ui(new Ui::OptionsDialog),
@@ -106,6 +108,8 @@ void OptionsDialog::reset_crf_to_default() {
         break;
     case VideoCodec::H265:
         ui->sbCrf->setValue(28);
+        break;
+    case VideoCodec::Invalid:
         break;
     }
 }

@@ -8,7 +8,7 @@ namespace controls {
 LabeledSlider::LabeledSlider(QWidget* parent)
     : QAbstractSlider(parent),
       m_label_format("%v") {
-    auto layout = new QHBoxLayout(this);
+    auto* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
     m_slider = new QSlider();

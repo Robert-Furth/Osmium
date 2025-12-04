@@ -12,8 +12,6 @@ namespace osmium {
 bool init();
 void uninit();
 
-// bool set_soundfonts(const std::vector<std::string>& soundfonts);
-
 } // namespace osmium
 
 #endif // OSMIUM_H
