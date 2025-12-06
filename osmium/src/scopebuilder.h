@@ -8,10 +8,10 @@
 
 #define BUILDER_DEF(_type, _name, _var_name, _default) \
 private: \
-    _type m_##_name = _default; \
+    _type m_##_name = _default; /* NOLINT(readability-redundant-member-init) */ \
 \
 public: \
-    ScopeBuilder& _name(_type _var_name) { \
+    ScopeBuilder& _name(const _type& _var_name) { \
         m_##_name = _var_name; \
         return *this; \
     }
@@ -28,24 +28,16 @@ class ScopeBuilder {
     BUILDER_DEF(unsigned, display_window_ms, ms, 40);
     BUILDER_DEF(unsigned, similarity_window_ms, ms, 40);
     BUILDER_DEF(double, similarity_bias, weight, 1.0);
-
     // BUILDER_DEF(double, repeat_bias, factor, 0.75)
     // BUILDER_DEF(unsigned, repeat_bias_window_ms, ms, 3)
     BUILDER_DEF(double, peak_bias, weight, 0.5)
     BUILDER_DEF(double, peak_threshold, factor, 0.9)
+    BUILDER_DEF(std::vector<std::string>, soundfonts, soundfonts, {})
 
 public:
-    ScopeBuilder& soundfonts(const std::vector<std::string>& soundfonts) {
-        m_soundfonts = soundfonts;
-        return *this;
-    }
-
     Scope build_from_file(const char* filename);
     Scope build_from_midi_channel(const char* filename, int channel);
     Scope build_from_handle(unsigned long handle);
-
-private:
-    std::vector<std::string> m_soundfonts;
 };
 
 } // namespace osmium
