@@ -1,8 +1,6 @@
 #include "eventtracker.h"
 
 #include <cstdint>
-#include <iomanip>
-#include <iostream>
 #include <vector>
 
 #include <bass.h>
@@ -24,7 +22,14 @@ EventTracker::EventTracker(uint32_t raw_handle, uint32_t fps) : m_s_per_frame(1.
         throw Error::from_bass_error();
     m_events.resize(num_events);
     m_times.reserve(num_events);
-    if (BASS_MIDI_StreamGetEvents(*handle, -1, 0, m_events.data()) == -1)
+
+    // Safety: osmium::Event is defined identically to BASS_MIDI_EVENT, so reinterpret_cast is fine
+    int result = BASS_MIDI_StreamGetEvents(*handle,
+                                           -1,
+                                           0,
+                                           reinterpret_cast<BASS_MIDI_EVENT*>(
+                                               m_events.data()));
+    if (result == -1)
         throw Error::from_bass_error();
 
     // Calculate timestamps for each event
@@ -43,7 +48,7 @@ EventTracker::EventTracker(uint32_t raw_handle, uint32_t fps) : m_s_per_frame(1.
         cur_seconds = time_of_last_tempo_change
                       + (event.tick - tick_of_last_tempo_change) * s_per_tick;
 
-        if (event.event == MIDI_EVENT_TEMPO) {
+        if (event.event == Event::Tempo) {
             s_per_tick = event.param * qn_per_tick * 1e-6;
             time_of_last_tempo_change = cur_seconds;
             tick_of_last_tempo_change = event.tick;
@@ -76,50 +81,5 @@ void EventTracker::next_events() {
     }
     m_event_index = i;
 }
-
-/*void get_events(const char* filename) {
-    auto raw_handle
-        = BASS_MIDI_StreamCreateFile(false, filename, 0, 0, BASS_STREAM_DECODE, 0);
-    if (!raw_handle)
-        return;
-    HandleWrapper handle(raw_handle);
-
-    uint32_t num_events = BASS_MIDI_StreamGetEvents(*handle, -1, 0, nullptr);
-    std::vector<BASS_MIDI_EVENT> events(num_events);
-    BASS_MIDI_StreamGetEvents(*handle, -1, 0, events.data());
-
-    float ppqn; // ticks per quarter note
-    if (!BASS_ChannelGetAttribute(*handle, BASS_ATTRIB_MIDI_PPQN, &ppqn))
-        return;
-
-    uint32_t uspqn = 500000; // microseconds per quarter note; defaults to 500000us = 120bpm
-
-    // us/qn * qn/tick = us/tick
-    double s_per_tick = static_cast<double>(uspqn / ppqn) * 0.000001;
-    double time_of_last_tempo_change = 0;
-    uint32_t tick_of_last_tempo_change = 0;
-    double cur_seconds = 0;
-    double cur_seconds_2 = 0;
-
-    std::cout << std::setprecision(24);
-    for (const auto& event : events) {
-        // I don't really like this, since repeatedly adding doubles together can lead to drift
-        cur_seconds = time_of_last_tempo_change
-                      + (event.tick - tick_of_last_tempo_change) * s_per_tick;
-
-        if (event.event == MIDI_EVENT_TEMPO) {
-            uspqn = event.param;
-            s_per_tick = static_cast<double>(uspqn / ppqn) * 0.000001;
-            time_of_last_tempo_change = cur_seconds;
-            tick_of_last_tempo_change = event.tick;
-        }
-        std::cout << std::setprecision(24) << std::dec << std::setprecision(3)
-                  << cur_seconds << "\t" << cur_seconds_2 << "\tT" << event.tick << "\tCH"
-                  << event.chan << "\t" << event.event << "(" << std::hex << event.param
-                  << ")\n";
-    }
-}*/
-
-// std::vector<std::string> get_track_names(const char* filename) {}
 
 } // namespace osmium

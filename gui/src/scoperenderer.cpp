@@ -244,7 +244,7 @@ QImage ScopeRenderer::paint_next_frame() {
         if (args.draw_labels) {
             for (const auto& event : m_event_tracker.get_events()) {
                 if (event.chan == args.channel_number
-                    && event.event == MIDI_EVENT_PROGRAM) {
+                    && event.event == osmium::Event::Program) {
                     pinfo.program_num = event.param;
                     pinfo.update_label(args);
                 }
