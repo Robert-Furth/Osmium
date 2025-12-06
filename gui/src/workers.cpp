@@ -1,4 +1,5 @@
 #include "workers.h"
+#include "config.h"
 
 #include <chrono>
 #include <format>
@@ -238,6 +239,7 @@ void RenderWorker::work(const QString& input_file,
         }
         m_ffmpeg.setArguments(get_ffmpeg_args());
 
+        qDebug() << "Running ffmpeg with args:" << m_ffmpeg.arguments();
         m_state = State::Running;
         lock.unlock();
         m_ffmpeg.start();
@@ -262,6 +264,21 @@ QStringList RenderWorker::get_ffmpeg_args() {
     int width = m_global_args.width;
     int height = m_global_args.height;
     double vol = m_global_args.volume;
+
+    QString vid_preset = to_string(m_global_args.h26x_preset);
+    int crf = m_global_args.crf;
+    int bitrate = m_global_args.bitrate_kbps;
+
+    QString vid_codec;
+    switch (m_global_args.vid_codec) {
+    case VideoCodec::H264:
+        vid_codec = "libx264";
+        break;
+    case VideoCodec::H265:
+        vid_codec = "libx265";
+        break;
+    }
+
     return QStringList() << "-y"
                          // input video format
                          << "-f" << "rawvideo" << "-pixel_format" << "rgb32"
@@ -274,11 +291,12 @@ QStringList RenderWorker::get_ffmpeg_args() {
                          << "-i"
                          << m_audio_server_path
                          // output video format
-                         << "-c:v" << "libx264" << "-filter:v"
+                         << "-c:v" << vid_codec << "-crf" << QString::number(crf)
+                         << "-preset" << vid_preset << "-filter:v"
                          << "format=yuv420p"
                          // output audio format
-                         << "-c:a" << "aac" << "-b:a"
-                         << "192k" << "-filter:a"
+                         << "-c:a" << "aac" << "-b:a" << QString("%1k").arg(bitrate)
+                         << "-filter:a"
                          << QString("volume=%1").arg(vol)
                          // output file
                          << m_output_path;

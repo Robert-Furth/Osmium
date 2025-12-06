@@ -5,6 +5,8 @@
 #include <QFont>
 #include <QObject>
 
+#include "config.h"
+
 enum class ChannelOrder { ROW_MAJOR, COLUMN_MAJOR };
 
 struct GlobalArgs {
@@ -12,8 +14,14 @@ struct GlobalArgs {
     int height;
     int num_rows_or_cols;
     ChannelOrder order;
+
     int fps;
     double volume;
+    VideoCodec vid_codec;
+    H26xPreset h26x_preset;
+    int crf;
+
+    int bitrate_kbps;
 
     QRgb border_color;
     double border_thickness;

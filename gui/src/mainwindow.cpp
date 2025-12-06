@@ -513,8 +513,15 @@ GlobalArgs MainWindow::create_global_args() {
         .height = ui->sbRenderHeight->value(),
         .num_rows_or_cols = ui->sbRowColCount->value(),
         .order = channel_order,
+
         .fps = ui->cmbFrameRate->currentData().toInt(),
         .volume = ui->slVolume->value() / 100.0,
+        .vid_codec = m_config.video_config.codec,
+        .h26x_preset = m_config.video_config.h26x_preset,
+        .crf = m_config.video_config.h26x_crf,
+
+        .bitrate_kbps = m_config.audio_config.bitrate_kbps,
+
         .border_color = ui->cpGridlineColor->color().rgb(),
         .border_thickness = ui->dsbGridlineThickness->value(),
         .background_color = ui->cpBackground->color().rgb(),
