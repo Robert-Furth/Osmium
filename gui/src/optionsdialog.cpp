@@ -53,8 +53,8 @@ void OptionsDialog::set_config(const PersistentConfig& config) {
     ui->pcSoundfontPath->set_current_path(config.path_config.soundfont_path);
 
     ui->cmbVideoCodec->setCurrentIndex(static_cast<int>(config.video_config.codec));
-    ui->cmbEncodeSpeed->setCurrentIndex(static_cast<int>(config.video_config.preset));
-    ui->sbCrf->setValue(config.video_config.crf);
+    ui->cmbEncodeSpeed->setCurrentIndex(static_cast<int>(config.video_config.h26x_preset));
+    ui->sbCrf->setValue(config.video_config.h26x_crf);
 
     ui->sbAudioBitrate->setValue(config.audio_config.bitrate_kbps);
 }
@@ -70,9 +70,9 @@ void OptionsDialog::update_config() {
 
     m_config.video_config.codec = static_cast<VideoCodec>(
         ui->cmbVideoCodec->currentIndex());
-    m_config.video_config.preset = static_cast<H26xPreset>(
+    m_config.video_config.h26x_preset = static_cast<H26xPreset>(
         ui->cmbEncodeSpeed->currentIndex());
-    m_config.video_config.crf = ui->sbCrf->value();
+    m_config.video_config.h26x_crf = ui->sbCrf->value();
 
     m_config.audio_config.bitrate_kbps = ui->sbAudioBitrate->value();
 }
@@ -108,8 +108,6 @@ void OptionsDialog::reset_crf_to_default() {
         break;
     case VideoCodec::H265:
         ui->sbCrf->setValue(28);
-        break;
-    case VideoCodec::Invalid:
         break;
     }
 }

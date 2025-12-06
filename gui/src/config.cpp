@@ -15,24 +15,24 @@
 
 namespace fs = std::filesystem;
 
-VideoCodec video_codec(const std::string& key) {
+VideoCodec video_codec(const std::string& key, VideoCodec default_val) {
     static const std::unordered_map<std::string, VideoCodec> codec_map{
 #define X(f, s) {s, VideoCodec::f},
 #include "xmacro/video_codec.txt"
 #undef X
     };
 
-    return codec_map.contains(key) ? codec_map.at(key) : VideoCodec::Invalid;
+    return codec_map.contains(key) ? codec_map.at(key) : default_val;
 }
 
-H26xPreset h26x_preset(const std::string& key) {
+H26xPreset h26x_preset(const std::string& key, H26xPreset default_val) {
     static const std::unordered_map<std::string, H26xPreset> preset_map{
 #define X(f, s) {s, H26xPreset::f},
 #include "xmacro/h26x_preset.txt"
 #undef X
     };
 
-    return preset_map.contains(key) ? preset_map.at(key) : H26xPreset::Invalid;
+    return preset_map.contains(key) ? preset_map.at(key) : default_val;
 }
 
 QString to_string(VideoCodec codec) {
@@ -90,20 +90,18 @@ VideoConfig load_video_config(const toml::node_view<toml::node>& v) {
     };
 
     std::string codec_str = v["codec"].value_or("");
-    VideoCodec codec = video_codec(codec_str);
-    codec = codec == VideoCodec::Invalid ? VideoCodec::H264 : codec;
+    VideoCodec codec = video_codec(codec_str, VideoCodec::H264);
 
     std::string preset_str = v["h26x_preset"].value_or("");
-    H26xPreset preset = h26x_preset(preset_str);
-    preset = preset == H26xPreset::Invalid ? H26xPreset::Medium : preset;
+    H26xPreset preset = h26x_preset(preset_str, H26xPreset::Medium);
 
     int crf = v["h26x_crf"].value_or(codec == VideoCodec::H264 ? 23 : 28);
     crf = std::clamp(crf, 0, 51);
 
     return VideoConfig{
         .codec = codec,
-        .preset = preset,
-        .crf = crf,
+        .h26x_preset = preset,
+        .h26x_crf = crf,
     };
 }
 
@@ -158,8 +156,8 @@ bool save_config(const PersistentConfig& config, const fs::path& save_path) {
         {"video",
          toml::table{
              {"codec", to_string(config.video_config.codec).toStdString()},
-             {"h26x_preset", to_string(config.video_config.preset).toStdString()},
-             {"crf", config.video_config.crf},
+             {"h26x_preset", to_string(config.video_config.h26x_preset).toStdString()},
+             {"h26x_crf", config.video_config.h26x_crf},
          }},
 
         {"audio",

@@ -10,18 +10,16 @@ enum class VideoCodec {
 #define X(f, s) f,
 #include "xmacro/video_codec.txt"
 #undef X
-    Invalid,
 };
 
 enum class H26xPreset {
 #define X(f, s) f,
 #include "xmacro/h26x_preset.txt"
 #undef X
-    Invalid,
 };
 
-VideoCodec video_codec(const std::string&);
-H26xPreset h26x_preset(const std::string&);
+VideoCodec video_codec(const std::string& key, VideoCodec default_val);
+H26xPreset h26x_preset(const std::string&, H26xPreset default_val);
 QString to_string(VideoCodec);
 QString to_string(H26xPreset);
 
@@ -35,8 +33,8 @@ struct PathConfig {
 
 struct VideoConfig {
     VideoCodec codec;
-    H26xPreset preset;
-    int crf;
+    H26xPreset h26x_preset;
+    int h26x_crf;
 };
 
 struct AudioConfig {
