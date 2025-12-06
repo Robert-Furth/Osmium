@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(local_lib_path "${PROJECT_SOURCE_DIR}/libs/${CMAKE_SYSTEM_PROCESSOR}")
 
 add_library(OsmiumLib STATIC
+    src/error.cpp
     src/error.h
     src/eventtracker.cpp
     src/eventtracker.h
