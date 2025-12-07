@@ -3,7 +3,6 @@
 
 #include <QColorDialog>
 #include <QPalette>
-#include <QStyle>
 
 namespace controls {
 

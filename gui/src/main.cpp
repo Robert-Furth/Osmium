@@ -1,12 +1,10 @@
-#include "mainwindow.h"
-
 #include <iostream>
 
 #include <QApplication>
-#include <QStyle>
-#include <QStyleFactory>
 
 #include <osmium.h>
+
+#include "mainwindow.h"
 
 int main(int argc, char *argv[]) {
     if (!osmium::init()) {

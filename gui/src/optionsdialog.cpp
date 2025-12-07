@@ -1,7 +1,6 @@
 #include "optionsdialog.h"
 #include "ui_optionsdialog.h"
 
-#include <QDir>
 #include <QDirListing>
 #include <QtSystemDetection>
 

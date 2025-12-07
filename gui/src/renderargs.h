@@ -1,9 +1,9 @@
 #ifndef RENDERARGS_H
 #define RENDERARGS_H
 
-#include <QColor>
 #include <QFont>
 #include <QObject>
+#include <QRgb>
 
 #include "config.h"
 

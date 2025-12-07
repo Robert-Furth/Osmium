@@ -8,11 +8,9 @@
 
 #include <QPainter>
 #include <QPen>
-#include <QPicture>
 #include <QPointF>
 #include <QPolygonF>
 #include <QRegularExpression>
-#include <QStandardItemModel>
 #include <QtConcurrentMap>
 
 #include <osmium.h>

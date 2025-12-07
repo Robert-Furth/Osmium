@@ -8,17 +8,10 @@
 #include <filesystem>
 
 #include <QColor>
-#include <QDialog>
-#include <QDir>
 #include <QFileDialog>
 #include <QFontComboBox>
-#include <QImage>
 #include <QList>
 #include <QMessageBox>
-#include <QPainter>
-#include <QPixmap>
-#include <QProcess>
-#include <QWaitCondition>
 
 #include "config.h"
 #include "renderargs.h"

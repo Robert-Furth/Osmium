@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QThread>
-#include <QVariant>
 
 #include "config.h"
 #include "optionsdialog.h"
