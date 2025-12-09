@@ -83,6 +83,7 @@ CMakeLists.txt.user*
 .rcc/
 .uic/
 /build*/
+/.cache
 
 # Local libraries and include files
 libs/
