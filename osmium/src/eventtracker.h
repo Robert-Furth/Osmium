@@ -6,7 +6,9 @@
 
 namespace osmium {
 
-// Compatible with BASS_MIDI_EVENT from bassmidi.h
+// Should be compatible with BASS_MIDI_EVENT from bassmidi.h.
+// (Annoyingly, BASS uses DWORDs, which are typedef'd to unsigned long on Windows but
+// unsigned int (via uint32_t) on other OSes. This makes conversion annoying.)
 struct Event {
     // Warning: extremely incomplete!
     enum EventType : uint32_t {

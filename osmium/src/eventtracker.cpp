@@ -23,12 +23,14 @@ EventTracker::EventTracker(uint32_t raw_handle, uint32_t fps) : m_s_per_frame(1.
     m_events.resize(num_events);
     m_times.reserve(num_events);
 
-    // Safety: osmium::Event is defined identically to BASS_MIDI_EVENT, so reinterpret_cast is fine
-    int result = BASS_MIDI_StreamGetEvents(*handle,
-                                           -1,
-                                           0,
-                                           reinterpret_cast<BASS_MIDI_EVENT*>(
-                                               m_events.data()));
+    // Make sure that osmium::Event can be reinterpret_cast'ed to BASS_MIDI_EVENT safely
+    // Can't use std::is_layout_compatible because DWORDs are either unsigned long or
+    // uint32_t (unsigned int) depending on OS
+    static_assert(sizeof(Event) == sizeof(BASS_MIDI_EVENT)
+                  && alignof(Event) == alignof(BASS_MIDI_EVENT));
+
+    int result = BASS_MIDI_StreamGetEvents(
+        *handle, -1, 0, reinterpret_cast<BASS_MIDI_EVENT*>(m_events.data()));
     if (result == -1)
         throw Error::from_bass_error();
 
@@ -59,8 +61,9 @@ EventTracker::EventTracker(uint32_t raw_handle, uint32_t fps) : m_s_per_frame(1.
 }
 
 EventTracker::EventTracker(const char* filename, uint32_t fps)
-    : EventTracker(BASS_MIDI_StreamCreateFile(false, filename, 0, 0, BASS_STREAM_DECODE, 0),
-                   fps) {}
+    : EventTracker(
+          BASS_MIDI_StreamCreateFile(false, filename, 0, 0, BASS_STREAM_DECODE, 0), fps) {
+}
 
 void EventTracker::next_events() {
     m_event_window.clear();
