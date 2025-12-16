@@ -20,10 +20,12 @@ namespace osmium {
 
 // --- helper functions ---
 
+namespace {
+
 /** "Left-shifts" `src` 's elements into `dest`.
  *  If `src.size() < min_size`, shifts in enough copies of `default_val` until
  *  `min_size` values have been shifted (as if `src` had been padded with
- *  `default_val` until it reached `min_size`). 
+ *  `default_val` until it reached `min_size`).
  */
 template<typename T>
 void shift_in(std::vector<T>& dest,
@@ -75,6 +77,17 @@ It abs_max_element(It begin, It end) {
     return candidate;
 }
 
+template<typename T>
+std::vector<T> stereo_downmix(const std::vector<T>& left, const std::vector<T>& right) {
+    std::vector<T> result(std::min(left.size(), right.size()), 0);
+    for (size_t i = 0; i < result.size(); ++i) {
+        result[i] = (left[i] + right[i]) / 2;
+    }
+    return result;
+}
+
+} // namespace
+
 // --- osmium::Scope implementation ---
 
 Scope::Scope(uint32_t handle, uint32_t window_size, uint32_t internal_size)
@@ -88,11 +101,12 @@ Scope::Scope(uint32_t handle, uint32_t window_size, uint32_t internal_size)
 void Scope::next_wave_data() {
     update_buffers();
 
-    m_flag1 = false;
-    m_flag2 = false;
-    auto maybe_nudge = find_best_nudge(m_left_buffer, m_left_output);
-    if (!maybe_nudge.has_value() && m_is_stereo) {
-        maybe_nudge = find_best_nudge(m_right_buffer, m_right_output);
+    std::optional<int32_t> maybe_nudge;
+    if (m_is_stereo) {
+        maybe_nudge = find_best_nudge(stereo_downmix(m_left_buffer, m_right_buffer),
+                                      stereo_downmix(m_left_output, m_right_output));
+    } else {
+        maybe_nudge = find_best_nudge(m_left_buffer, m_right_buffer);
     }
 
     m_no_good_nudge = !maybe_nudge.has_value();
