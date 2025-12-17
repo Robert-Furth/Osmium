@@ -54,6 +54,8 @@ struct ChannelArgs {
     int similarity_window_ms;
     double peak_bias;
     double peak_threshold;
+    double drift_window_ms;
+    double avoid_drift_bias;
 };
 
 Q_DECLARE_METATYPE(GlobalArgs)

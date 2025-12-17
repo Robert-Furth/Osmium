@@ -39,6 +39,8 @@ enum class ChannelArgRole {
     SimilarityWindowMs,
     PeakBias,
     PeakThreshold,
+    DriftWindowMs,
+    AvoidDriftBias,
 
     InheritDefaults,
     IsVisible,

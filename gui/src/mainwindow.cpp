@@ -71,8 +71,10 @@ MainWindow::MainWindow(QWidget* parent)
     default_item->setData(35, toint(ChannelArgRole::MaxNudgeMs));
     default_item->setData(1.0, toint(ChannelArgRole::SimilarityBias));
     default_item->setData(20, toint(ChannelArgRole::SimilarityWindowMs));
-    default_item->setData(0.5, toint(ChannelArgRole::PeakBias));
-    default_item->setData(0.9, toint(ChannelArgRole::PeakThreshold));
+    default_item->setData(0.1, toint(ChannelArgRole::PeakBias));
+    default_item->setData(0.75, toint(ChannelArgRole::PeakThreshold));
+    default_item->setData(5.0, toint(ChannelArgRole::DriftWindowMs));
+    default_item->setData(0.20, toint(ChannelArgRole::AvoidDriftBias));
 
     default_item->setData(true, toint(ChannelArgRole::InheritDefaults));
     default_item->setData(true, toint(ChannelArgRole::IsVisible));
@@ -181,6 +183,14 @@ MainWindow::MainWindow(QWidget* parent)
                   ChannelArgRole::PeakThreshold,
                   &QDoubleSpinBox::valueChanged,
                   &QDoubleSpinBox::setValue);
+    bind_to_model(ui->dsbDriftWindow,
+                  ChannelArgRole::DriftWindowMs,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
+    bind_to_model(ui->dsbNoDriftBias,
+                  ChannelArgRole::AvoidDriftBias,
+                  &QDoubleSpinBox::valueChanged,
+                  &QDoubleSpinBox::setValue);
 
     reinit_channel_model(16); // DEBUG
 
@@ -198,6 +208,21 @@ MainWindow::MainWindow(QWidget* parent)
             &QCheckBox::clicked,
             this,
             &MainWindow::update_channel_opts_enabled);
+    connect(ui->sbScopeWidth,
+            &QSpinBox::valueChanged,
+            ui->sbSimilarityWindow,
+            &QSpinBox::setMaximum);
+
+    ui->sbSimilarityWindow->setMaximum(ui->sbScopeWidth->value());
+    ui->dsbDriftWindow->setMaximum(ui->sbScopeWidth->value() + ui->sbMaxNudge->value());
+    connect(ui->sbScopeWidth, &QSpinBox::valueChanged, [this]() {
+        ui->dsbDriftWindow->setMaximum(ui->sbScopeWidth->value()
+                                       + ui->sbMaxNudge->value());
+    });
+    connect(ui->sbMaxNudge, &QSpinBox::valueChanged, [this]() {
+        ui->dsbDriftWindow->setMaximum(ui->sbScopeWidth->value()
+                                       + ui->sbMaxNudge->value());
+    });
 
     connect(m_options_dialog,
             &OptionsDialog::accepted,
@@ -577,5 +602,7 @@ ChannelArgs MainWindow::create_channel_args(QStandardItem* args, int index) {
                                     .toInt(),
         .peak_bias = args->data(toint(ChannelArgRole::PeakBias)).toDouble(),
         .peak_threshold = args->data(toint(ChannelArgRole::PeakThreshold)).toDouble(),
+        .drift_window_ms = args->data(toint(ChannelArgRole::DriftWindowMs)).toDouble(),
+        .avoid_drift_bias = args->data(toint(ChannelArgRole::AvoidDriftBias)).toDouble(),
     };
 }

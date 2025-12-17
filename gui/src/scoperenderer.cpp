@@ -207,7 +207,9 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
         const auto& args = channel_args[i];
         auto scope = osmium::ScopeBuilder()
                          .amplification(args.amplification)
+                         .avoid_drift_bias(args.avoid_drift_bias)
                          .display_window_ms(args.scope_width_ms)
+                         .drift_window(args.drift_window_ms)
                          .frame_rate(global_args.fps)
                          .max_nudge_ms(args.max_nudge_ms)
                          .peak_bias(args.peak_bias)

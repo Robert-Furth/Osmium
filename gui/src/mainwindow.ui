@@ -546,9 +546,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-261</y>
+            <y>-323</y>
             <width>232</width>
-            <height>637</height>
+            <height>699</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1059,6 +1059,46 @@
                 </property>
                 <property name="value">
                  <double>0.900000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QLabel" name="label_26">
+                <property name="text">
+                 <string>Drift Window</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QDoubleSpinBox" name="dsbDriftWindow">
+                <property name="suffix">
+                 <string>ms</string>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QLabel" name="label_27">
+                <property name="text">
+                 <string>No-Drift Bias</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QDoubleSpinBox" name="dsbNoDriftBias">
+                <property name="decimals">
+                 <number>2</number>
+                </property>
+                <property name="maximum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.010000000000000</double>
+                </property>
+                <property name="value">
+                 <double>0.500000000000000</double>
                 </property>
                </widget>
               </item>
