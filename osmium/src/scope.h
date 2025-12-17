@@ -41,15 +41,14 @@ private:
 
     // Inter-frame alignment //
 
-    // How far forward a sample can be moved to fit
-    uint32_t m_max_nudge;
-    uint32_t m_similarity_window;
-    double m_trigger_threshold;
-    double m_similarity_bias;
+    uint32_t m_max_nudge;         // How far forward a sample can be moved to fit
+    uint32_t m_similarity_window; // # samples to check for similarity between frames
+    double m_trigger_threshold;   // % of peak amplitude to trigger at
+    double m_similarity_bias;     // How much to consider inter-frame similarity
     // double m_repeat_bias;
     // uint32_t m_repeat_bias_window; // 48 samples = 1 ms
-    double m_peak_bias;
-    double m_peak_bias_min_factor; // 90% of peak
+    double m_peak_bias;            // How much to consider pre-peak zero-crosses
+    double m_peak_bias_min_factor; // % of peak amplitude to count as pre-peak
 
     // Info/debug variables
     uint64_t m_total_samples_read = 0;
