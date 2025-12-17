@@ -1,4 +1,5 @@
 #include "scopebuilder.h"
+#include <limits>
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -14,6 +15,8 @@
 #include "error.h"
 
 namespace osmium {
+
+namespace {
 
 // -- Callbacks --
 
@@ -49,6 +52,8 @@ std::vector<HSOUNDFONT> construct_soundfonts(const std::vector<std::string>& sou
 
     return handles;
 }
+
+} // namespace
 
 // -- ScopeBuilder --
 
@@ -96,11 +101,16 @@ Scope ScopeBuilder::build_from_handle(HSTREAM handle) {
     if (!BASS_ChannelGetInfo(handle, &info))
         throw Error::from_bass_error("Error getting channel info: ");
 
-    uint32_t samples_per_frame = info.freq / m_frame_rate;
+    if (info.freq > std::numeric_limits<int32_t>::max())
+        throw Error("Frequency for the internal BASS channel is too high");
+
+    int32_t freq = static_cast<int32_t>(info.freq);
+    int32_t samples_per_frame = freq / m_frame_rate;
     // samples/sec * ms/window * sec/ms = samples/window
-    uint32_t samples_per_window = info.freq * m_display_window_ms / 1000;
-    uint32_t max_nudge_samples = info.freq * m_max_nudge_ms / 1000;
-    uint32_t similarity_window = info.freq * m_similarity_window_ms / 1000;
+    int32_t samples_per_window = freq * m_display_window_ms / 1000;
+    int32_t max_nudge_samples = freq * m_max_nudge_ms / 1000;
+    int32_t similarity_window = freq * m_similarity_window_ms / 1000;
+    int32_t drift_window = freq * (m_drift_window / 1000.0);
 
     Scope scope(handle, samples_per_window, samples_per_window + max_nudge_samples);
     scope.m_samples_per_frame = samples_per_frame;
@@ -116,6 +126,8 @@ Scope ScopeBuilder::build_from_handle(HSTREAM handle) {
     scope.m_similarity_window = std::min(similarity_window, samples_per_window);
     scope.m_peak_bias = m_peak_bias;
     scope.m_peak_bias_min_factor = m_peak_threshold;
+    scope.m_drift_window = drift_window;
+    scope.m_avoid_drift_bias = m_avoid_drift_bias;
 
     if (!m_soundfonts.empty()) {
         auto sf_handles = construct_soundfonts(m_soundfonts);

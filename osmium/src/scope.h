@@ -26,29 +26,25 @@ public:
 
     void next_wave_data();
 
-    bool m_flag1 = false;
-    bool m_flag2 = false;
-
 private:
     HandleWrapper m_stream_handle;
 
-    uint32_t m_samples_per_frame;
+    int32_t m_samples_per_frame;
     uint32_t m_sample_rate;
-    uint32_t m_window_size;
+    int32_t m_window_size;
     double m_amplification;
     unsigned m_src_num_channels;
     bool m_is_stereo;
 
-    // Inter-frame alignment //
-
-    uint32_t m_max_nudge;         // How far forward a sample can be moved to fit
-    uint32_t m_similarity_window; // # samples to check for similarity between frames
-    double m_trigger_threshold;   // % of peak amplitude to trigger at
-    double m_similarity_bias;     // How much to consider inter-frame similarity
-    // double m_repeat_bias;
-    // uint32_t m_repeat_bias_window; // 48 samples = 1 ms
+    // Inter-frame alignment
+    int32_t m_max_nudge;           // How far forward a sample can be moved to fit
+    int32_t m_similarity_window;   // # samples to check for similarity between frames
+    double m_trigger_threshold;    // % of peak amplitude to trigger at
+    double m_similarity_bias;      // How much to consider inter-frame similarity
     double m_peak_bias;            // How much to consider pre-peak zero-crosses
     double m_peak_bias_min_factor; // % of peak amplitude to count as pre-peak
+    int32_t m_drift_window;        // # samples around a zero-cross to consider
+    double m_avoid_drift_bias;     // How much to penalize samples far from a zero-cross
 
     // Info/debug variables
     uint64_t m_total_samples_read = 0;
@@ -57,6 +53,7 @@ private:
     int m_frame_num = 0;
     bool m_no_good_nudge = false;
 
+    // Buffers
     std::vector<float> m_left_output;
     std::vector<float> m_right_output;
     std::vector<float> m_left_buffer;

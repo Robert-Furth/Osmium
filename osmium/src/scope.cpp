@@ -1,7 +1,3 @@
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-
 #include "scope.h"
 
 #include <algorithm>
@@ -10,7 +6,12 @@
 #include <iterator>
 #include <limits>
 #include <optional>
+#include <queue>
 #include <vector>
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 
 #include <bass.h>
 
@@ -59,6 +60,12 @@ constexpr bool mod_within_window(int32_t n, int32_t min, int32_t max) {
     if (min <= max)
         return min <= n && n <= max;
     return n <= max || min <= n;
+}
+
+// Credit to https://stackoverflow.com/a/2745086/31835764
+template<typename T>
+constexpr T div_ceil(T a, T b) {
+    return a == 0 ? 0 : 1 + ((a - 1) / b);
 }
 
 template<std::forward_iterator It>
@@ -125,13 +132,14 @@ void Scope::next_wave_data() {
 }
 
 void Scope::update_buffers() {
-    std::vector<float> data(static_cast<size_t>(m_samples_per_frame) * m_src_num_channels);
+    std::vector<float> data(static_cast<size_t>(m_samples_per_frame)
+                            * m_src_num_channels);
 
     // Read the stream data
-    uint32_t bytes_read = BASS_ChannelGetData(*m_stream_handle,
-                                              data.data(),
-                                              (data.size() * sizeof(float))
-                                                  | BASS_DATA_FLOAT);
+    uint32_t bytes_read =
+        BASS_ChannelGetData(*m_stream_handle,
+                            data.data(),
+                            (data.size() * sizeof(float)) | BASS_DATA_FLOAT);
     if (bytes_read == -1) {
         int code = BASS_ErrorGetCode();
         if (code != BASS_ERROR_ENDED)
@@ -184,6 +192,12 @@ void Scope::update_buffers() {
     }
 }
 
+struct nudge_data {
+    int32_t amount;
+    int32_t dist_from_zero = 0;
+    bool is_before_peak = false;
+};
+
 std::optional<int32_t> Scope::find_best_nudge(const std::vector<float>& floats,
                                               const std::vector<float>& prev) {
     const double EPSILON = 0.005;
@@ -197,8 +211,8 @@ std::optional<int32_t> Scope::find_best_nudge(const std::vector<float>& floats,
     double trigger_threshold = std::max(EPSILON, m_trigger_threshold * peak_amplitude);
 
     // Find all rising edges within the window
-    std::vector<int32_t> nudges;
-    std::vector<int32_t> peak_nudges;
+    std::vector<nudge_data> base_nudges;
+    std::queue<int32_t> peaks;
     int32_t last_candidate_nudge = 0;
     float last_amplitude = 0;
 
@@ -225,83 +239,97 @@ std::optional<int32_t> Scope::find_best_nudge(const std::vector<float>& floats,
         }
 
         if (lower_bound_cross && upper_bound_cross) {
-            nudges.push_back(last_candidate_nudge);
+            base_nudges.emplace_back(last_candidate_nudge);
             lower_bound_cross = false;
             upper_bound_cross = false;
         }
 
-        if (f > peak_amp_threshold && !nudges.empty()
-            && (peak_nudges.empty() || peak_nudges.back() != nudges.back())) {
-            peak_nudges.push_back(last_candidate_nudge);
+        if (f > peak_amp_threshold && !base_nudges.empty()
+            && !base_nudges.back().is_before_peak) {
+            peaks.push(offs);
+            base_nudges.back().is_before_peak = true;
         }
 
         last_amplitude = f;
     }
 
-    // Early exits if 0 or 1 candidate nudges were found
-    if (nudges.size() == 0)
+    // Early exits if no candidate nudges were found
+    if (base_nudges.size() == 0)
         return std::nullopt;
-    if (nudges.size() == 1)
-        return nudges[0];
+
+    // Add extra nudges in a window around the centers
+    std::vector<nudge_data> nudges;
+    if (m_drift_window == 0) {
+        nudges = base_nudges;
+    } else {
+        nudges.reserve(std::max(m_drift_window, 1) * base_nudges.size());
+
+        int32_t min_start = 0;
+        for (int32_t i = 0; i < base_nudges.size(); i++) {
+            const auto& base_nudge = base_nudges[i];
+
+            // The nudge amount halfway between this nudge and the next nudge
+            // If the drift window is greater than the distance between this nudge and the
+            // next one, only go up to halfway so we don't insert duplicates.
+            int32_t halfway = i + 1 < base_nudges.size()
+                                  ? (base_nudge.amount + base_nudges[i + 1].amount) / 2
+                                  : std::numeric_limits<int32_t>::max();
+
+            int32_t start = std::max(base_nudge.amount - (m_drift_window / 2), min_start);
+            int32_t end = std::min(
+                {base_nudge.amount + div_ceil(m_drift_window, 2), m_max_nudge, halfway});
+
+            for (int32_t j = start; j < end; j++) {
+                bool is_before_peak = base_nudge.is_before_peak && j <= peaks.front();
+                nudges.emplace_back(j, j - base_nudge.amount, is_before_peak);
+            }
+
+            if (base_nudge.is_before_peak) {
+                peaks.pop();
+            }
+
+            min_start = end;
+        }
+    }
 
     // Compute an error value for each candidate nudge. This is based on
     // multiple factors that can be weighted individually by the user.
-
     uint32_t sim_window_start = (m_window_size - m_similarity_window) / 2;
-    size_t peak_nudge_idx = 0;
     int32_t best_nudge = 0;
     double min_error = std::numeric_limits<double>::infinity();
+    double sq_drift_window = m_drift_window * m_drift_window;
 
-    // For debug visualization
-    int32_t other_best_nudge = 0;
-    double other_min_error = std::numeric_limits<double>::infinity();
-
-    for (auto nudge : nudges) {
-        double errors[] = {0, 0};
+    for (const auto& nudge : nudges) {
         bool flag2 = false;
 
         // Factor 1: Compute the average difference between a candidate view
         // window and the previous one. (Should typically range between 0 and 2)
+        double similarity_factor = 0;
         for (uint32_t i = 0; i < m_similarity_window; i++) {
-            errors[0] += std::abs(floats[nudge + i + sim_window_start]
-                                  - prev[i + sim_window_start]);
+            similarity_factor += std::abs(floats[nudge.amount + i + sim_window_start]
+                                          - prev[i + sim_window_start]);
         }
-        errors[0] = errors[0] / m_similarity_window;
-
-        // Factor 2: If the difference between this nudge and the last nudge is
-        // close to the difference between the last nudge and the one before it,
-        // multiply a bias factor with the error.
-        //   This prioritizes moving the nudge window at a constant rate,
-        //   hopefully good for frequency detection.
-
-        // This didn't end up working very well, so I'm disabling it
-        /*if (mod_within_window(nudge, expected_nudge_min, expected_nudge_max)) {
-             flag1 = true;
-             error *= m_repeat_bias;
-        }*/
+        similarity_factor /= m_similarity_window;
 
         // Factor 2: If a nudge is before a peak value, reduce its error. This
         // prioritizes output windows centered before large amplitudes.
-        if (peak_nudge_idx < peak_nudges.size() && nudge == peak_nudges[peak_nudge_idx]) {
-            flag2 = true;
-            errors[1] = 0;
-            peak_nudge_idx++;
-        } else {
-            errors[1] = 1;
-        }
+        double before_peak_factor = nudge.is_before_peak ? 0 : 1;
 
-        double error = errors[0] * m_similarity_bias + errors[1] * m_peak_bias;
+        // Factor 3: Penalize a nudge if it's far away from a zero
+        double drift_factor =
+            m_drift_window == 0
+                ? 0
+                : std::abs(static_cast<double>(nudge.dist_from_zero) / m_drift_window);
+
+        double error = similarity_factor * m_similarity_bias
+                       + before_peak_factor * m_peak_bias
+                       + drift_factor * m_avoid_drift_bias;
 
         // If we've found a nudge with lower error, use it
         if (error < min_error) {
-            m_flag2 = flag2;
             min_error = error;
-            best_nudge = nudge;
+            best_nudge = nudge.amount;
         }
-    }
-
-    if (other_best_nudge == best_nudge) {
-        m_flag2 = false;
     }
 
     return best_nudge;
