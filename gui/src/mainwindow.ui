@@ -1294,6 +1294,8 @@
   <tabstop>sbSimilarityWindow</tabstop>
   <tabstop>dsbPeakBias</tabstop>
   <tabstop>dsbPeakThreshold</tabstop>
+  <tabstop>dsbDriftWindow</tabstop>
+  <tabstop>dsbNoDriftBias</tabstop>
   <tabstop>btnStartRender</tabstop>
   <tabstop>btnStopRender</tabstop>
  </tabstops>
