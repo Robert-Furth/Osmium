@@ -6,10 +6,10 @@ namespace controls {
 
 Previewer::Previewer(QWidget* parent) : QWidget{parent} {}
 
-void Previewer::paintEvent(QPaintEvent* event) {
+void Previewer::paintEvent(QPaintEvent* /*event*/) {
     QPainter painter(this);
 
-    int render_width, render_height;
+    int render_width, render_height; // NOLINT
     if (m_pixmap) {
         render_width = m_pixmap->width();
         render_height = m_pixmap->height();

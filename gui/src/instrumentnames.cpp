@@ -179,7 +179,7 @@ const std::unordered_map<int, const char*> g_percussion_names = {
     {56, "SFX Kit"},
 };
 
-QString get_instrument_name(int program, int bank, bool is_percussion) {
+QString get_instrument_name(int program, int /*bank*/, bool is_percussion) {
     if (is_percussion) {
         if (g_percussion_names.contains(program))
             return g_percussion_names.at(program);

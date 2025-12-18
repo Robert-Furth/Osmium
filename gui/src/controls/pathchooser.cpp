@@ -17,7 +17,10 @@ PathChooser::PathChooser(QWidget* parent) : QWidget(parent) {
     m_choose_button = new QPushButton("Choose...", this);
     layout->addWidget(m_choose_button);
 
-    connect(m_choose_button, &QPushButton::clicked, this, &PathChooser::open_file_chooser);
+    connect(m_choose_button,
+            &QPushButton::clicked,
+            this,
+            &PathChooser::open_file_chooser);
 
     setLayout(layout);
     setFocusProxy(m_line_edit);
@@ -43,10 +46,8 @@ void PathChooser::open_file_chooser() {
         initial_dir = QFileInfo(m_current_path).absoluteDir().path();
     }
 
-    QString filename = QFileDialog::getOpenFileName(this,
-                                                    m_dialog_title,
-                                                    initial_dir,
-                                                    m_filter);
+    QString filename =
+        QFileDialog::getOpenFileName(this, m_dialog_title, initial_dir, m_filter);
     if (filename.isNull())
         return;
 

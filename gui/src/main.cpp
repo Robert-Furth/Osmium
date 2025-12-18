@@ -6,7 +6,8 @@
 
 #include "mainwindow.h"
 
-int main(int argc, char *argv[]) {
+// NOLINTBEGIN(bugprone-exception-escape, readability-static-accessed-through-instance)
+int main(int argc, char* argv[]) {
     if (!osmium::init()) {
         std::cout << "Could not start osmium library\n";
         return 1;
@@ -24,3 +25,4 @@ int main(int argc, char *argv[]) {
     w.show();
     return a.exec();
 }
+// NOLINTEND(bugprone-exception-escape, readability-static-accessed-through-instance)

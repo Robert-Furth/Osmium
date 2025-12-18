@@ -56,7 +56,7 @@ signals:
     void preview_image_changed(const QPixmap&);
 
 protected:
-    void handle_connection(QLocalSocket*) override;
+    void handle_connection(QLocalSocket* connection) override;
 
 private:
     int m_width = 0;
@@ -82,7 +82,7 @@ signals:
     void done(bool, const QString& msg = "");
 
 protected:
-    void handle_connection(QLocalSocket*) override;
+    void handle_connection(QLocalSocket* connection) override;
 
 private:
     QString m_filename;

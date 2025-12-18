@@ -20,8 +20,11 @@ namespace {
 
 // -- Callbacks --
 
-BOOL CALLBACK midi_filter_channel(
-    HSTREAM handle, int track, BASS_MIDI_EVENT* event, BOOL seeking, void* user) {
+BOOL CALLBACK midi_filter_channel(HSTREAM /*handle*/,
+                                  int /*track*/,
+                                  BASS_MIDI_EVENT* event,
+                                  BOOL /*seeking*/,
+                                  void* user) {
     int* channelp = static_cast<int*>(user);
     // Filter out all notes not from the given channel
     if (event->event == MIDI_EVENT_NOTE)
@@ -30,7 +33,7 @@ BOOL CALLBACK midi_filter_channel(
 }
 
 BOOL CALLBACK midi_filter_track(
-    HSTREAM handle, int track, BASS_MIDI_EVENT* event, BOOL seeking, void* user) {
+    HSTREAM /*handle*/, int track, BASS_MIDI_EVENT* event, BOOL /*seeking*/, void* user) {
     int* channelp = static_cast<int*>(user);
     // Filter out all notes not from the given track
     if (event->event == MIDI_EVENT_NOTE)

@@ -17,10 +17,14 @@
 #include "renderargs.h"
 #include "workers.h"
 
+namespace {
+
 // Because typing "static_cast<int>(...)" every time gets old fast
 constexpr int toint(ChannelArgRole role) {
     return static_cast<int>(role);
 }
+
+} // namespace
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
@@ -341,19 +345,19 @@ void MainWindow::start_rendering() {
     }
 
     if (!std::filesystem::is_regular_file(soundfont_path.toStdString())) {
-        QString message
-            = QString("The file \"%1\" does not exist or is not a regular file. Please "
-                      "choose a new soundfont in the Program Options menu.")
-                  .arg(soundfont_path);
+        QString message =
+            QString("The file \"%1\" does not exist or is not a regular file. Please "
+                    "choose a new soundfont in the Program Options menu.")
+                .arg(soundfont_path);
         QMessageBox::warning(this, "Error", message);
         return;
     }
 
-    auto outfile_name
-        = std::filesystem::path(m_input_file.toStdString()).stem().concat(".mp4");
-    auto outfile_path = std::filesystem::path(
-                            m_config.path_config.output_file_dir.toStdString())
-                        / outfile_name;
+    auto outfile_name =
+        std::filesystem::path(m_input_file.toStdString()).stem().concat(".mp4");
+    auto outfile_path =
+        std::filesystem::path(m_config.path_config.output_file_dir.toStdString())
+        / outfile_name;
 
     QString output_file = QFileDialog::getSaveFileName(this,
                                                        "Render File",
@@ -392,11 +396,8 @@ void MainWindow::handle_render_stop(bool ok, const QString& message) {
         QString title = ok ? "Osmium" : "Error";
         QMessageBox::Icon icon = ok ? QMessageBox::Information : QMessageBox::Warning;
 
-        QMessageBox mbox(icon,
-                         title,
-                         display_message,
-                         QMessageBox::StandardButton::Ok,
-                         this);
+        QMessageBox mbox(
+            icon, title, display_message, QMessageBox::StandardButton::Ok, this);
         mbox.setTextFormat(Qt::RichText);
         mbox.exec();
     }
@@ -543,7 +544,7 @@ GlobalArgs MainWindow::create_global_args() {
         .border_color = ui->cpGridlineColor->color().rgb(),
         .border_thickness = ui->dsbGridlineThickness->value(),
         .background_color = ui->cpBackground->color().rgb(),
-        .debug_vis = false, //ui->chbDebugVis->isChecked(),
+        .debug_vis = false,
     };
 }
 
@@ -583,23 +584,25 @@ ChannelArgs MainWindow::create_channel_args(QStandardItem* args, int index) {
 
         .color = args->data(toint(ChannelArgRole::WaveColor)).value<QColor>().rgb(),
         .thickness = args->data(toint(ChannelArgRole::WaveThickness)).toDouble(),
-        .midline_color
-        = args->data(toint(ChannelArgRole::MidlineColor)).value<QColor>().rgb(),
-        .midline_thickness = args->data(toint(ChannelArgRole::MidlineThickness)).toDouble(),
+        .midline_color =
+            args->data(toint(ChannelArgRole::MidlineColor)).value<QColor>().rgb(),
+        .midline_thickness =
+            args->data(toint(ChannelArgRole::MidlineThickness)).toDouble(),
         .draw_h_midline = args->data(toint(ChannelArgRole::DrawHMidline)).toBool(),
         .draw_v_midline = args->data(toint(ChannelArgRole::DrawVMidline)).toBool(),
 
         .draw_labels = args->data(toint(ChannelArgRole::ShowInstrumentLabels)).toBool(),
         .label_template = args->data(toint(ChannelArgRole::LabelTemplate)).toString(),
         .label_font = font,
-        .label_color
-        = args->data(toint(ChannelArgRole::LabelFontColor)).value<QColor>().rgb(),
+        .label_color =
+            args->data(toint(ChannelArgRole::LabelFontColor)).value<QColor>().rgb(),
 
         .max_nudge_ms = args->data(toint(ChannelArgRole::MaxNudgeMs)).toInt(),
-        .trigger_threshold = args->data(toint(ChannelArgRole::TriggerThreshold)).toDouble(),
+        .trigger_threshold =
+            args->data(toint(ChannelArgRole::TriggerThreshold)).toDouble(),
         .similarity_bias = args->data(toint(ChannelArgRole::SimilarityBias)).toDouble(),
-        .similarity_window_ms = args->data(toint(ChannelArgRole::SimilarityWindowMs))
-                                    .toInt(),
+        .similarity_window_ms =
+            args->data(toint(ChannelArgRole::SimilarityWindowMs)).toInt(),
         .peak_bias = args->data(toint(ChannelArgRole::PeakBias)).toDouble(),
         .peak_threshold = args->data(toint(ChannelArgRole::PeakThreshold)).toDouble(),
         .drift_window_ms = args->data(toint(ChannelArgRole::DriftWindowMs)).toDouble(),

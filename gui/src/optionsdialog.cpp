@@ -52,7 +52,8 @@ void OptionsDialog::set_config(const PersistentConfig& config) {
     ui->pcSoundfontPath->set_current_path(config.path_config.soundfont_path);
 
     ui->cmbVideoCodec->setCurrentIndex(static_cast<int>(config.video_config.codec));
-    ui->cmbEncodeSpeed->setCurrentIndex(static_cast<int>(config.video_config.h26x_preset));
+    ui->cmbEncodeSpeed->setCurrentIndex(
+        static_cast<int>(config.video_config.h26x_preset));
     ui->sbCrf->setValue(config.video_config.h26x_crf);
 
     ui->sbAudioBitrate->setValue(config.audio_config.bitrate_kbps);
@@ -67,10 +68,10 @@ void OptionsDialog::update_config() {
     m_config.path_config.ffmpeg_path = ui->pcFfmpegPath->current_path();
     m_config.path_config.soundfont_path = ui->pcSoundfontPath->current_path();
 
-    m_config.video_config.codec = static_cast<VideoCodec>(
-        ui->cmbVideoCodec->currentIndex());
-    m_config.video_config.h26x_preset = static_cast<H26xPreset>(
-        ui->cmbEncodeSpeed->currentIndex());
+    m_config.video_config.codec =
+        static_cast<VideoCodec>(ui->cmbVideoCodec->currentIndex());
+    m_config.video_config.h26x_preset =
+        static_cast<H26xPreset>(ui->cmbEncodeSpeed->currentIndex());
     m_config.video_config.h26x_crf = ui->sbCrf->value();
 
     m_config.audio_config.bitrate_kbps = ui->sbAudioBitrate->value();
@@ -157,8 +158,8 @@ QString OptionsDialog::search_path(const QString& exe) {
 QString OptionsDialog::search_path(const QString& exe) {
     const auto paths = m_env.value("PATH").split(':');
 
-    auto flags = QDirListing::IteratorFlag::FilesOnly
-                 | QDirListing::IteratorFlag::CaseSensitive;
+    auto flags =
+        QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::CaseSensitive;
     QStringList filter{exe};
     for (const auto& path : paths) {
         if (path.isEmpty())

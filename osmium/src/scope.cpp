@@ -49,19 +49,6 @@ void shift_in(std::vector<T>& dest,
     std::fill(it, dest.end(), default_val);
 }
 
-/** Returns the integer `n` in range [0, `m`) s.t. `a` ≡ `n` (mod `m`) */
-constexpr int32_t mod(int32_t a, uint32_t m) {
-    while (a < 0)
-        a += m;
-    return a % m;
-}
-
-constexpr bool mod_within_window(int32_t n, int32_t min, int32_t max) {
-    if (min <= max)
-        return min <= n && n <= max;
-    return n <= max || min <= n;
-}
-
 // Credit to https://stackoverflow.com/a/2745086/31835764
 template<typename T>
 constexpr T div_ceil(T a, T b) {
@@ -254,7 +241,7 @@ std::optional<int32_t> Scope::find_best_nudge(const std::vector<float>& floats,
     }
 
     // Early exits if no candidate nudges were found
-    if (base_nudges.size() == 0)
+    if (base_nudges.empty())
         return std::nullopt;
 
     // Add extra nudges in a window around the centers
@@ -297,7 +284,6 @@ std::optional<int32_t> Scope::find_best_nudge(const std::vector<float>& floats,
     uint32_t sim_window_start = (m_window_size - m_similarity_window) / 2;
     int32_t best_nudge = 0;
     double min_error = std::numeric_limits<double>::infinity();
-    double sq_drift_window = m_drift_window * m_drift_window;
 
     for (const auto& nudge : nudges) {
         bool flag2 = false;

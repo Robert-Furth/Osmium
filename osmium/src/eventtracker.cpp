@@ -17,7 +17,7 @@ EventTracker::EventTracker(uint32_t raw_handle, uint32_t fps) : m_s_per_frame(1.
 
     HandleWrapper handle(raw_handle);
 
-    int32_t num_events = BASS_MIDI_StreamGetEvents(*handle, -1, 0, nullptr);
+    uint32_t num_events = BASS_MIDI_StreamGetEvents(*handle, -1, 0, nullptr);
     if (num_events == -1)
         throw Error::from_bass_error();
     m_events.resize(num_events);
@@ -29,7 +29,7 @@ EventTracker::EventTracker(uint32_t raw_handle, uint32_t fps) : m_s_per_frame(1.
     static_assert(sizeof(Event) == sizeof(BASS_MIDI_EVENT)
                   && alignof(Event) == alignof(BASS_MIDI_EVENT));
 
-    int result = BASS_MIDI_StreamGetEvents(
+    uint32_t result = BASS_MIDI_StreamGetEvents(
         *handle, -1, 0, reinterpret_cast<BASS_MIDI_EVENT*>(m_events.data()));
     if (result == -1)
         throw Error::from_bass_error();

@@ -26,7 +26,7 @@ public:                                                                         
                       _name,                                                             \
                       _var_name,                                                         \
                       _default,                                                          \
-                      if (_var_name < 0) throw Error(#_name " cannot be negative");)
+                      if ((_var_name) < 0) throw Error(#_name " cannot be negative");)
 
 namespace osmium {
 

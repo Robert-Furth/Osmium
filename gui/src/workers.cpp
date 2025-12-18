@@ -81,23 +81,33 @@ void VideoSocketWorker::init(const QString& filename,
 void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::steady_clock;
+    using std::chrono::duration_cast;
+
+    if (!m_renderer) {
+        emit done(false, "Renderer not initialized");
+        return;
+    }
 
     int frame_counter = 0;
     int preview_update_freq = std::max(1, m_fps / 2);
-    unsigned long long elapsed_ms = 0;
+    ms total_render_ms(0);
+    ms total_write_ms(0);
+
     auto render_start = clock::now();
     while (m_renderer->has_frames_remaining() && !m_abort_requested) {
         auto frame_start = clock::now();
         auto frame = m_renderer->paint_next_frame();
-        auto frame_dur = std::chrono::duration_cast<ms>(clock::now() - frame_start);
-        elapsed_ms += frame_dur.count();
+        total_render_ms += duration_cast<ms>(clock::now() - frame_start);
 
-        qint64 write_result = connection->write(reinterpret_cast<const char*>(
-                                                    frame.constBits()),
-                                                frame.sizeInBytes());
+        auto write_start = clock::now();
+        auto write_result =
+            connection->write(reinterpret_cast<const char*>(frame.constBits()),
+                              frame.sizeInBytes());
+        total_write_ms += duration_cast<ms>(clock::now() - write_start);
+
         if (write_result == -1) {
-            auto err_message = QString("Error writing frame data: %1")
-                                   .arg(connection->errorString());
+            auto err_message =
+                QString("Error writing frame data: %1").arg(connection->errorString());
             m_renderer.reset();
             emit done(false, err_message);
             return;
@@ -111,11 +121,13 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
         frame_counter += 1;
     }
 
-    auto render_dur = std::chrono::duration_cast<ms>(clock::now() - render_start);
+    auto render_dur = duration_cast<ms>(clock::now() - render_start);
 
     qDebug() << "VIDEO:" << frame_counter << "frames";
     qDebug() << "Average frame render time:"
-             << elapsed_ms / static_cast<double>(frame_counter) << "ms";
+             << total_render_ms.count() / static_cast<double>(frame_counter) << "ms";
+    qDebug() << "Average socket write time:"
+             << total_write_ms.count() / static_cast<double>(frame_counter) << "ms";
     qDebug() << "Total render time:" << std::format("{:%M:%S}", render_dur).c_str();
 
     connection->flush();
@@ -147,16 +159,21 @@ void AudioSocketWorker::init(const QString& filename, const QString& soundfont, 
 }
 
 void AudioSocketWorker::handle_connection(QLocalSocket* connection) {
+    if (!m_player) {
+        emit done(false, "Player not initialized");
+        return;
+    }
+
     int frame_no = 0;
     while (m_player->is_playing() && !m_abort_requested) {
         m_player->next_wave_data();
         const auto& samples = m_player->get_samples();
-        qint64 write_result = connection->write(reinterpret_cast<const char*>(
-                                                    samples.data()),
-                                                samples.size() * sizeof(float));
+        auto write_result =
+            connection->write(reinterpret_cast<const char*>(samples.data()),
+                              samples.size() * sizeof(float));
         if (write_result == -1) {
-            auto err_message = QString("Error writing audio data: %1")
-                                   .arg(connection->errorString());
+            auto err_message =
+                QString("Error writing audio data: %1").arg(connection->errorString());
             m_player.reset();
             emit done(false, err_message);
             return;
@@ -201,7 +218,10 @@ RenderWorker::RenderWorker(QObject* parent)
     m_audio_thread.start();
 
     connect(&m_ffmpeg, &QProcess::finished, this, &RenderWorker::notify_ffmpeg_done);
-    connect(&m_ffmpeg, &QProcess::errorOccurred, this, &RenderWorker::notify_ffmpeg_error);
+    connect(&m_ffmpeg,
+            &QProcess::errorOccurred,
+            this,
+            &RenderWorker::notify_ffmpeg_error);
 }
 
 void RenderWorker::work(const QString& input_file,
@@ -335,8 +355,8 @@ void RenderWorker::notify_ffmpeg_done(int status_code) {
     if (status_code != 0) {
         m_status = false;
         if (m_status_message.isEmpty()) {
-            m_status_message = QString("FFmpeg exited abnormally (status code %1).")
-                                   .arg(status_code);
+            m_status_message =
+                QString("FFmpeg exited abnormally (status code %1).").arg(status_code);
         }
     }
 
@@ -356,13 +376,13 @@ void RenderWorker::notify_ffmpeg_error(QProcess::ProcessError err) {
                       "haven't installed FFmpeg yet, you can download it from <a "
                       "href='https://ffmpeg.org/download.html'>its website</a>.";
         } else {
-            message
-                = QString(
-                      "Could not start FFmpeg; the file \"%1\" either does not exist or "
-                      "is not executable. Specify the proper path in the Program Options "
-                      "menu. If you haven't installed FFmpeg yet, you can download it "
-                      "from <a href='https://ffmpeg.org/download.html'>its website</a>.")
-                      .arg(m_ffmpeg_path.toHtmlEscaped());
+            message =
+                QString(
+                    "Could not start FFmpeg; the file \"%1\" either does not exist or "
+                    "is not executable. Specify the proper path in the Program Options "
+                    "menu. If you haven't installed FFmpeg yet, you can download it "
+                    "from <a href='https://ffmpeg.org/download.html'>its website</a>.")
+                    .arg(m_ffmpeg_path.toHtmlEscaped());
         }
 
         emit done(false, message);

@@ -85,7 +85,8 @@ protected:
 
 class PreviewRenderer : public BaseRenderer {
 public:
-    PreviewRenderer(const QList<ChannelArgs>& channel_args, const GlobalArgs& global_args);
+    PreviewRenderer(const QList<ChannelArgs>& channel_args,
+                    const GlobalArgs& global_args);
 
 protected:
     const std::vector<float>& get_left_wave(int index) const override;

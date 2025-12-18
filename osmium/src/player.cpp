@@ -19,7 +19,7 @@ Player::Player(uint32_t handle, uint32_t fps, const char* soundfont)
     m_num_channels = info.chans;
     m_sample_rate = info.freq;
     m_samples_per_frame = info.freq / fps;
-    m_buffer.resize(m_samples_per_frame * m_num_channels);
+    m_buffer.resize(static_cast<size_t>(m_samples_per_frame) * m_num_channels);
 
     if (soundfont) {
         HSOUNDFONT sf_handle = BASS_MIDI_FontInit(soundfont, 0);
@@ -46,11 +46,11 @@ bool Player::is_playing() const {
 }
 
 void Player::next_wave_data() {
-    std::vector<float> data(m_samples_per_frame * m_num_channels);
-    uint32_t bytes_read = BASS_ChannelGetData(*m_stream_handle,
-                                              data.data(),
-                                              data.size() * sizeof(float)
-                                                  | BASS_DATA_FLOAT);
+    std::vector<float> data(static_cast<size_t>(m_samples_per_frame) * m_num_channels);
+    uint32_t bytes_read =
+        BASS_ChannelGetData(*m_stream_handle,
+                            data.data(),
+                            data.size() * sizeof(float) | BASS_DATA_FLOAT);
     if (bytes_read == -1) {
         int errcode = BASS_ErrorGetCode();
         if (errcode != BASS_ERROR_ENDED)

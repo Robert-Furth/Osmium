@@ -7,7 +7,9 @@
 
 namespace osmium {
 
-static HPLUGIN g_midi_plugin = 0;
+namespace {
+HPLUGIN g_midi_plugin = 0;
+} // namespace
 
 bool init() {
     g_midi_plugin = BASS_PluginLoad("bassmidi", 0);

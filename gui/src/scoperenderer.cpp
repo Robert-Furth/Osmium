@@ -113,24 +113,22 @@ void BaseRenderer::paint_subframe(QPainter& painter, int index) {
 
     if (args.draw_v_midline) {
         painter.setPen(p.midline_pen);
-        painter.drawLine(p.w * 0.5, 0, p.w * 0.5, p.h); // Vertical axis
+        painter.drawLine(QLineF(p.w * 0.5, 0, p.w * 0.5, p.h)); // Vertical axis
     }
 
     if (args.draw_labels) {
         painter.setFont(args.label_font);
         painter.setPen(QColor(args.label_color));
-        painter.drawText(QRectF(m_border_thickness * 0.5 + 3,
-                                m_border_thickness * 0.5 + 3,
-                                p.w,
-                                p.h),
-                         p.label);
+        painter.drawText(
+            QRectF(m_border_thickness * 0.5 + 3, m_border_thickness * 0.5 + 3, p.w, p.h),
+            p.label);
     }
 
     if (args.is_stereo) {
         if (args.draw_h_midline) {
             painter.setPen(p.midline_pen);
-            painter.drawLine(0, p.h * 0.25, p.w, p.h * 0.25); // H axis 1
-            painter.drawLine(0, p.h * 0.75, p.w, p.h * 0.75); // H axis 2
+            painter.drawLine(QLineF(0, p.h * 0.25, p.w, p.h * 0.25)); // H axis 1
+            painter.drawLine(QLineF(0, p.h * 0.75, p.w, p.h * 0.75)); // H axis 2
         }
 
         painter.setPen(p.wave_pen);
@@ -170,11 +168,11 @@ void BaseRenderer::PaintInfo::update_label(const ChannelArgs& args) {
     label = "";
     QRegularExpression re("%.");
 
-    int lastMatchEnd = 0;
+    int last_match_end = 0;
     for (const auto& match : re.globalMatch(args.label_template)) {
-        label += args.label_template.sliced(lastMatchEnd,
-                                            match.capturedStart() - lastMatchEnd);
-        lastMatchEnd = match.capturedEnd();
+        label += args.label_template.sliced(last_match_end,
+                                            match.capturedStart() - last_match_end);
+        last_match_end = match.capturedEnd();
 
         auto mstr = match.captured();
         switch (mstr[1].unicode()) {
@@ -192,7 +190,7 @@ void BaseRenderer::PaintInfo::update_label(const ChannelArgs& args) {
         }
     }
 
-    label += args.label_template.sliced(lastMatchEnd);
+    label += args.label_template.sliced(last_match_end);
 }
 
 // -- ScopeRenderer --
@@ -233,12 +231,12 @@ QImage ScopeRenderer::paint_next_frame() {
     // Run each subimage in parallel
     std::vector<int> indices(m_scopes.size());
     std::iota(indices.begin(), indices.end(), 0);
-    auto subframes = QtConcurrent::blockingMapped(indices, [this, render_hints](int index) {
-        const auto& args = m_channel_args[index];
-        auto& pinfo = m_paint_infos[index];
+    auto subframes = QtConcurrent::blockingMapped(indices, [this, render_hints](int idx) {
+        const auto& args = m_channel_args[idx];
+        auto& pinfo = m_paint_infos[idx];
 
         // Update wave data
-        m_scopes[index].next_wave_data();
+        m_scopes[idx].next_wave_data();
 
         // Update label if necessary
         if (args.draw_labels) {
@@ -256,7 +254,7 @@ QImage ScopeRenderer::paint_next_frame() {
         subimg.fill(m_background_color);
         QPainter painter(&subimg);
         painter.setRenderHints(render_hints);
-        paint_subframe(painter, index);
+        paint_subframe(painter, idx);
 
         return subimg;
     });
@@ -277,19 +275,14 @@ QImage ScopeRenderer::paint_next_frame() {
 }
 
 bool ScopeRenderer::has_frames_remaining() const {
-    // for (const auto& scope : m_scopes) {
-    //     if (scope.is_playing())
-    //         return true;
-    // }
-    // return false;
     return std::ranges::any_of(m_scopes, &osmium::Scope::is_playing);
 }
 
 double ScopeRenderer::get_progress() {
     double acc = 0.0;
     for (const auto& scope : m_scopes) {
-        acc += static_cast<double>(scope.get_current_progress())
-               / scope.get_total_samples();
+        acc +=
+            static_cast<double>(scope.get_current_progress()) / scope.get_total_samples();
     }
     return acc / m_scopes.size();
 }
@@ -313,10 +306,10 @@ PreviewRenderer::PreviewRenderer(const QList<ChannelArgs>& channel_args,
     }
 }
 
-const std::vector<float>& PreviewRenderer::get_left_wave(int index) const {
+const std::vector<float>& PreviewRenderer::get_left_wave(int /*index*/) const {
     return m_wave_data;
 }
 
-const std::vector<float>& PreviewRenderer::get_right_wave(int index) const {
+const std::vector<float>& PreviewRenderer::get_right_wave(int /*index*/) const {
     return m_wave_data;
 }

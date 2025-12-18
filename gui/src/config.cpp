@@ -37,8 +37,8 @@ H26xPreset h26x_preset(const std::string& key, H26xPreset default_val) {
 
 QString to_string(VideoCodec codec) {
     switch (codec) {
-#define X(f, s) \
-    case VideoCodec::f: \
+#define X(f, s)                                                                          \
+    case VideoCodec::f:                                                                  \
         return s;
 #include "xmacro/video_codec.txt"
 #undef X
@@ -50,8 +50,8 @@ QString to_string(VideoCodec codec) {
 
 QString to_string(H26xPreset preset) {
     switch (preset) {
-#define X(f, s) \
-    case H26xPreset::f: \
+#define X(f, s)                                                                          \
+    case H26xPreset::f:                                                                  \
         return s;
 #include "xmacro/h26x_preset.txt"
 #undef X
@@ -60,6 +60,8 @@ QString to_string(H26xPreset preset) {
         return "";
     }
 }
+
+namespace {
 
 fs::path config_path() {
     auto dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -72,14 +74,14 @@ fs::path config_path() {
 PathConfig load_path_config(const toml::node_view<toml::node>& v) {
     auto x = QString::fromStdString(v["soundfont_path"].value_or<std::string>(""));
     return PathConfig{
-        .soundfont_path = QString::fromStdString(
-            v["soundfont_path"].value_or<std::string>("")),
+        .soundfont_path =
+            QString::fromStdString(v["soundfont_path"].value_or<std::string>("")),
         .use_system_ffmpeg = v["use_system_ffmpeg"].value_or(true),
         .ffmpeg_path = QString::fromStdString(v["ffmpeg_path"].value_or<std::string>("")),
-        .input_file_dir = QString::fromStdString(
-            v["input_file_dir"].value_or<std::string>("")),
-        .output_file_dir = QString::fromStdString(
-            v["output_file_dir"].value_or<std::string>("")),
+        .input_file_dir =
+            QString::fromStdString(v["input_file_dir"].value_or<std::string>("")),
+        .output_file_dir =
+            QString::fromStdString(v["output_file_dir"].value_or<std::string>("")),
     };
 }
 
@@ -113,6 +115,8 @@ AudioConfig load_audio_config(const toml::node_view<toml::node>& v) {
         .bitrate_kbps = bitrate,
     };
 }
+
+} // namespace
 
 PersistentConfig load_config() {
     return load_config(config_path());
