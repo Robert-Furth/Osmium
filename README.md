@@ -2,6 +2,8 @@
 
 An oscilliscope visualizer for MIDIs inspired by [corrscope](https://github.com/corrscope/corrscope).
 
+![](/doc/rendering.png)
+
 ## Download
 
 Download the executable for your system in the [Releases](https://github.com/Robert-Furth/Osmium/releases) page.
@@ -24,6 +26,7 @@ Nevertheless, here are some things I'd like to add in the future:
 - [ ] Saving/loading presets
 - [ ] More rendering options (codec, CRF, etc.)
 - [ ] Per-track as well as per-channel visualizations
+- [ ] MOD music support
 - [ ] More control over scope placement
 - [ ] Rendering optimizations
 - [ ] Waveform stability improvements
