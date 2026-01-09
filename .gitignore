@@ -84,6 +84,7 @@ CMakeLists.txt.user*
 .uic/
 /build*/
 /.cache
+/install
 
 # Local libraries and include files
 libs/
