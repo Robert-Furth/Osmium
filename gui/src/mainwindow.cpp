@@ -13,6 +13,8 @@
 #include <QList>
 #include <QMessageBox>
 
+#include <osmium.h>
+
 #include "config.h"
 #include "renderargs.h"
 #include "workers.h"
@@ -271,12 +273,25 @@ MainWindow::~MainWindow() {
 
 void MainWindow::reinit_channel_model(int num_channels) {
     set_ui_state(UiState::Resetting);
+
+    std::vector<bool> channels_with_notes;
+    if (!m_input_file.isEmpty()) {
+        osmium::EventTracker trk(m_input_file.toUtf8(),
+                                 ui->cmbFrameRate->currentData().toInt());
+        channels_with_notes = trk.get_channels_with_notes();
+    }
+    // int num_channels = channels_with_notes.size();
+
     m_channel_model.setRowCount(num_channels + 1);
 
     auto* default_item = m_channel_model.item(0);
     for (int i = 1; i <= num_channels; i++) {
         auto* item = default_item->clone();
         item->setText(QString("Channel %1").arg(i));
+        item->setData(QVariant(i - 1 >= channels_with_notes.size()
+                                   ? false
+                                   : channels_with_notes[i - 1]),
+                      toint(ChannelArgRole::IsVisible));
         m_channel_model.setItem(i, item);
     }
 
@@ -412,8 +427,8 @@ void MainWindow::set_input_file(const QString& filename) {
     m_config.path_config.input_file_dir = input_file_dir;
     ui->pcInputFile->set_initial_dir(input_file_dir);
     ui->pcInputFile->set_current_path(filename);
-
     ui->btnStartRender->setDisabled(m_input_file.isEmpty());
+    reinit_channel_model(16);
 }
 
 void MainWindow::show_options_dialog() {
@@ -556,7 +571,7 @@ QList<ChannelArgs> MainWindow::create_channel_args() {
     for (int i = 1; i < num_rows; i++) {
         auto* item = m_channel_model.item(i);
 
-        if (!item->data(toint(ChannelArgRole::IsVisible)).toBool())
+        if (!item || !item->data(toint(ChannelArgRole::IsVisible)).toBool())
             continue;
 
         if (item->data(toint(ChannelArgRole::InheritDefaults)).toBool()) {

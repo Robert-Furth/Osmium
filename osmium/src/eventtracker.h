@@ -32,11 +32,13 @@ public:
 
     void next_events();
     const std::vector<Event>& get_events() const { return m_event_window; }
+    const std::vector<bool>& get_channels_with_notes();
 
 private:
     std::vector<Event> m_event_window;
     std::vector<Event> m_events;
     std::vector<double> m_times;
+    std::vector<bool> m_channel_has_notes;
 
     size_t m_event_index = 0;
     unsigned int m_cur_frame = 0;

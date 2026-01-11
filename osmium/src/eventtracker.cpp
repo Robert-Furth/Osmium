@@ -75,14 +75,27 @@ void EventTracker::next_events() {
     double seconds = m_cur_frame * m_s_per_frame;
 
     size_t i;
-    for (i = m_event_index; i < m_times.size(); i++) {
-        if (m_times[i] < seconds) {
-            m_event_window.emplace_back(m_events[i]);
-        } else {
-            break;
-        }
+    for (i = m_event_index; i < m_times.size() && m_times[i] <= seconds; i++) {
+        m_event_window.emplace_back(m_events[i]);
     }
     m_event_index = i;
+}
+
+const std::vector<bool>& EventTracker::get_channels_with_notes() {
+    if (!m_channel_has_notes.empty())
+        return m_channel_has_notes;
+
+    for (const auto& event : m_events) {
+        if (event.chan >= m_channel_has_notes.size()) {
+            m_channel_has_notes.resize(event.chan + 1);
+        }
+
+        if (event.event == Event::EventType::Note) {
+            m_channel_has_notes[event.chan] = true;
+        }
+    }
+
+    return m_channel_has_notes;
 }
 
 } // namespace osmium
