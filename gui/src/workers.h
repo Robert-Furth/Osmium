@@ -8,6 +8,9 @@
 #include <QLocalSocket>
 #include <QMutex>
 #include <QObject>
+#include <QOffscreenSurface>
+#include <QOpenGLContext>
+#include <QOpenGLFramebufferObject>
 #include <QPixmap>
 #include <QProcess>
 #include <QString>
@@ -42,6 +45,8 @@ class VideoSocketWorker : public AbstractSocketWorker {
 public:
     VideoSocketWorker();
 
+    ~VideoSocketWorker();
+
 public slots:
     void init(const QString& filename,
               const QString& soundfont,
@@ -64,6 +69,12 @@ private:
     int m_fps = 0;
 
     std::optional<ScopeRenderer> m_renderer;
+    QOffscreenSurface* m_offscreen_surface;
+    QOpenGLContext* m_opengl_ctx;
+
+    bool handle_connection_inner(QLocalSocket* connection,
+                                 const QOpenGLFramebufferObject& framebuffer,
+                                 QString& out_status_str);
 };
 
 class AudioSocketWorker : public AbstractSocketWorker {

@@ -16,7 +16,7 @@ if(WIN32)
     set(CMAKE_INSTALL_BINDIR ".")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Widgets Network)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent Core Widgets Network OpenGL)
 qt_standard_project_setup()
 
 set(app_icon_resource_windows "${PROJECT_SOURCE_DIR}/res.rc")
@@ -63,6 +63,7 @@ target_link_libraries(OsmiumGui
     Qt6::Widgets
     Qt6::Concurrent
     Qt6::Network
+    Qt6::OpenGL
     OsmiumLib
 )
 

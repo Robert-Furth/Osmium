@@ -71,7 +71,8 @@ public:
     ScopeRenderer(const ScopeRenderer&) = delete;
     ScopeRenderer& operator=(const ScopeRenderer&) = delete;
 
-    QImage paint_next_frame();
+    QImage paint_concurrent();
+    void advance_frame();
     bool has_frames_remaining() const;
     double get_progress();
 

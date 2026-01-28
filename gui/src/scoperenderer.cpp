@@ -222,36 +222,18 @@ ScopeRenderer::ScopeRenderer(const QString& filename,
     }
 }
 
-QImage ScopeRenderer::paint_next_frame() {
-    // Update events (for tracking instrument changes)
-    m_event_tracker.next_events();
-
-    auto render_hints = QPainter::Antialiasing | QPainter::TextAntialiasing;
+QImage ScopeRenderer::paint_concurrent() {
+    const auto render_hints = QPainter::Antialiasing | QPainter::TextAntialiasing;
 
     // Run each subimage in parallel
     std::vector<int> indices(m_scopes.size());
     std::iota(indices.begin(), indices.end(), 0);
     auto subframes = QtConcurrent::blockingMapped(indices, [this, render_hints](int idx) {
-        const auto& args = m_channel_args[idx];
         auto& pinfo = m_paint_infos[idx];
 
-        // Update wave data
-        m_scopes[idx].next_wave_data();
-
-        // Update label if necessary
-        if (args.draw_labels) {
-            for (const auto& event : m_event_tracker.get_events()) {
-                if (event.chan == args.channel_number
-                    && event.event == osmium::Event::Program) {
-                    pinfo.program_num = event.param;
-                    pinfo.update_label(args);
-                }
-            }
-        }
-
-        // Paint
         QImage subimg(std::ceil(pinfo.w), std::ceil(pinfo.h), QImage::Format_RGB32);
         subimg.fill(m_background_color);
+
         QPainter painter(&subimg);
         painter.setRenderHints(render_hints);
         paint_subframe(painter, idx);
@@ -259,6 +241,7 @@ QImage ScopeRenderer::paint_next_frame() {
         return subimg;
     });
 
+    // Composite each subimage into the full image
     QImage full_frame(m_width, m_height, QImage::Format_RGB32);
     full_frame.fill(m_background_color);
     QPainter painter(&full_frame);
@@ -272,6 +255,33 @@ QImage ScopeRenderer::paint_next_frame() {
     paint_borders(painter);
 
     return full_frame;
+}
+
+void ScopeRenderer::advance_frame() {
+    // Update events (for tracking instrument changes)
+    m_event_tracker.next_events();
+
+    // Update labels for each channel
+    for (const auto& event : m_event_tracker.get_events()) {
+        if (event.event != osmium::Event::Program)
+            continue;
+
+        // I don't really like this double loop, but m_channel_args should be small.
+        for (int i = 0; i < m_channel_args.size(); i++) {
+            const auto& args = m_channel_args[i];
+
+            if (!args.draw_labels || event.chan != args.channel_number)
+                continue;
+
+            auto& pinfo = m_paint_infos[i];
+            pinfo.program_num = event.param;
+            pinfo.update_label(args);
+        }
+    }
+
+    // In parallel: update wave data
+    QtConcurrent::blockingMap(m_scopes,
+                              [](osmium::Scope& scope) { scope.next_wave_data(); });
 }
 
 bool ScopeRenderer::has_frames_remaining() const {

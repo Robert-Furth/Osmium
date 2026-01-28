@@ -10,6 +10,10 @@
 #include <QLocalSocket>
 #include <QMutexLocker>
 #include <QObject>
+#include <QOffscreenSurface>
+#include <QOpenGLContext>
+#include <QOpenGLFramebufferObject>
+#include <QOpenGLPaintDevice>
 #include <QString>
 
 // -- AbstractSocketWorker --
@@ -58,7 +62,19 @@ void AbstractSocketWorker::priv_on_connection() {
 
 // -- VideoSocketWorker --
 
-VideoSocketWorker::VideoSocketWorker() : AbstractSocketWorker("osvid-") {}
+VideoSocketWorker::VideoSocketWorker()
+    : AbstractSocketWorker("osvid-"),
+      m_offscreen_surface(new QOffscreenSurface(nullptr, this)),
+      m_opengl_ctx(new QOpenGLContext(this)) {
+    // Set up offscreen surface
+    m_opengl_ctx->create();
+    m_offscreen_surface->setFormat(m_opengl_ctx->format());
+    m_offscreen_surface->create();
+}
+
+VideoSocketWorker::~VideoSocketWorker() {
+    m_offscreen_surface->destroy();
+}
 
 void VideoSocketWorker::init(const QString& filename,
                              const QString& soundfont,
@@ -79,25 +95,69 @@ void VideoSocketWorker::init(const QString& filename,
 }
 
 void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
-    using ms = std::chrono::milliseconds;
-    using clock = std::chrono::steady_clock;
-    using std::chrono::duration_cast;
-
     if (!m_renderer) {
         emit done(false, "Renderer not initialized");
         return;
     }
 
+    if (!m_opengl_ctx->makeCurrent(m_offscreen_surface)) {
+        m_renderer.reset();
+        emit done(false, "Could not make OpenGL context current");
+        return;
+    }
+
+    QOpenGLFramebufferObject framebuffer(
+        m_width,
+        m_height,
+        QOpenGLFramebufferObject::Attachment::CombinedDepthStencil,
+        GL_TEXTURE_2D,
+        GL_RGB);
+    if (!framebuffer.bind()) {
+        m_opengl_ctx->doneCurrent();
+        m_renderer.reset();
+        emit done(false, "Could not bind OpenGL framebufffer");
+        return;
+    }
+
+    QString status_str;
+    bool ok = handle_connection_inner(connection, framebuffer, status_str);
+
+    connection->flush();
+    m_opengl_ctx->doneCurrent();
+    m_renderer.reset();
+    emit done(ok, status_str);
+}
+
+bool VideoSocketWorker::handle_connection_inner(
+    QLocalSocket* connection,
+    const QOpenGLFramebufferObject& framebuffer,
+    QString& out_status_str) {
+
+    using ms = std::chrono::milliseconds;
+    using clock = std::chrono::steady_clock;
+    using std::chrono::duration_cast;
+
+    QOpenGLPaintDevice paint_device(m_width, m_height);
+    QPainter painter(&paint_device);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+
     int frame_counter = 0;
     int preview_update_freq = std::max(1, m_fps / 2);
-    ms total_render_ms(0);
+    ms total_frameadvance_ms(0);
+    ms total_paint_ms(0);
     ms total_write_ms(0);
 
     auto render_start = clock::now();
     while (m_renderer->has_frames_remaining() && !m_abort_requested) {
-        auto frame_start = clock::now();
-        auto frame = m_renderer->paint_next_frame();
-        total_render_ms += duration_cast<ms>(clock::now() - frame_start);
+        auto frameadvance_start = clock::now();
+        m_renderer->advance_frame();
+        total_frameadvance_ms += duration_cast<ms>(clock::now() - frameadvance_start);
+
+        auto paint_start = clock::now();
+        // auto frame = m_renderer->paint_next_frame();
+        m_renderer->paint(painter);
+        auto frame = framebuffer.toImage();
+        total_paint_ms += duration_cast<ms>(clock::now() - paint_start);
 
         auto write_start = clock::now();
         auto write_result =
@@ -106,11 +166,9 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
         total_write_ms += duration_cast<ms>(clock::now() - write_start);
 
         if (write_result == -1) {
-            auto err_message =
+            out_status_str =
                 QString("Error writing frame data: %1").arg(connection->errorString());
-            m_renderer.reset();
-            emit done(false, err_message);
-            return;
+            return false;
         }
 
         if (frame_counter % preview_update_freq == 0) {
@@ -122,18 +180,21 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
     }
 
     auto render_dur = duration_cast<ms>(clock::now() - render_start);
+    double framecount_double = static_cast<double>(frame_counter);
 
     qDebug() << "VIDEO:" << frame_counter << "frames";
-    qDebug() << "Average frame render time:"
-             << total_render_ms.count() / static_cast<double>(frame_counter) << "ms";
-    qDebug() << "Average socket write time:"
-             << total_write_ms.count() / static_cast<double>(frame_counter) << "ms";
+    qDebug() << "Average frame advance time:"
+             << total_frameadvance_ms.count() / framecount_double << "ms";
+    qDebug() << "Average frame paint time:" << total_paint_ms.count() / framecount_double
+             << "ms";
+    qDebug() << "Average socket write time:" << total_write_ms.count() / framecount_double
+             << "ms";
     qDebug() << "Total render time:" << std::format("{:%M:%S}", render_dur).c_str();
 
-    connection->flush();
-    m_renderer.reset();
-
-    emit done(true, m_abort_requested ? "Rendering aborted" : "");
+    if (m_abort_requested) {
+        out_status_str = "Rendering aborted";
+    }
+    return true;
 }
 
 // -- AudioSocketWorker --
