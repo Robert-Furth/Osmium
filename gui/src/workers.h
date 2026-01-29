@@ -72,9 +72,7 @@ private:
     QOffscreenSurface* m_offscreen_surface;
     QOpenGLContext* m_opengl_ctx;
 
-    bool handle_connection_inner(QLocalSocket* connection,
-                                 QOpenGLFramebufferObject& framebuffer,
-                                 QString& out_status_str);
+    bool handle_connection_inner(QLocalSocket* connection, QString& out_status_str);
 };
 
 class AudioSocketWorker : public AbstractSocketWorker {

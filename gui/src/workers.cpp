@@ -115,16 +115,8 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
         return;
     }
 
-    QOpenGLFramebufferObjectFormat framebuffer_format;
-    framebuffer_format.setAttachment(
-        QOpenGLFramebufferObject::Attachment::CombinedDepthStencil);
-    framebuffer_format.setSamples(MSAA_SAMPLES);
-    framebuffer_format.setInternalTextureFormat(GL_RGB);
-
-    QOpenGLFramebufferObject framebuffer(m_width, m_height, framebuffer_format);
-
     QString status_str;
-    bool ok = handle_connection_inner(connection, framebuffer, status_str);
+    bool ok = handle_connection_inner(connection, status_str);
 
     connection->flush();
     m_opengl_ctx->doneCurrent();
@@ -133,13 +125,19 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
 }
 
 bool VideoSocketWorker::handle_connection_inner(QLocalSocket* connection,
-                                                QOpenGLFramebufferObject& framebuffer,
                                                 QString& out_status_str) {
 
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::steady_clock;
     using std::chrono::duration_cast;
 
+    QOpenGLFramebufferObjectFormat framebuffer_format;
+    framebuffer_format.setAttachment(
+        QOpenGLFramebufferObject::Attachment::CombinedDepthStencil);
+    framebuffer_format.setSamples(MSAA_SAMPLES);
+    framebuffer_format.setInternalTextureFormat(GL_RGB);
+
+    QOpenGLFramebufferObject framebuffer(m_width, m_height, framebuffer_format);
     QOpenGLPaintDevice paint_device(m_width, m_height);
 
     int frame_counter = 0;
