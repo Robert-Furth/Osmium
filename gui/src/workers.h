@@ -73,7 +73,7 @@ private:
     QOpenGLContext* m_opengl_ctx;
 
     bool handle_connection_inner(QLocalSocket* connection,
-                                 const QOpenGLFramebufferObject& framebuffer,
+                                 QOpenGLFramebufferObject& framebuffer,
                                  QString& out_status_str);
 };
 

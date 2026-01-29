@@ -13,8 +13,10 @@
 #include <QOffscreenSurface>
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObject>
+#include <QOpenGLFramebufferObjectFormat>
 #include <QOpenGLPaintDevice>
 #include <QString>
+#include <QSurfaceFormat>
 
 // -- AbstractSocketWorker --
 
@@ -62,11 +64,18 @@ void AbstractSocketWorker::priv_on_connection() {
 
 // -- VideoSocketWorker --
 
+const int MSAA_SAMPLES = 4;
+
 VideoSocketWorker::VideoSocketWorker()
     : AbstractSocketWorker("osvid-"),
       m_offscreen_surface(new QOffscreenSurface(nullptr, this)),
       m_opengl_ctx(new QOpenGLContext(this)) {
-    // Set up offscreen surface
+
+    // Enable multisampling for AA
+    QSurfaceFormat surface_format;
+    surface_format.setSamples(MSAA_SAMPLES);
+
+    m_opengl_ctx->setFormat(surface_format);
     m_opengl_ctx->create();
     m_offscreen_surface->setFormat(m_opengl_ctx->format());
     m_offscreen_surface->create();
@@ -106,18 +115,13 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
         return;
     }
 
-    QOpenGLFramebufferObject framebuffer(
-        m_width,
-        m_height,
-        QOpenGLFramebufferObject::Attachment::CombinedDepthStencil,
-        GL_TEXTURE_2D,
-        GL_RGB);
-    if (!framebuffer.bind()) {
-        m_opengl_ctx->doneCurrent();
-        m_renderer.reset();
-        emit done(false, "Could not bind OpenGL framebufffer");
-        return;
-    }
+    QOpenGLFramebufferObjectFormat framebuffer_format;
+    framebuffer_format.setAttachment(
+        QOpenGLFramebufferObject::Attachment::CombinedDepthStencil);
+    framebuffer_format.setSamples(MSAA_SAMPLES);
+    framebuffer_format.setInternalTextureFormat(GL_RGB);
+
+    QOpenGLFramebufferObject framebuffer(m_width, m_height, framebuffer_format);
 
     QString status_str;
     bool ok = handle_connection_inner(connection, framebuffer, status_str);
@@ -128,27 +132,33 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
     emit done(ok, status_str);
 }
 
-bool VideoSocketWorker::handle_connection_inner(
-    QLocalSocket* connection,
-    const QOpenGLFramebufferObject& framebuffer,
-    QString& out_status_str) {
+bool VideoSocketWorker::handle_connection_inner(QLocalSocket* connection,
+                                                QOpenGLFramebufferObject& framebuffer,
+                                                QString& out_status_str) {
 
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::steady_clock;
     using std::chrono::duration_cast;
 
     QOpenGLPaintDevice paint_device(m_width, m_height);
-    QPainter painter(&paint_device);
-    painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
 
     int frame_counter = 0;
     int preview_update_freq = std::max(1, m_fps / 2);
     ms total_frameadvance_ms(0);
     ms total_paint_ms(0);
+    ms total_toimg_ms(0);
     ms total_write_ms(0);
 
     auto render_start = clock::now();
     while (m_renderer->has_frames_remaining() && !m_abort_requested) {
+        if (!framebuffer.bind()) {
+            out_status_str = "Could not bind OpenGL framebufffer";
+            return false;
+        }
+
+        QPainter painter(&paint_device);
+        painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+
         auto frameadvance_start = clock::now();
         m_renderer->advance_frame();
         total_frameadvance_ms += duration_cast<ms>(clock::now() - frameadvance_start);
@@ -156,8 +166,14 @@ bool VideoSocketWorker::handle_connection_inner(
         auto paint_start = clock::now();
         // auto frame = m_renderer->paint_next_frame();
         m_renderer->paint(painter);
-        auto frame = framebuffer.toImage();
         total_paint_ms += duration_cast<ms>(clock::now() - paint_start);
+
+        auto toimage_start = clock::now();
+        // TODO: toImage() is fairly inefficient (takes up the bulk of render time).
+        // Any good alternatives? Or is this just a consequence of transferring data
+        // between the GPU and CPU?
+        auto frame = framebuffer.toImage();
+        total_toimg_ms += duration_cast<ms>(clock::now() - toimage_start);
 
         auto write_start = clock::now();
         auto write_result =
@@ -187,6 +203,8 @@ bool VideoSocketWorker::handle_connection_inner(
              << total_frameadvance_ms.count() / framecount_double << "ms";
     qDebug() << "Average frame paint time:" << total_paint_ms.count() / framecount_double
              << "ms";
+    qDebug() << "Average frame toImage() time:"
+             << total_toimg_ms.count() / framecount_double << "ms";
     qDebug() << "Average socket write time:" << total_write_ms.count() / framecount_double
              << "ms";
     qDebug() << "Total render time:" << std::format("{:%M:%S}", render_dur).c_str();
