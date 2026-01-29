@@ -21,7 +21,7 @@ BaseRenderer::BaseRenderer(const QList<ChannelArgs>& channel_args,
                            const GlobalArgs& global_args)
     : m_width(global_args.width),
       m_height(global_args.height),
-      m_border_color(global_args.border_color),
+      m_border_color(QColor::fromRgba(global_args.border_color)),
       m_border_thickness(global_args.border_thickness),
       m_background_color(global_args.background_color),
       m_channel_args(channel_args.cbegin(), channel_args.cend()) {
@@ -50,8 +50,10 @@ BaseRenderer::BaseRenderer(const QList<ChannelArgs>& channel_args,
             .y = row * h,
             .w = w,
             .h = h,
-            .wave_pen = QPen(QColor(args.color), args.thickness),
-            .midline_pen = QPen(QColor(args.midline_color), args.midline_thickness),
+            .wave_pen = QPen(QColor::fromRgba(args.color), args.thickness),
+            .midline_pen =
+                QPen(QColor::fromRgba(args.midline_color), args.midline_thickness),
+            .label_pen = QPen(QColor::fromRgba(args.label_color)),
             .label = "",
             .program_num = 0,
             .bank_num = 0,
@@ -118,7 +120,7 @@ void BaseRenderer::paint_subframe(QPainter& painter, int index) {
 
     if (args.draw_labels) {
         painter.setFont(args.label_font);
-        painter.setPen(QColor(args.label_color));
+        painter.setPen(p.label_pen);
         painter.drawText(
             QRectF(m_border_thickness * 0.5 + 3, m_border_thickness * 0.5 + 3, p.w, p.h),
             p.label);
