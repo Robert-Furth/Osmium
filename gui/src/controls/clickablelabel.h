@@ -17,7 +17,8 @@ signals:
 
 protected:
     void mouseReleaseEvent(QMouseEvent* event) override {
-        if (rect().contains(event->pos())) {
+        if (event->button() == Qt::MouseButton::LeftButton
+            && rect().contains(event->pos())) {
             emit clicked();
         }
     }
