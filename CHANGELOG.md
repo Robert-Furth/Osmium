@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.1 (2026-01-29)
+
+- Bugfix: Wave/line/text transparency now works properly.
+- Bugfix: Render toolbar option is now properly disabled when a render is already in progress.
+- Improvements to the color picker control.
+
 ## v0.2.0 (2026-01-08)
 
 - Added configurable templates for channel labels.

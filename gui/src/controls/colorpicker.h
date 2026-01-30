@@ -1,12 +1,14 @@
 #ifndef COLORPICKER_H
 #define COLORPICKER_H
 
+#include <optional>
+
 #include <QColor>
+#include <QLabel>
+#include <QPixmap>
 #include <QWidget>
 
-namespace Ui {
-class ColorPicker;
-}
+#include "clickablelabel.h"
 
 namespace controls {
 
@@ -19,7 +21,6 @@ class ColorPicker : public QWidget {
 
 public:
     explicit ColorPicker(QWidget* parent = nullptr);
-    ~ColorPicker();
 
     QColor color() const { return m_color; }
     bool allowAlpha() const { return m_allow_alpha; }
@@ -37,10 +38,13 @@ signals:
     void allowAlphaChanged(bool allow);
 
 private:
-    Ui::ColorPicker* ui;
+    ClickableLabel* m_lbl_color;
 
     QColor m_color = QColor(0, 0, 0);
     bool m_allow_alpha = true;
+
+    static std::optional<QPixmap> s_checkerboard_pixmap;
+    static QPixmap& get_checkerboard_pixmap();
 };
 
 } // namespace controls

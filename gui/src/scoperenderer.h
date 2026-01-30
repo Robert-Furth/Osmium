@@ -31,6 +31,7 @@ protected:
         double h;
         QPen wave_pen;
         QPen midline_pen;
+        QPen label_pen;
         QString label;
         int program_num;
         int bank_num;

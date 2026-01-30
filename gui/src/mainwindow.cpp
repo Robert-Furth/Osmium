@@ -311,12 +311,14 @@ void MainWindow::set_ui_state(UiState state) {
 
         ui->btnStartRender->setEnabled(!m_input_file.isEmpty());
         ui->btnStopRender->setEnabled(false);
+        ui->actionRender->setEnabled(true);
         ui->progressBar->setValue(0);
         recalc_preview();
         break;
     case UiState::Rendering:
         ui->btnStartRender->setEnabled(false);
         ui->btnStopRender->setEnabled(true);
+        ui->actionRender->setEnabled(false);
         break;
     case UiState::Canceling:
         ui->btnStartRender->setEnabled(false);
@@ -556,9 +558,9 @@ GlobalArgs MainWindow::create_global_args() {
 
         .bitrate_kbps = m_config.audio_config.bitrate_kbps,
 
-        .border_color = ui->cpGridlineColor->color().rgb(),
+        .border_color = ui->cpGridlineColor->color().rgba(),
         .border_thickness = ui->dsbGridlineThickness->value(),
-        .background_color = ui->cpBackground->color().rgb(),
+        .background_color = ui->cpBackground->color().rgba(),
         .debug_vis = false,
     };
 }
@@ -597,10 +599,10 @@ ChannelArgs MainWindow::create_channel_args(QStandardItem* args, int index) {
         .amplification = args->data(toint(ChannelArgRole::Amplification)).toDouble(),
         .is_stereo = args->data(toint(ChannelArgRole::IsStereo)).toBool(),
 
-        .color = args->data(toint(ChannelArgRole::WaveColor)).value<QColor>().rgb(),
+        .color = args->data(toint(ChannelArgRole::WaveColor)).value<QColor>().rgba(),
         .thickness = args->data(toint(ChannelArgRole::WaveThickness)).toDouble(),
         .midline_color =
-            args->data(toint(ChannelArgRole::MidlineColor)).value<QColor>().rgb(),
+            args->data(toint(ChannelArgRole::MidlineColor)).value<QColor>().rgba(),
         .midline_thickness =
             args->data(toint(ChannelArgRole::MidlineThickness)).toDouble(),
         .draw_h_midline = args->data(toint(ChannelArgRole::DrawHMidline)).toBool(),
@@ -610,7 +612,7 @@ ChannelArgs MainWindow::create_channel_args(QStandardItem* args, int index) {
         .label_template = args->data(toint(ChannelArgRole::LabelTemplate)).toString(),
         .label_font = font,
         .label_color =
-            args->data(toint(ChannelArgRole::LabelFontColor)).value<QColor>().rgb(),
+            args->data(toint(ChannelArgRole::LabelFontColor)).value<QColor>().rgba(),
 
         .max_nudge_ms = args->data(toint(ChannelArgRole::MaxNudgeMs)).toInt(),
         .trigger_threshold =
