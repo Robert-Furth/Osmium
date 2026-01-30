@@ -28,9 +28,9 @@ qt_add_executable(OsmiumGui
     src/resources/icon-render.png
     src/resources/osmium.ico
 
+    src/controls/clickablelabel.h
     src/controls/colorpicker.cpp
     src/controls/colorpicker.h
-    src/controls/colorpicker.ui
     src/controls/labeledslider.cpp
     src/controls/labeledslider.h
     src/controls/pathchooser.cpp
