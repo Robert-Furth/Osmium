@@ -296,12 +296,14 @@ void MainWindow::set_ui_state(UiState state) {
 
         ui->btnStartRender->setEnabled(!m_input_file.isEmpty());
         ui->btnStopRender->setEnabled(false);
+        ui->actionRender->setEnabled(true);
         ui->progressBar->setValue(0);
         recalc_preview();
         break;
     case UiState::Rendering:
         ui->btnStartRender->setEnabled(false);
         ui->btnStopRender->setEnabled(true);
+        ui->actionRender->setEnabled(false);
         break;
     case UiState::Canceling:
         ui->btnStartRender->setEnabled(false);
