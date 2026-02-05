@@ -41,6 +41,8 @@ qt_add_executable(OsmiumGui
     src/xmacro/video_codec.txt
     src/config.cpp
     src/config.h
+    src/glrendertarget.cpp
+    src/glrendertarget.h
     src/instrumentnames.cpp
     src/instrumentnames.h
     src/main.cpp

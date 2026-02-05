@@ -12,11 +12,11 @@
 #include <QObject>
 #include <QOffscreenSurface>
 #include <QOpenGLContext>
-#include <QOpenGLFramebufferObject>
-#include <QOpenGLFramebufferObjectFormat>
 #include <QOpenGLPaintDevice>
 #include <QString>
 #include <QSurfaceFormat>
+
+#include "glrendertarget.h"
 
 // -- AbstractSocketWorker --
 
@@ -64,7 +64,7 @@ void AbstractSocketWorker::priv_on_connection() {
 
 // -- VideoSocketWorker --
 
-const int MSAA_SAMPLES = 4;
+constexpr int MSAA_SAMPLES = 4;
 
 VideoSocketWorker::VideoSocketWorker()
     : AbstractSocketWorker("osvid-"),
@@ -126,85 +126,76 @@ void VideoSocketWorker::handle_connection(QLocalSocket* connection) {
 
 bool VideoSocketWorker::handle_connection_inner(QLocalSocket* connection,
                                                 QString& out_status_str) {
-
     using ms = std::chrono::milliseconds;
     using clock = std::chrono::steady_clock;
     using std::chrono::duration_cast;
 
-    QOpenGLFramebufferObjectFormat framebuffer_format;
-    framebuffer_format.setAttachment(
-        QOpenGLFramebufferObject::Attachment::CombinedDepthStencil);
-    framebuffer_format.setSamples(MSAA_SAMPLES);
-    framebuffer_format.setInternalTextureFormat(GL_RGB);
-
-    QOpenGLFramebufferObject framebuffer(m_width, m_height, framebuffer_format);
+    GLRenderTarget render_target(m_width, m_height, MSAA_SAMPLES);
     QOpenGLPaintDevice paint_device(m_width, m_height);
+    QTransform flip_vertical(1, 0, 0, 0, -1, 0, 0, m_height, 1);
 
     int frame_counter = 0;
     int preview_update_freq = std::max(1, m_fps / 2);
-    ms total_frameadvance_ms(0);
-    ms total_paint_ms(0);
-    ms total_toimg_ms(0);
-    ms total_write_ms(0);
 
     auto render_start = clock::now();
     while (m_renderer->has_frames_remaining() && !m_abort_requested) {
-        if (!framebuffer.bind()) {
-            out_status_str = "Could not bind OpenGL framebufffer";
+        if (!render_target.bind()) {
+            out_status_str = "Could not bind OpenGL framebuffer";
             return false;
         }
 
         QPainter painter(&paint_device);
         painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+        painter.setTransform(flip_vertical);
 
-        auto frameadvance_start = clock::now();
         m_renderer->advance_frame();
-        total_frameadvance_ms += duration_cast<ms>(clock::now() - frameadvance_start);
-
-        auto paint_start = clock::now();
-        // auto frame = m_renderer->paint_next_frame();
         m_renderer->paint(painter);
-        total_paint_ms += duration_cast<ms>(clock::now() - paint_start);
 
-        auto toimage_start = clock::now();
-        // TODO: toImage() is fairly inefficient (takes up the bulk of render time).
-        // Any good alternatives? Or is this just a consequence of transferring data
-        // between the GPU and CPU?
-        auto frame = framebuffer.toImage();
-        total_toimg_ms += duration_cast<ms>(clock::now() - toimage_start);
+        if (!render_target.start_pixel_transfer()) {
+            out_status_str = "Could not initiate pixel transfer";
+            return false;
+        }
 
-        auto write_start = clock::now();
-        auto write_result =
-            connection->write(reinterpret_cast<const char*>(frame.constBits()),
-                              frame.sizeInBytes());
-        total_write_ms += duration_cast<ms>(clock::now() - write_start);
+        // This may not be the most efficient; we're effectively calling glMapBuffer() via
+        // render_target.map() right after glReadPixels() via
+        // render_target.start_pixel_transfer(), so we aren't getting the benefits of the
+        // async-ness of PBOs. In my testing, though, using two GLRenderTargets as a front
+        // and back buffer was not noticeably faster.
+        void* frame_bits = render_target.map();
+        if (frame_bits == nullptr) {
+            out_status_str = "Frame bits are null";
+            return false;
+        }
+
+        auto write_result = connection->write(static_cast<char*>(frame_bits),
+                                              render_target.buffer_size());
 
         if (write_result == -1) {
             out_status_str =
                 QString("Error writing frame data: %1").arg(connection->errorString());
+            render_target.unmap();
             return false;
         }
 
         if (frame_counter % preview_update_freq == 0) {
-            emit preview_image_changed(QPixmap::fromImage(frame));
+            QImage preview_image(static_cast<uchar*>(frame_bits),
+                                 m_width,
+                                 m_height,
+                                 QImage::Format_RGBA8888);
+            emit preview_image_changed(QPixmap::fromImage(preview_image));
         }
+        render_target.unmap();
+
         emit progress_changed(m_renderer->get_progress() * 1000);
 
         frame_counter += 1;
     }
 
     auto render_dur = duration_cast<ms>(clock::now() - render_start);
-    double framecount_double = static_cast<double>(frame_counter);
+    double total_frame_count = frame_counter;
 
     qDebug() << "VIDEO:" << frame_counter << "frames";
-    qDebug() << "Average frame advance time:"
-             << total_frameadvance_ms.count() / framecount_double << "ms";
-    qDebug() << "Average frame paint time:" << total_paint_ms.count() / framecount_double
-             << "ms";
-    qDebug() << "Average frame toImage() time:"
-             << total_toimg_ms.count() / framecount_double << "ms";
-    qDebug() << "Average socket write time:" << total_write_ms.count() / framecount_double
-             << "ms";
+    qDebug() << "Average frame render time:" << render_dur.count() / total_frame_count;
     qDebug() << "Total render time:" << std::format("{:%M:%S}", render_dur).c_str();
 
     if (m_abort_requested) {
@@ -378,7 +369,7 @@ QStringList RenderWorker::get_ffmpeg_args() {
 
     return QStringList() << "-y"
                          // input video format
-                         << "-f" << "rawvideo" << "-pixel_format" << "rgb32"
+                         << "-f" << "rawvideo" << "-pixel_format" << "rgba"
                          << "-framerate" << QString::number(fps) << "-video_size"
                          << QString("%1x%2").arg(width).arg(height) << "-i"
                          << m_video_server_path
