@@ -50,6 +50,7 @@ void OptionsDialog::set_config(const PersistentConfig& config) {
 
     ui->pcFfmpegPath->set_current_path(config.path_config.ffmpeg_path);
     ui->pcSoundfontPath->set_current_path(config.path_config.soundfont_path);
+    ui->chbAutohideUnused->setChecked(config.general_config.autohide_unused_channels);
 
     ui->cmbVideoCodec->setCurrentIndex(static_cast<int>(config.video_config.codec));
     ui->cmbEncodeSpeed->setCurrentIndex(
@@ -75,6 +76,8 @@ void OptionsDialog::update_config() {
     m_config.video_config.h26x_crf = ui->sbCrf->value();
 
     m_config.audio_config.bitrate_kbps = ui->sbAudioBitrate->value();
+
+    m_config.general_config.autohide_unused_channels = ui->chbAutohideUnused->isChecked();
 }
 
 void OptionsDialog::enable_ffmpeg_check_timer(bool enable) {

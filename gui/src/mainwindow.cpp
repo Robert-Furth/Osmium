@@ -287,11 +287,14 @@ void MainWindow::reinit_channel_model(int num_channels) {
     auto* default_item = m_channel_model.item(0);
     for (int i = 1; i <= num_channels; i++) {
         auto* item = default_item->clone();
+
         item->setText(QString("Channel %1").arg(i));
-        item->setData(QVariant(i - 1 >= channels_with_notes.size()
-                                   ? false
-                                   : channels_with_notes[i - 1]),
-                      toint(ChannelArgRole::IsVisible));
+        if (m_config.general_config.autohide_unused_channels) {
+            item->setData(QVariant(i - 1 >= channels_with_notes.size()
+                                       ? false
+                                       : channels_with_notes[i - 1]),
+                          toint(ChannelArgRole::IsVisible));
+        }
         m_channel_model.setItem(i, item);
     }
 

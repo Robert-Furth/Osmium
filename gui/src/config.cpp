@@ -116,6 +116,14 @@ AudioConfig load_audio_config(const toml::node_view<toml::node>& v) {
     };
 }
 
+GeneralConfig load_general_config(const toml::node_view<toml::node>& v) {
+    bool autohide_unused = v["autohide_unused_channels"].value_or(true);
+
+    return GeneralConfig{
+        .autohide_unused_channels = autohide_unused,
+    };
+}
+
 } // namespace
 
 PersistentConfig load_config() {
@@ -134,6 +142,7 @@ PersistentConfig load_config(const fs::path& load_path) {
         .path_config = load_path_config(paths),
         .video_config = load_video_config(table["video"]),
         .audio_config = load_audio_config(table["audio"]),
+        .general_config = load_general_config(table["general"]),
     };
 }
 
@@ -148,6 +157,11 @@ bool save_config(const PersistentConfig& config, const fs::path& save_path) {
     fs::create_directories(save_path.parent_path());
 
     toml::table table{
+        {"general",
+         toml::table{
+             {"autohide_unused_channels", config.general_config.autohide_unused_channels},
+         }},
+
         {"paths",
          toml::table{
              {"soundfont_path", config.path_config.soundfont_path.toStdString()},

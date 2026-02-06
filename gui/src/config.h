@@ -41,10 +41,15 @@ struct AudioConfig {
     int bitrate_kbps;
 };
 
+struct GeneralConfig {
+    bool autohide_unused_channels;
+};
+
 struct PersistentConfig {
     PathConfig path_config;
     VideoConfig video_config;
     AudioConfig audio_config;
+    GeneralConfig general_config;
 };
 
 PersistentConfig load_config();

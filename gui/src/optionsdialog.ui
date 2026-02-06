@@ -116,16 +116,30 @@ color: red;
    <item>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
-      <string>Soundfont Path</string>
+      <string>MIDI Options</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Soundfont Path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="controls::PathChooser" name="pcSoundfontPath" native="true">
         <property name="focusPolicy">
          <enum>Qt::FocusPolicy::TabFocus</enum>
         </property>
         <property name="filter" stdset="0">
          <string>Soundfonts (*.sf2 *.sfz)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QCheckBox" name="chbAutohideUnused">
+        <property name="text">
+         <string>Auto-hide Unused Channels</string>
         </property>
        </widget>
       </item>
